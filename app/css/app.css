@@ -1,0 +1,180 @@
+/* app css stylesheet */
+
+[ng\:cloak], [ng-cloak], .ng-cloak { display: none; }
+
+body {
+   font-size: 20px;
+   line-height: 1.25em;
+   font-family: 'Open Sans', sans-serif;
+   background-color: #999;
+}
+
+h1 {
+   font-size: 84px;
+   color: #E7852E;
+   margin: 20px 0;
+   background: -webkit-linear-gradient(#E7852E, #f3c445);
+   -webkit-background-clip: text;
+   -webkit-text-fill-color: transparent;
+}
+
+h1 img {
+   text-align: center;
+   width: 100px;
+   margin-right: 25px;
+}
+
+h2 {
+   font-size: 28px;
+   line-height: 36px;
+}
+
+section.intro {
+   position: relative;
+   margin: 10px;
+   padding: 20px 30px;
+   box-shadow: 0 2px 2px rgba(0, 0, 0, .5);
+}
+
+section.intro a.dismiss {
+   display: block;
+   font-weight: bold;
+   font-size: 24px;
+   line-height: 24px;
+   text-decoration: none;
+}
+
+section.intro h1, section.intro h2 {
+   text-align: center;
+}
+
+ul.unstyled {
+   list-style: none;
+   margin: 0;
+}
+
+ul.unstyled li {
+   display: inline;
+}
+
+button {
+   font-size: 20px;
+   line-height: 28px;
+   cursor: pointer;
+}
+
+nav {
+   background-color: #eee;
+   padding: 10px;
+   margin: 0;
+   box-shadow: 0 1px 2px rgba(0, 0, 0, .3);
+   position: relative;
+   z-index: 2;
+}
+
+.pull-right {
+   margin-left: 15px;
+}
+
+nav .btn {
+   margin-top: 2px;
+}
+
+.brand {
+   font-size: 28px;
+   font-weight: bold;
+   line-height: 32px;
+   text-decoration: none;
+   color: #E7852E;
+   background: -webkit-linear-gradient(#E7852E, #f3c445);
+   -webkit-background-clip: text;
+   -webkit-text-fill-color: transparent;
+}
+
+.brand img {
+   height: 30px;
+   margin-right: 10px;
+   position: relative;
+   top: -2px;
+}
+
+section.settings {
+   background-color: #e5e5e5;
+   padding: 5px 15px;
+   margin: 0;
+   box-shadow: 0 1px 1px rgba(0, 0, 0, .2);
+}
+
+#filters {
+   display: inline;
+}
+
+#filters li {
+   border-radius: 5px;
+   border: 1px solid #999;
+   padding: 2px 4px;
+   margin: 3px;
+}
+
+#filters li:hover {
+   background-color: #fafafa;
+}
+
+#filters li label {
+   padding: 0;
+}
+
+#filters li i {
+   opacity: .8;
+   margin-left: 4px;
+   font-size: 14px;
+   line-height: 20px;
+   color: #946b6e;
+   cursor: pointer;
+}
+
+#filters li i:hover {
+   opacity: 1;
+   color: red;
+}
+
+#info-button {
+   color: #0088CC;
+   font-size: 28px;
+   line-height: 32px;
+   cursor: pointer;
+}
+
+#info-button:hover {
+   text-decoration: none;
+}
+
+#info-button i {
+   cursor: pointer;
+}
+
+#info-button.active {
+   opacity: .4;
+   color: #aaa;
+}
+
+section.intro i {
+   color: #E7852E;
+}
+
+section.feeds article {
+   float: left;
+   margin: 10px;
+   padding: 10px;
+   border-radius: 10px;
+   background-color: white;
+}
+
+.isotope-item {
+   z-index: 2;
+}
+
+.isotope-hidden.isotope-item {
+   pointer-events: none;
+   z-index: 1;
+}

@@ -1,0 +1,31 @@
+<section class="settings form-inline">
+    <label class="pull-right">
+        sort:
+        <select class="input-small">
+           <option>Newest</option>
+           <option>Oldest</option>
+           <option>Title</option>
+        </select>
+    </label>
+
+    <form class="form-search pull-right">
+        <div class="input-append">
+            <input type="text" class="span2 search-query">
+            <button type="submit" class="btn"><i class="icon-search"></i></button>
+        </div>
+    </form>
+
+    <ul id="filters" class="inline">
+        <li ng-repeat="(id, feed) in feeds"><label class="checkbox inline">{{feed.title}} <input type="checkbox" ng-model="feed.active" value="{{id}}" /></label> <i class="icon-remove-sign"></i></li>
+    </ul>
+
+    <button class="btn"><i class="icon-plus"></i></button>
+
+</section>
+
+<section class="feeds clearfix" id="feeds">
+   <article ng-repeat="article in articles">
+       <h2>{{article.title}} <a href="{{article.link}}" class="pull-right"><i class="icon-external-link"></i></a></h2>
+       <div ng-bind-html-unsafe="article.summary"></div>
+   </article>
+</section>
