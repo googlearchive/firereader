@@ -11,12 +11,12 @@
     <form class="form-search pull-right">
         <div class="input-append">
             <input type="text" class="span2 search-query" ng-model="searchText">
-            <button type="submit" class="btn"><i class="icon-search"></i></button>
+            <button class="btn btn-disabled"><i class="icon-search"></i></button>
         </div>
     </form>
 
     <ul id="filters" class="inline">
-        <li ng-repeat="(id, feed) in feeds"><label class="checkbox inline">{{feed.title}} <input type="checkbox" ng-model="feed.active" value="{{id}}" /></label> <i class="icon-remove-sign"></i></li>
+        <li ng-repeat="(id, feed) in feeds"><label ng-click="initFeed(id)" class="checkbox inline">{{feed.title}}<span ng-show="feed.init"> ({{feed.count}})</span><input type="checkbox" ng-model="feed.active" value="{{id}}" /></label> <i class="icon-remove-sign"></i></li>
     </ul>
 
     <button class="btn"><i class="icon-plus"></i></button>

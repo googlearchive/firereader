@@ -1,14 +1,40 @@
 // Read-only collection that monitors multiple paths
 angular.module('firebase').factory('angularFireAggregate', ['$timeout', '$q', function($timeout, $q) {
-   return function($scope, paths, callback) {
-      if( typeof(paths) === 'function' ) {
-         callback = paths;
-         paths = null;
-      }
 
+   /**
+    * Opts parms (all optional):
+    *     {Array<Firebase|String>} paths - a set of paths to be monitored, additional paths can be added via collection.addPath()
+    *     {Function} callback - invoked when all the paths have been initialized
+    *     {Function(snapshot, index)} factory - converts a Firebase snapshot into an object, defaults to AngularFireItem (see below)
+    *
+    * @param {Scope} $scope
+    * @param {Object} opts - see above
+    */
+   return function($scope, opts) {
       var collection = [];
       var indexes = {};
 
+      /**
+       * This can be invoked to add additional paths after initialization
+       *
+       * @param {Firebase|String} path
+       * @return {Promise}
+       */
+      collection.addPath = function(path) {
+         console.log('addPath', path); //debug
+         var def = $q.defer();
+         new Path(path, function(ss) { def.resolve(ss); });
+         return def.promise;
+      };
+
+      /**
+       * The default object for representing a data item in the Collection. This can be overridden by
+       * setting opts.factory.
+       *
+       * @param {Firebase} ref
+       * @param {int} index
+       * @constructor
+       */
       function AngularFireItem(ref, index) {
          this.$ref = ref.ref();
          this.$id = ref.name();
@@ -16,24 +42,29 @@ angular.module('firebase').factory('angularFireAggregate', ['$timeout', '$q', fu
          angular.extend(this, {priority:ref.getPriority()}, ref.val());
       }
 
+      /**
+       * A single Firebase path from which data objects are going to be aggregated into the Collection. Each
+       * item in the path is converted using  into an object by using opts.factory.
+       *
+       * @param {String|Firebase} collectionUrlOrRef
+       * @param {Function} [initialCb]
+       * @constructor
+       */
       function Path(collectionUrlOrRef, initialCb) {
-         var pathRef, disposables = [];
+         var pathRef;
          if (typeof collectionUrlOrRef == "string") {
             pathRef = new Firebase(collectionUrlOrRef);
          } else {
+            // if it is not a string, it is already a Firebase ref
             pathRef = collectionUrlOrRef;
-         }
-
-         if (initialCb && typeof initialCb == 'function') {
-            pathRef.once('value', initialCb);
          }
 
          pathRef.on('child_added', function(data, prevId) {
             $timeout(function() {
-               var index = getIndex(prevId);
-               addChild(index, new AngularFireItem(data, index));
+               var index = getIndex(prevId), item = processItem(data, index);
+               addChild(index, item);
                updateIndexes(index);
-               $scope.$broadcast('angulareFireAggregate-child_added', {id: data.name(), index: index});
+               $scope.$broadcast('angulareFireAggregateChildAdded', {id: item.$id, index: index, item: item});
             });
          });
 
@@ -42,9 +73,10 @@ angular.module('firebase').factory('angularFireAggregate', ['$timeout', '$q', fu
             $timeout(function() {
                var id = data.name();
                var pos = indexes[id];
+               var item = collection[pos];
                removeChild(id);
                updateIndexes(pos);
-               $scope.$broadcast('angulareFireAggregate-child_removed', {id: id, index: pos});
+               $scope.$broadcast('angulareFireAggregateChildRemoved', {id: id, index: pos, item: item});
             });
          });
 
@@ -53,13 +85,13 @@ angular.module('firebase').factory('angularFireAggregate', ['$timeout', '$q', fu
             $timeout(function() {
                var index = indexes[data.name()];
                var newIndex = getIndex(prevId);
-               var item = new AngularFireItem(data, index);
+               var item = processItem(data, index);
 
                updateChild(index, item);
                if (newIndex !== index) {
                   moveChild(index, newIndex, item);
                }
-               $scope.$broadcast('angulareFireAggregate-child_changed', {id: item.$id, index: newIndex, oldIndex: index});
+               $scope.$broadcast('angulareFireAggregateChildChanged', {id: item.$id, index: newIndex, oldIndex: index});
             });
          });
 
@@ -69,11 +101,22 @@ angular.module('firebase').factory('angularFireAggregate', ['$timeout', '$q', fu
                var newIndex = getIndex(prevId);
                var item = collection[oldIndex];
                moveChild(oldIndex, newIndex, item);
-               $scope.$broadcast('angulareFireAggregate-child_added', {id: item.$id, index: newIndex, oldIndex: oldIndex});
+               $scope.$broadcast('angulareFireAggregateChildMoved', {id: item.$id, index: newIndex, oldIndex: oldIndex});
             });
          });
+
+         // putting this at the end makes performance appear considerably faster
+         // since child_added callbacks start immediately instead of after entire
+         // data set is loaded on server
+         if (initialCb && typeof initialCb == 'function') {
+            pathRef.once('value', initialCb);
+         }
       }
 
+      ///////////// internal functions
+
+      //todo this could have some unforseen side effects; the idea of using prevId with multiple paths
+      //todo should be evaluated and tested against some different use cases
       function getIndex(prevId) {
          return prevId ? indexes[prevId] + 1 : 0;
       }
@@ -112,22 +155,29 @@ angular.module('firebase').factory('angularFireAggregate', ['$timeout', '$q', fu
          }
       }
 
-      collection.addPath = function(path, cb) {
-         new Path(path, cb);
-      };
-
-      if( paths ) {
-         var promises = [];
-         for(var i = 0; i < paths.length; i++) {
-            waitFor(promises, collection, paths[i])
-         }
-         callback && $q.all(promises).then(callback);
+      function processItem(data, index) {
+         var out = opts.factory(data, index);
+         out.$id = data.name();
+         out.$index = index;
+         return out;
       }
 
-      function waitFor(promises, collection, path) {
-         var def = $q.defer();
-         promises.push(def.promise);
-         collection.addPath(path, function() { def.resolve(); });
+      //////////////// process and create the aggregated Collection
+
+      opts = angular.extend({
+         factory: function(ref, index) { return new AngularFireItem(ref, index); },
+         paths: null,
+         callback: null
+      }, opts);
+
+      if( opts.paths ) {
+         // if any paths were passed in via opts, then add and fetch them now
+         var promises = [];
+         for(var i = 0; i < opts.paths.length; i++) {
+            promises.push(collection.addPath(opts.paths[i]));
+         }
+         // if there is a callback, wait for all the paths to initialize and then invoke it
+         opts.callback && $q.all(promises).then(opts.callback);
       }
 
       return collection;

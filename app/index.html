@@ -13,13 +13,13 @@
      <a href="#/" class="brand"><img src="img/logo.png" />Fireplace</a>
      <a href="#/account" ng-cloak ng-hide="authUser" class="pull-right btn btn-warning">Customize My Fireplace</a>
      <a href="#/account" ng-cloak ng-show="authUser" class="pull-right btn btn-warning">Hello, {{authUser}}</a>
-     <a href="#info-button" id="info-button" ng-click="toggleInfo($event)" ng-class="{active:showInfo}" class="pull-right active" title="What am I looking at?"><i class="icon-info-sign"></i></a>
+     <a id="info-button" ng-click="toggleInfo($event)" ng-class="{active:showInfo}" class="pull-right active" title="What am I looking at?"><i class="icon-info-sign"></i></a>
   </nav>
 
   <section ng-show="showInfo" class="intro">
       <a href="http://katowulf.github.com/fireplace"><img style="position: absolute; top: 0; left: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_left_orange_ff7600.png" alt="Fork me on GitHub"></a>
 
-      <a href="#" ng-click="toggleInfo($event)" class="pull-right"><i class="icon-remove"></i></a>
+      <a ng-click="toggleInfo($event)" class="pull-right"><i class="icon-remove"></i></a>
       <!--<h1><img src="img/logo.png" />Fireplace</h1>-->
 
       <h2>A unique, real-time content aggregator
@@ -31,6 +31,12 @@
   </section>
 
   <div ng-view class="clearfix"></div>
+
+  {{auth.authenticated}}
+
+  {{auth.user}}
+
+  {{auth.service}}
 
   <div>Angular seed app: v<span app-version></span></div>
 
