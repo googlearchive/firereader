@@ -1,6 +1,11 @@
 // Read-only collection that monitors multiple paths
-angular.module('firebase').factory('angularFireAggregate', ['$timeout', function($timeout) {
-   return function(paths) {
+angular.module('firebase').factory('angularFireAggregate', ['$timeout', '$q', function($timeout, $q) {
+   return function($scope, paths, callback) {
+      if( typeof(paths) === 'function' ) {
+         callback = paths;
+         paths = null;
+      }
+
       var collection = [];
       var indexes = {};
 
@@ -28,19 +33,23 @@ angular.module('firebase').factory('angularFireAggregate', ['$timeout', function
                var index = getIndex(prevId);
                addChild(index, new AngularFireItem(data, index));
                updateIndexes(index);
+               $scope.$broadcast('angulareFireAggregate-child_added', {id: data.name(), index: index});
             });
          });
 
          pathRef.on('child_removed', function(data) {
+            //todo broakdacst to scope
             $timeout(function() {
                var id = data.name();
                var pos = indexes[id];
                removeChild(id);
                updateIndexes(pos);
+               $scope.$broadcast('angulareFireAggregate-child_removed', {id: id, index: pos});
             });
          });
 
          pathRef.on('child_changed', function(data, prevId) {
+            //todo broadcast to scope
             $timeout(function() {
                var index = indexes[data.name()];
                var newIndex = getIndex(prevId);
@@ -50,6 +59,7 @@ angular.module('firebase').factory('angularFireAggregate', ['$timeout', function
                if (newIndex !== index) {
                   moveChild(index, newIndex, item);
                }
+               $scope.$broadcast('angulareFireAggregate-child_changed', {id: item.$id, index: newIndex, oldIndex: index});
             });
          });
 
@@ -59,6 +69,7 @@ angular.module('firebase').factory('angularFireAggregate', ['$timeout', function
                var newIndex = getIndex(prevId);
                var item = collection[oldIndex];
                moveChild(oldIndex, newIndex, item);
+               $scope.$broadcast('angulareFireAggregate-child_added', {id: item.$id, index: newIndex, oldIndex: oldIndex});
             });
          });
       }
@@ -106,9 +117,17 @@ angular.module('firebase').factory('angularFireAggregate', ['$timeout', function
       };
 
       if( paths ) {
+         var promises = [];
          for(var i = 0; i < paths.length; i++) {
-            collection.addPath(paths[i]);
+            waitFor(promises, collection, paths[i])
          }
+         callback && $q.all(promises).then(callback);
+      }
+
+      function waitFor(promises, collection, path) {
+         var def = $q.defer();
+         promises.push(def.promise);
+         collection.addPath(path, function() { def.resolve(); });
       }
 
       return collection;

@@ -34,6 +34,7 @@ section.intro {
    margin: 10px;
    padding: 20px 30px;
    box-shadow: 0 2px 2px rgba(0, 0, 0, .5);
+   background-color: #ffffff;
 }
 
 section.intro a.dismiss {
@@ -162,13 +163,6 @@ section.intro i {
    color: #E7852E;
 }
 
-section.feeds article {
-   float: left;
-   margin: 10px;
-   padding: 10px;
-   border-radius: 10px;
-   background-color: white;
-}
 
 .isotope-item {
    z-index: 2;
@@ -177,4 +171,91 @@ section.feeds article {
 .isotope-hidden.isotope-item {
    pointer-events: none;
    z-index: 1;
+}
+
+.isotope,
+.isotope .isotope-item {
+   /* change duration value to whatever you like */
+   -webkit-transition-duration: 0.8s;
+   -moz-transition-duration: 0.8s;
+   -ms-transition-duration: 0.8s;
+   -o-transition-duration: 0.8s;
+   transition-duration: 0.8s;
+}
+
+.isotope {
+   -webkit-transition-property: height, width;
+   -moz-transition-property: height, width;
+   -ms-transition-property: height, width;
+   -o-transition-property: height, width;
+   transition-property: height, width;
+}
+
+.isotope .isotope-item {
+   -webkit-transition-property: -webkit-transform, opacity;
+   -moz-transition-property:    -moz-transform, opacity;
+   -ms-transition-property:     -ms-transform, opacity;
+   -o-transition-property:      -o-transform, opacity;
+   transition-property:         transform, opacity;
+}
+
+/**** disabling Isotope CSS3 transitions ****/
+
+.isotope.no-transition,
+.isotope.no-transition .isotope-item,
+.isotope .isotope-item.no-transition {
+   -webkit-transition-duration: 0s;
+   -moz-transition-duration: 0s;
+   -ms-transition-duration: 0s;
+   -o-transition-duration: 0s;
+   transition-duration: 0s;
+}
+
+section.feeds {
+   width: 100%;
+   position: relative;
+   padding: 0;
+   margin: 0;
+}
+
+section.feeds article {
+   float: left;
+   max-width: 390px;
+   min-width: 190px;
+   max-height: 390px;
+   min-height: 190px;
+   overflow: hidden;
+   position: relative;
+   border-radius: 10px;
+   background-color: white;
+   padding: 10px;
+   margin: 5px;
+   text-overflow: ellipsis;
+}
+
+section.feeds article h2 {
+   max-height: 2.5em;
+   text-overflow: ellipsis;
+   overflow: hidden;
+}
+
+@media (max-width: 900px) {
+   section.feeds article {
+      max-width: 45%;
+      margin: 10px 2.48%;
+   }
+}
+
+@media (max-width: 700px) {
+   section.feeds article {
+      max-width: none;
+      min-width: inherit;
+      min-height: inherit;
+      width: auto;
+      margin: 5px 0;
+   }
+}
+
+a [class^="icon-"]:before, a [class*=" icon-"]:before {
+   cursor: pointer;
 }

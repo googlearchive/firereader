@@ -1,16 +1,16 @@
 <section class="settings form-inline">
     <label class="pull-right">
         sort:
-        <select class="input-small">
+        <select class="input-small" ng-model="sortBy">
            <option>Newest</option>
            <option>Oldest</option>
-           <option>Title</option>
+           <!--<option>Title</option>-->
         </select>
     </label>
 
     <form class="form-search pull-right">
         <div class="input-append">
-            <input type="text" class="span2 search-query">
+            <input type="text" class="span2 search-query" ng-model="searchText">
             <button type="submit" class="btn"><i class="icon-search"></i></button>
         </div>
     </form>
@@ -24,8 +24,8 @@
 </section>
 
 <section class="feeds clearfix" id="feeds">
-   <article ng-repeat="article in articles">
-       <h2>{{article.title}} <a href="{{article.link}}" class="pull-right"><i class="icon-external-link"></i></a></h2>
-       <div ng-bind-html-unsafe="article.summary"></div>
+   <article ng-repeat="article in articles | filter:searchText" data-time="{{timestamp(article)}}" ng-class="{filtered:isFiltered(article)}">
+       <h2 title="{{article.title}}"><a href="{{article.link}}" class="pull-right" target="_blank"><i class="icon-external-link"></i></a> {{article.title}}</h2>
+       <div ng-bind-html-unsafe="article.description"></div>
    </article>
 </section>
