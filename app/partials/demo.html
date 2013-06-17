@@ -16,7 +16,7 @@
     </form>
 
     <ul id="filters" class="inline">
-        <li ng-repeat="(id, feed) in feeds"><label ng-click="initFeed(id)" class="checkbox inline">{{feed.title}}<span ng-show="feed.init"> ({{feed.count}})</span><input type="checkbox" ng-model="feed.active" value="{{id}}" /></label></li>
+        <li ng-repeat="(id, feed) in feeds"><label ng-click="initFeed(feed)" class="checkbox inline">{{feed.title}}<span ng-show="feed.init"> ({{feed.count}})</span><input type="checkbox" ng-model="feed.active" value="{{id}}" /></label></li>
         <li class="link"><a ng-click="allFeeds()">all</a></li>
         <li class="link"><a ng-click="noFeeds()">none</a></li>
     </ul>

@@ -38,12 +38,7 @@ angular.module('myApp.controllers', ['firebase'])
          return new Date(article.date).getTime();
       };
 
-      $scope.initFeed = function(feedId) {
-         var feed = $scope.feeds[feedId];
-         if( feed && !feed.init ) {
-            initFeed(feed);
-         }
-      };
+      $scope.initFeed = initFeed;
 
       $scope.allFeeds = function() {
          $timeout(function() {
@@ -158,7 +153,11 @@ angular.module('myApp.controllers', ['firebase'])
       }
 
       function initFeed(feed) {
-         !feed.init && console.log('initFeed', feed) && (feed.init = true) && $scope.articles.addPath(feedPath(feed.id));
+         if( !feed.init ) {
+            console.log('initFeed', feed);
+            feed.init = true;
+            $scope.articles.addPath(feedPath(feed.id));
+         }
       }
 
       $scope.isFiltered = function(article) {
