@@ -27,5 +27,6 @@
     <article ng-repeat="article in articles | filter:searchText" data-time="{{timestamp(article)}}" ng-class="{filtered:isFiltered(article)}">
         <h2 title="{{article.title}}"><a href="{{article.link}}" class="pull-right" target="_blank"><i class="icon-external-link"></i></a> {{article.title}}</h2>
         <div ng-bind-html-unsafe="article.description"></div>
+        <p>&nbsp;</p>
     </article>
 </section>
