@@ -87,6 +87,7 @@ AngularFire.prototype = {
             self._initial = false;
             return;
          }
+         //todo should be using angular.fromJson
          var val = JSON.parse(angular.toJson(self._parse(name)($scope)));
          if (angular.equals(val, self._remoteValue)) {
             return;
@@ -110,6 +111,7 @@ angular.module('firebase').factory('angularFireCollection', ['$timeout', functio
    return function(collectionUrlOrRef, initialCb) {
       var collection = [];
       var indexes = {};
+      var listeners = [];
 
       var collectionRef;
       if (typeof collectionUrlOrRef == "string") {
@@ -125,23 +127,27 @@ angular.module('firebase').factory('angularFireCollection', ['$timeout', functio
       function addChild(index, item) {
          indexes[item.$id] = index;
          collection.splice(index, 0, item);
+         notify('child_added', item, index);
       }
 
       function removeChild(id) {
          var index = indexes[id];
          // Remove the item from the collection.
-         collection.splice(index, 1);
+         var item = collection.splice(index, 1);
          indexes[id] = undefined;
+         notify('child_removed', item, index);
       }
 
       function updateChild (index, item) {
          collection[index] = item;
+         notify('child_updated', item, index);
       }
 
       function moveChild (from, to, item) {
          collection.splice(from, 1);
          collection.splice(to, 0, item);
          updateIndexes(from, to);
+         notify('child_moved', item, to, from);
       }
 
       function updateIndexes(from, to) {
@@ -154,6 +160,14 @@ angular.module('firebase').factory('angularFireCollection', ['$timeout', functio
             var item = collection[index];
             item.$index = indexes[item.$id] = index;
          }
+      }
+
+      function notify(event, item, index, oldIndex) {
+         angular.forEach(listeners, function(props) {
+            var fn = props[0];
+            var type = props[1];
+            (type === 'all' || type === event) && fn(item, event, index, oldIndex);
+         });
       }
 
       if (initialCb && typeof initialCb == 'function') {
@@ -222,6 +236,11 @@ angular.module('firebase').factory('angularFireCollection', ['$timeout', functio
             }
          });
          item.$ref.set(copy);
+      };
+
+      collection.on = function(event, callback) {
+         if( angular.isFunction(event) ) { callback = event; event = 'all'; }
+         listeners.push([callback, event]);
       };
 
       return collection;

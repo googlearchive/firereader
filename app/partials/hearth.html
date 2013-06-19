@@ -1,4 +1,4 @@
-<section class="settings form-inline">
+<section class="settings form-inline" ng-switch="">
     <label class="pull-right">
         sort:
         <select class="input-small" ng-model="sortBy">
@@ -10,21 +10,31 @@
 
     <form class="form-search pull-right">
         <div class="input-append">
-            <input type="text" class="span2 search-query" ng-model="searchText">
-            <button class="btn btn-disabled"><i class="icon-search"></i></button>
+            <input type="text" class="span2 search-query" ng-model="articleFilter">
+            <button class="btn" ng-disabled="!articleFilter" ng-click="articleFilter=null"><i class="icon-search"></i></button>
         </div>
     </form>
 
     <ul id="filters" class="inline">
-        <li ng-repeat="(id, feed) in feeds"><label ng-click="initFeed(id)" class="checkbox inline">{{feed.title}}<span ng-show="feed.init"> ({{feed.count}})</span><input type="checkbox" ng-model="feed.active" value="{{id}}" /></label> <i class="icon-remove-sign"></i></li>
+        <li ng-repeat="feed in feeds | orderBy:title"><label class="checkbox inline">{{feed.title}}<span ng-show="counts[feed.id] > 0"> ({{counts[feed.id]}})</span><input type="checkbox" ng-model="feed.active" value="{{feed.id}}" /></label> <a ng-click="removeFeed(feed.id)"><i class="icon-remove-sign"></i></a></li>
     </ul>
 
-    <button class="btn"><i class="icon-plus"></i></button>
+    <div id="addfeeds" ng-cloak ng-show="noFeeds"><a>Add your feeds!</a></div>
+    <div class="btn-group">
+        <button class="btn dropdown-toggle" data-toggle="dropdown"><i class="icon-plus"></i></button>
+        <ul class="dropdown-menu">
+            <!--<li><input ng-model="feedChoiceFilter" placeholder="filter" /></li>-->
+            <li ng-repeat="feed in feedChoices | filter:feedChoiceFilter | orderBy:feed.title"><a title="{{feed.description}}" ng-click="addFeed(feed)">{{feed.title}}</a></li>
+            <li class="divider"></li>
+            <li><a ng-click="addCustomFeed()">Something else...</a></li>
+        </ul>
+    </div>
+
 
 </section>
 
 <section class="feeds clearfix" id="feeds">
-   <article ng-repeat="article in articles | filter:searchText" data-time="{{timestamp(article)}}" ng-class="{filtered:isFiltered(article)}">
+   <article ng-repeat="article in articles | filter:articleFilter" data-time="{{timestamp(article)}}" data-feed="{{article.feed}}" ng-class="{filtered:isFiltered(article)}">
        <h2 title="{{article.title}}"><a href="{{article.link}}" class="pull-right" target="_blank"><i class="icon-external-link"></i></a> {{article.title}}</h2>
        <div ng-bind-html-unsafe="article.description"></div>
        <p>&nbsp;</p>

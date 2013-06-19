@@ -1,0 +1,14 @@
+
+<div class="login">
+    <section>
+        <h2>Please Log In</h2>
+        <ul class="inline">
+            <li class="block" ng-show="preferred">
+                <button ng-click="login(preferred.id)" class="btn btn-block btn-primary"><i class="{{preferred.icon}}"></i> {{preferred.name}}</button>
+            </li>
+            <li ng-repeat="provider in filteredProviders()"><button class="btn" ng-class="{'btn-large':!auth.provider}" ng-click="login(provider.id)"><i class="{{provider.icon}}"></i> {{provider.name}}</button></li>
+        </ul>
+    </section>
+</div>
+
+{{auth|json}}

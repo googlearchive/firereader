@@ -3,7 +3,38 @@
 /* Controllers */
 
 angular.module('myApp.controllers', ['firebase'])
-   .controller('NavCtrl', ['$scope',  'localStorage', 'firebaseAuth', function($scope, localStorage) {
+   .controller('LoginCtrl', ['$scope', 'firebaseAuth', 'authProviders', '$location', function($scope, firebaseAuth, authProviders, $location) {
+      $scope.providers = {};
+      angular.forEach(authProviders, function(p) {
+         $scope.providers[p.id] = angular.extend({preferred: $scope.auth.provider === p.id}, p);
+      });
+
+      $scope.$watch('auth.provider', setPreferred);
+      setPreferred($scope.auth.provider);
+
+      $scope.filteredProviders = function() {
+         return _.filter($scope.providers, function(v,k) {
+            return k !== $scope.auth.provider;
+         });
+      };
+
+      function setPreferred(provider) {
+         $scope.preferred = provider? angular.extend({}, $scope.providers[provider]) : null;
+         angular.forEach($scope.providers, function(p, k) {p.preferred = (k === provider)});
+      }
+
+      var fn = $scope.$watch('auth.authenticated', function(auth) {
+         if( auth ) {
+            fn();
+            var redirect = !$scope.redirectPath||$scope.redirectPath==='/login'? '/hearth' : $scope.redirectPath;
+            $scope.logger('LoginCtrl auth event received', redirect, $scope.redirectPath); //debug
+            $location.path(redirect);
+         }
+      });
+
+   }])
+
+   .controller('NavCtrl', ['$scope',  'localStorage', function($scope, localStorage) {
       //todo NavCtrl is attached to <body> tag, use a pseudo element to limit scope?
       $scope.showInfo = localStorage.get('hideInfo')? false : true;
       $scope.toggleInfo = function() {
@@ -11,17 +42,58 @@ angular.module('myApp.controllers', ['firebase'])
          localStorage.set('hideInfo', $scope.showInfo? null : 1);
       };
    }])
-   .controller('AccountCtrl', [function() {
+
+   .controller('AccountCtrl', ['$scope', function($scope) {
       //todo
       //todo
       //todo
    }])
-   .controller('HearthCtrl', [function() {
-      //todo
-      //todo
-      //todo
+
+   .controller('HearthCtrl', ['$scope', 'FeedManager', 'ArticleManager', 'SortManager', 'masonry', '$timeout', function($scope, FeedManager, ArticleManager, SortManager, masonry, $timeout) {
+      var feedMgr = new FeedManager($scope, $scope.auth.user);
+      var artMgr = new ArticleManager(feedMgr, $scope);
+      var sortMgr = new SortManager($scope);
+
+      var resort = masonry('#feeds', $scope.sortField, $scope.sortDesc);
+      $.resort = resort;
+      sortMgr.sortWhen(resort, 'articleFilter');
+      artMgr.on(sortMgr.sortCallback(resort));
+      feedMgr.on(sortMgr.sortCallback(resort));
+
+      $scope.activateAllFeeds = function() {
+         $timeout(function() {
+            angular.forEach($scope.feeds, function(f) {f.active = true;});
+         });
+      };
+
+      $scope.deactivateAllFeeds = function() {
+         $timeout(function() {
+            angular.forEach($scope.feeds, function(f) {f.active = false;});
+         });
+      };
+
+      $scope.addCustomFeed = function() {
+         window.alert('I don\'t know how to do custom feeds yet; I\'ll probably learn soon.');
+      };
+
+      $scope.addFeed = function(choice) {
+         console.log('addFeed', choice); //debug
+         $scope.feeds[choice.$id] = feedMgr.makeFeed(choice.$id);
+      };
+
+      $scope.removeFeed = function(feedId) {
+         delete $scope.feeds[feedId];
+      };
+
+      $scope.timestamp = function(article) {
+         return new Date(article.date).getTime();
+      };
    }])
+
    .controller('DemoCtrl', ['$scope', '$timeout', 'angularFireAggregate', 'localStorage', function($scope, $timeout, angularFireAggregate, localStorage) {
+
+      //todo move some of this crazy to services
+
        $scope.sortBy = localStorage.get('sortBy')||'Newest';
 
        $scope.feeds = {
@@ -65,10 +137,10 @@ angular.module('myApp.controllers', ['firebase'])
             }
          }
 
-         console.log('articles done');
+         $scope.logger('articles done'); //debug
 
          var resort = _.debounce(function() {
-            console.log('resort'); //debug
+            $scope.logger('resort'); //debug
             $('#feeds').isotope( 'reloadItems' ).isotope({ sortBy: sortByField(), sortAscending: $scope.sortBy !== 'Newest' });
          }, 250);
 
@@ -154,7 +226,7 @@ angular.module('myApp.controllers', ['firebase'])
 
       function initFeed(feed) {
          if( !feed.init ) {
-            console.log('initFeed', feed);
+            $scope.logger('initFeed', feed);
             feed.init = true;
             $scope.articles.addPath(feedPath(feed.id));
          }
@@ -168,7 +240,7 @@ angular.module('myApp.controllers', ['firebase'])
          if( !baseUrl ) { return txt; }
          return txt.replace(/(href|src)=(['"])([^'"]+)['"]/g, function(match, p1, p2, p3) {
             if( !p3.match(/^(mailto:|[a-z][-a-z0-9\+\.]*:\/\/)/) ) {
-               console.log('link', match, p1 + '=' + p2 + _prefix(baseUrl, p3) + p2); //debug
+               $scope.logger('link', match, p1 + '=' + p2 + _prefix(baseUrl, p3) + p2); //debug
                match = p1 + '=' + p2 + _prefix(baseUrl, p3) + p2;
             }
             return match;

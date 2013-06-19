@@ -3,14 +3,43 @@
 
 // Declare app level module which depends on filters, and services
 angular.module('myApp', ['myApp.filters', 'myApp.services', 'myApp.directives', 'myApp.controllers', 'ngSanitize']).
-  config(['$routeProvider', function($routeProvider) {
-    $routeProvider.when('/account', {templateUrl: 'partials/account.html', controller: 'AccountCtrl'});
-    $routeProvider.when('/hearth', {templateUrl: 'partials/hearth.html', controller: 'HearthCtrl'});
-    $routeProvider.when('/demo', {templateUrl: 'partials/demo.html', controller: 'DemoCtrl'});
-    $routeProvider.otherwise({redirectTo: '/demo'});
-  }])
-   .run(['$rootScope', function($rootScope) {
-      $rootScope.feedChoices =
-      {"xkcd":{"title":"xkcd.com","url":"http://xkcd.com/","description":"xkcd.com: A webcomic of romance and math humor."},"techcrunch":{"title":"TechCrunch","url":"http://techcrunch.com","description":"TechCrunch is a group-edited blog that profiles the companies, products and events defining and transforming the new web."},"gizmodo":{"title":"Gizmodo","url":"http://gizmodo.com","description":"The Gadget Guide"},"ars":{"title":"Ars Technica","url":"http://arstechnica.com","description":"The Art of Technology"},"lifehacker":{"title":"Lifehacker","url":"http://lifehacker.com","description":"Tips and downloads for getting things done"},"newsblur":{"title":"The NewsBlur Blog","url":"http://blog.newsblur.com/","description":"NewsBlur is a personal news reader that brings people together to talk about the world. A new sound of an old instrument."},"google":{"title":"The Official Google Blog","url":"http://googleblog.blogspot.com/","description":"Insights from Googlers into our products, technology, and the Google culture."},"slashdot":{"title":"Slashdot","url":"http://slashdot.org/","description":"News for nerds, stuff that matters"},"fireball":{"title":"Daring Fireball","url":"http://daringfireball.net/","description":"Mac and web curmudgeonry/nerdery. By John Gruber."},"engadget":{"title":"Engadget RSS Feed","url":"http://www.engadget.com","description":"Engadget"},"wired":{"title":"Wired Top Stories","url":"http://www.wired.com","description":"Top Stories"},"boing":{"title":"Boing Boing","url":"http://boingboing.net","description":"Brain candy for Happy Mutants"},"bigpicture":{"title":"The Big Picture","url":"http://www.boston.com/bigpicture/","description":"News Stories in Photographs from the Boston Globe"},"oatmeal":{"title":"The Oatmeal - Comics, Quizzes, & Stories","url":"http://theoatmeal.com/","description":"The oatmeal tastes better than stale skittles found under the couch cushions"},"codinghorror":{"title":"Coding Horror","url":"http://www.codinghorror.com/blog/","description":"programming and human factors - Jeff Atwood"},"kottke":{"title":"kottke.org","url":"http://kottke.org/","description":"Jason Kottke's weblog, home of fine hypertext products"},"smbc":{"title":"Saturday Morning Breakfast Cereal (updated daily)","url":"http://www.smbc-comics.com","description":"The Saturday Morning Breakfast Cereal Blog"},"smashing":{"title":"Smashing Magazine Feed","url":"http://www.smashingmagazine.com/","description":"For Professional Web Designers and Developers"},"tuaw":{"title":"TUAW - The Unofficial Apple Weblog","url":"http://www.tuaw.com","description":"TUAW - The Unofficial Apple Weblog"},"gmail":{"title":"Gmail Blog","url":"http://gmailblog.blogspot.com/","description":"News, tips and tricks from Google's Gmail team and friends."},"macrumors":{"title":"MacRumors: Mac News and Rumors - All Stories","url":"http://www.macrumors.com","description":"the mac news you care about"},"make":{"title":"MAKE","url":"http://blog.makezine.com","description":"DIY projects, how-tos, and inspiration from geeks, makers, and hackers"},"joel":{"title":"Joel on Software","url":"http://www.joelonsoftware.com","description":"Painless Software Management"},"reader":{"title":"Official Google Reader Blog","url":"http://googlereader.blogspot.com/","description":"News, tips and tricks from the Google reader team."},"dilbert":{"title":"Dilbert Daily Strip","url":"http://dilbert.com/","description":"The Official Dilbert Daily Comic Strip RSS Feed"},"nyt":{"title":"NYT > U.S.","url":"http://www.nytimes.com/pages/national/index.html?partner=rss&emc=rss","description":"US"},"bbc":{"title":"BBC News - Home","url":"http://www.bbc.co.uk/news/#sa-ns_mchannel=rss&ns_source=PublicRSS20-sa","description":"The latest stories from the Home section of the BBC News web site."},"failblog":{"title":"FAIL Blog","url":"http://failblog.cheezburger.com/","description":"Funny FAIL Pictures and Videos"},"alistapart":{"title":"A List Apart: The Full Feed","url":"http://alistapart.com","description":"Articles, columns, and blog posts for people who make web sites."},"marco":{"title":"Marco.org","url":"http://www.marco.org/","description":"I’m Marco Arment, creator of Instapaper, technology writer, and coffee enthusiast."},"verge":{"title":"The Verge -  All Posts","url":"http://www.theverge.com/"},"zenhabits":{"title":"zenhabits","url":"http://zenhabits.net","description":"breathe"},"dailywtf":{"title":"The Daily WTF","url":"http://thedailywtf.com/","description":"Curious Perversions in Information Technology"},"seth":{"title":"Seth Godin's Blog on marketing, tribes and respect","url":"http://sethgodin.typepad.com/seths_blog/","description":"Seth Godin's riffs on marketing, respect, and the ways ideas spread."},"penny":{"title":"Penny Arcade","url":"http://www.penny-arcade.com","description":"News Fucker 5000"},"whatif":{"title":"What If?","url":"http://what-if.xkcd.com/"},"readwrite":{"title":"ReadWrite","url":"http://readwrite.com"},"qc":{"title":"QC RSS","url":"http://www.questionablecontent.net","description":"The Official QC RSS Feed"},"cooltools":{"title":"Cool Tools","url":"http://kk.org/cooltools","description":"Cool tools really work. A cool tool can be any book, gadget, software, video, map, hardware, material, or website that is tried and true. All reviews on this site are written by readers who have actually used the tool and others like it. Items can be either old or new as long as they are wonderful. We only post things we like and ignore the rest. Suggestions for tools much better than what is recommended here are always wanted. Tell me what you love."},"googleos":{"title":"Google Operating System","url":"http://googlesystem.blogspot.com/","description":"Unofficial news and tips about Google. A blog that watches Google's latest developments and the attempts to move your operating system online."},"smitten":{"title":"smitten kitchen","url":"http://smittenkitchen.com"},"cnn":{"title":"CNN.com - Top Stories","url":"http://www.cnn.com/index.html?eref=rss_topstories","description":"CNN.com delivers up-to-the-minute news and information on the latest top stories, weather, entertainment, politics and more."},"hn":{"title":"Hacker News","url":"https://news.ycombinator.com/","description":"Links for the intellectually curious, ranked by readers."},"rands":{"title":"Rands In Repose","url":"http://www.randsinrepose.com/"},"waxy":{"title":"Waxy.org","url":"http://waxy.org/","description":"Andy Baio lives here"},"venturebeat":{"title":"VentureBeat","url":"http://venturebeat.com","description":"News About Tech, Money and Innovation"},"apartment":{"title":"Apartment Therapy | Saving the world, one room at a time","url":"http://www.apartmenttherapy.com/feedburnermain","description":"Saving the world, one room at a time"},"hyperbole":{"title":"Hyperbole and a Half","url":"http://hyperboleandahalf.blogspot.com/","description":"Blog of Indescribable Awesomeness"},"gigaom":{"title":"GigaOM","url":"http://gigaom.com"},"schneier":{"title":"Schneier on Security","url":"http://www.schneier.com/blog/","description":"A blog covering security and security technology."}}
-      ;
+   config(['$routeProvider', function($routeProvider) {
+      $routeProvider.when('/account', {
+         templateUrl: 'partials/account.html',
+         controller: 'AccountCtrl',
+         authRequired: true,
+         pathTo: '/account'
+      });
+      $routeProvider.when('/hearth', {
+         templateUrl: 'partials/hearth.html',
+         controller: 'HearthCtrl',
+         authRequired: true,
+         pathTo: '/hearth'
+      });
+      $routeProvider.when('/demo', {
+         templateUrl: 'partials/demo.html',
+         controller: 'DemoCtrl',
+         authRequired: false,
+         pathTo: '/demo'
+      });
+      $routeProvider.when('/login', {
+         templateUrl: 'partials/login.html',
+         controller: 'LoginCtrl',
+         authRequired: false,
+         pathTo: '/login'
+      });
+      $routeProvider.otherwise({redirectTo: '/demo'});
+   }])
+   .run(['$rootScope', '$location', 'fbUrl', 'angularFireCollection', function($rootScope, $location, fbUrl, angularFireCollection) {
+      $rootScope.feedChoices = angularFireCollection(fbUrl('feeds'));
+
+      //todo make this a service
+      $rootScope.$on("$routeChangeStart", function (event, next, current) {
+         $rootScope.redirectPath = null;
+         if(next.authRequired && !$rootScope.auth.authenticated) {
+            $rootScope.redirectPath = next.pathTo === '/login'? '/hearth' : next.pathTo;
+            $rootScope.logger('must log in before going to this page', $rootScope.redirectPath);
+            $location.path('/login');
+         }
+      });
    }]);

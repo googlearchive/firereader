@@ -13,6 +13,7 @@ angular.module('firebase').factory('angularFireAggregate', ['$timeout', '$q', fu
    return function($scope, opts) {
       var collection = [];
       var indexes = {};
+      var listeners = [];
 
       /**
        * This can be invoked to add additional paths after initialization
@@ -25,6 +26,21 @@ angular.module('firebase').factory('angularFireAggregate', ['$timeout', '$q', fu
          var def = $q.defer();
          new Path(path, function(ss) { def.resolve(ss); });
          return def.promise;
+      };
+
+      /**
+       * Observer pattern, notify types are
+       * @param {string} [type] 'all' (default), 'child_added', 'child_removed', 'child_changed', or 'child_moved'
+       * @param {Function} callback
+       */
+      collection.on = function(type, callback) {
+         if( angular.isFunction(type) ) {
+            callback = type;
+            type = 'all';
+         }
+         angular.forEach(type.split(' '), function(t) {
+            listeners.push([callback, t]);
+         });
       };
 
       /**
@@ -64,7 +80,6 @@ angular.module('firebase').factory('angularFireAggregate', ['$timeout', '$q', fu
                var index = getIndex(prevId), item = processItem(data, index);
                addChild(index, item);
                updateIndexes(index);
-               $scope.$broadcast('angulareFireAggregateChildAdded', {id: item.$id, index: index, item: item});
             });
          });
 
@@ -76,7 +91,6 @@ angular.module('firebase').factory('angularFireAggregate', ['$timeout', '$q', fu
                var item = collection[pos];
                removeChild(id);
                updateIndexes(pos);
-               $scope.$broadcast('angulareFireAggregateChildRemoved', {id: id, index: pos, item: item});
             });
          });
 
@@ -91,7 +105,6 @@ angular.module('firebase').factory('angularFireAggregate', ['$timeout', '$q', fu
                if (newIndex !== index) {
                   moveChild(index, newIndex, item);
                }
-               $scope.$broadcast('angulareFireAggregateChildChanged', {id: item.$id, index: newIndex, oldIndex: index});
             });
          });
 
@@ -101,7 +114,6 @@ angular.module('firebase').factory('angularFireAggregate', ['$timeout', '$q', fu
                var newIndex = getIndex(prevId);
                var item = collection[oldIndex];
                moveChild(oldIndex, newIndex, item);
-               $scope.$broadcast('angulareFireAggregateChildMoved', {id: item.$id, index: newIndex, oldIndex: oldIndex});
             });
          });
 
@@ -124,23 +136,27 @@ angular.module('firebase').factory('angularFireAggregate', ['$timeout', '$q', fu
       function addChild(index, item) {
          indexes[item.$id] = index;
          collection.splice(index, 0, item);
+         notify('added', item, index);
       }
 
       function removeChild(id) {
          var index = indexes[id];
          // Remove the item from the collection.
-         collection.splice(index, 1);
+         var item = collection.splice(index, 1);
          indexes[id] = undefined;
+         notify('removed', item, index);
       }
 
       function updateChild (index, item) {
          collection[index] = item;
+         notify('updated', item, index);
       }
 
       function moveChild (from, to, item) {
          collection.splice(from, 1);
          collection.splice(to, 0, item);
          updateIndexes(from, to);
+         notify('moved', item, to, from);
       }
 
       function updateIndexes(from, to) {
@@ -160,6 +176,14 @@ angular.module('firebase').factory('angularFireAggregate', ['$timeout', '$q', fu
          out.$id = data.name();
          out.$index = index;
          return out;
+      }
+
+      function notify(event, item, index, oldIndex) {
+         angular.forEach(listeners, function(props) {
+            var fn = props[0];
+            var type = props[1];
+            (type === 'all' || type === event) && fn(item, event, index, oldIndex);
+         });
       }
 
       //////////////// process and create the aggregated Collection

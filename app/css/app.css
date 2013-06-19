@@ -297,3 +297,88 @@ section.feeds article:after {
    background: linear-gradient(to bottom,  rgba(255,255,255,0) 0%,rgba(255,255,255,1) 100%); /* W3C */
    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00ffffff', endColorstr='#ffffff',GradientType=0 ); /* IE6-9 */
 }
+
+#foot {
+   text-align: center;
+   margin: 20px 10px;
+   color: #eee;
+}
+
+#foot ul li:last-child:after {
+   content: "";
+}
+
+div.login {
+   margin: 20px auto 20px;
+   font-size: 24px;
+   line-height: 32px;
+   background-color: white;
+   border-radius: 20px;
+   box-shadow: 0 2px 2px rgba(0,0,0,.4);
+   max-width: 600px;
+}
+
+div.login h2 {
+   margin-top: 0;
+   text-align: center;
+}
+
+div.login ul {
+   text-align: center;
+}
+
+div.login ul li {
+   margin-bottom: 10px;
+}
+
+div.login ul li.block {
+   display: block;
+   margin: 0 50px 10px;
+}
+
+div.login ul li.block button {
+   height: 3em;
+}
+
+
+#addfeeds {
+   margin: 5px 25px 5px 0;
+   padding: 0;
+   position: relative;
+   display: inline-block;
+}
+
+#addfeeds a {
+   display: inline-block;
+   height: 24px;
+   line-height: 24px;
+   position: relative;
+   margin: 0;
+   padding: 0 10px 0 14px;
+   background: #0ac92b;
+   color: #fff;
+   font-size: 16px;
+   text-decoration: none;
+   cursor: default;
+}
+
+#addfeeds a:after {
+   content: "";
+   position: absolute;
+   top: 0;
+   right: -12px;
+   width: 0;
+   height: 0;
+   border-color: transparent transparent transparent #0ac92b;
+   border-style: solid;
+   border-width: 12px 0 12px 12px;
+}
+
+section.settings .dropdown-menu {
+   max-height: 250px;
+   overflow: auto;
+}
+
+#feeds article[data-feed="whatif"] h1 {
+   display: none;
+}

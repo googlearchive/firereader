@@ -16,7 +16,7 @@ if (!Function.prototype.bind) {
 }
 
 if( typeof(console) === 'undefined' ) {
-   window.console = (function() {
+   console = (function() {
       function f() {}
       return { debug: f, info: f, log: f, warn: f, error: f };
    })();
