@@ -16,7 +16,9 @@
     </form>
 
     <ul id="filters" class="inline">
-        <li ng-repeat="feed in feeds | orderBy:title"><label class="checkbox inline">{{feed.title}}<span ng-show="counts[feed.id] > 0"> ({{counts[feed.id]}})</span><input type="checkbox" ng-model="feed.active" value="{{feed.id}}" /></label> <a ng-click="removeFeed(feed.id)"><i class="icon-remove-sign"></i></a></li>
+        <li ng-repeat="feed in feeds | orderBy:title"><label class="checkbox inline">{{feed.title}}<span ng-show="counts[feed.id] > 0"> ({{counts[feed.id]}})</span><input type="checkbox" ng-model="feed.active" value="{{feed.id}}" /></label> <a ng-click="removeFeed(feed.id)"><i class="icon-remove-sign" ng-cloak ng-hide="isDemo"></i></a></li>
+        <li ng-cloak ng-hide="noFeeds" class="link"><a ng-click="activateAllFeeds()">all</a></li>
+        <li ng-cloak ng-hide="noFeeds" class="link"><a ng-click="deactivateAllFeeds()">none</a></li>
     </ul>
 
     <div id="addfeeds" ng-cloak ng-show="noFeeds"><a>Add your feeds!</a></div>
@@ -33,10 +35,10 @@
 
 </section>
 
-<section class="feeds clearfix" id="feeds">
-   <article ng-repeat="article in articles | filter:articleFilter" data-time="{{timestamp(article)}}" data-feed="{{article.feed}}" ng-class="{filtered:isFiltered(article)}">
-       <h2 title="{{article.title}}"><a href="{{article.link}}" class="pull-right" target="_blank"><i class="icon-external-link"></i></a> {{article.title}}</h2>
-       <div ng-bind-html-unsafe="article.description"></div>
+<section class="feeds clearfix" id="feeds" fb-isotope="filteredArticles">
+   <article data-time="{{timestamp(item)}}" data-feed="{{item.feed}}" ng-class="{filtered:isFiltered({'item':item})}">
+       <h2 title="{{item.title}}"><a href="{{item.link}}" class="pull-right" target="_blank"><i class="icon-external-link"></i></a> {{item.title}}</h2>
+       <div ng-bind-html-unsafe="item.description"></div>
        <p>&nbsp;</p>
    </article>
 </section>

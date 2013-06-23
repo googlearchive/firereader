@@ -15,23 +15,6 @@ if (!Function.prototype.bind) {
    };
 }
 
-if( typeof(console) === 'undefined' ) {
-   console = (function() {
-      function f() {}
-      return { debug: f, info: f, log: f, warn: f, error: f };
-   })();
-}
-
-// IE 9 won't allow us to call console.log.apply (WTF IE!) It also reports typeof(console.log) as 'object' (UNH!)
-// but together, those two errors can be useful in allowing us to fix stuff so it works right
-if( typeof(console.log) === 'object' ) {
-   // Array.forEach doesn't work in IE 8 so don't try that :(
-   console.log = Function.prototype.call.bind(console.log, console);
-   console.info = Function.prototype.call.bind(console.info, console);
-   console.warn = Function.prototype.call.bind(console.warn, console);
-   console.error = Function.prototype.call.bind(console.error, console);
-}
-
 if ( !Array.prototype.forEach ) {
    // credits: https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/forEach
    Array.prototype.forEach = function(fn, scope) {
@@ -40,3 +23,4 @@ if ( !Array.prototype.forEach ) {
       }
    }
 }
+

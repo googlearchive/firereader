@@ -134,8 +134,11 @@ section.settings {
    margin-left: 4px;
    font-size: 14px;
    line-height: 20px;
-   color: #946b6e;
    cursor: pointer;
+}
+
+i.icon-remove-sign {
+   color: #946b6e;
 }
 
 #filters li i:hover {
@@ -231,10 +234,10 @@ section.feeds {
 
 section.feeds article {
    float: left;
-   max-width: 390px;
+   max-width: 270px;
    min-width: 190px;
-   max-height: 390px;
-   min-height: 190px;
+   max-height: 350px;
+   min-height: 150px;
    overflow: hidden;
    position: relative;
    border-radius: 10px;
@@ -250,22 +253,23 @@ section.feeds article h2 {
    overflow: hidden;
 }
 
-@media (max-width: 900px) {
-   section.feeds article {
-      max-width: 45%;
-      margin: 10px 2.48%;
-   }
-}
+/* using bootstrap for these */
+/*@media (max-width: 900px) {*/
+   /*section.feeds article {*/
+      /*max-width: 45%;*/
+      /*margin: 10px 2.48%;*/
+   /*}*/
+/*}*/
 
-@media (max-width: 700px) {
-   section.feeds article {
-      max-width: none;
-      min-width: inherit;
-      min-height: inherit;
-      width: auto;
-      margin: 5px 0;
-   }
-}
+/*@media (max-width: 700px) {*/
+   /*section.feeds article {*/
+      /*max-width: none;*/
+      /*min-width: inherit;*/
+      /*min-height: inherit;*/
+      /*width: auto;*/
+      /*margin: 5px 0;*/
+   /*}*/
+/*}*/
 
 a [class^="icon-"]:before, a [class*=" icon-"]:before {
    cursor: pointer;

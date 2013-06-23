@@ -3,19 +3,6 @@
    "use strict";
 
    angular.module('myApp.services', [])
-      .value('version', '0.1')
-
-      .value('debugLevel', 0)// 0=log, 1=info, 2=warn, 3=error, 99=off
-
-      .value('FIREBASE_URL', 'https://fireplace.firebaseio.com/')
-
-      .value('authProviders', [
-         { id: 'persona',  name: 'Persona',  icon: 'icon-user'     },
-         { id: 'twitter',  name: 'Twitter',  icon: 'icon-twitter'  },
-         { id: 'facebook', name: 'Facebook', icon: 'icon-facebook' },
-         { id: 'github',   name: 'GitHub',   icon: 'icon-github'   }
-//         { id: 'email',    name: 'Email',    icon: 'icon-envelope' }
-      ])
 
       /**
        * A simple utility to create Firebase URLs from a list of parameters
@@ -32,17 +19,9 @@
       }])
 
       /**
-       * A rudimentary logging tool that allows logging to be filtered on the fly by changing
-       * debugLevel above.
-       */
-      .factory('logger', ['debugLevel', '$rootScope', function(debugLevel, $rootScope) {
-         return $rootScope.logger = new Logger(debugLevel);
-      }])
-
-      /**
        * A utility to store variables in local storage, with a fallback to cookies if localStorage isn't supported.
        */
-      .factory('localStorage', ['logger', function(logger) {
+      .factory('localStorage', ['$log', function($log) {
          //todo should handle booleans and integers more intelligently?
          var loc = {
             /**
@@ -51,7 +30,7 @@
              * @returns {localStorage}
              */
             set: function(key, value) {
-               logger('localStorage.set', key, value);
+               $log.debug('localStorage.set', key, value);
                var undefined;
                if( value === undefined || value === null ) {
                   // storing a null value returns "null" (a string) when get is called later
@@ -74,7 +53,6 @@
              * @returns {*} the value or null if not found
              */
             get: function(key) {
-               logger('localStorage.get', key);
                var v = null;
                if( typeof(localStorage) === 'undefined' ) {
                   v = cookie(key);
@@ -90,7 +68,7 @@
              * @returns {localStorage}
              */
             remove: function(key) {
-               logger('localStorage.remove', key);
+               $log.debug('localStorage.remove', key);
                if( typeof(localStorage) === 'undefined' ) {
                   cookie(key, null);
                }
@@ -103,7 +81,7 @@
 
          //debug just a temporary tool for debugging and testing
          angular.resetLocalStorage = function() {
-            logger('resetting localStorage values');
+            $log.info('resetting localStorage values');
             _.each(['authUser', 'authProvider', 'sortBy'], loc.remove);
          };
 
@@ -138,6 +116,57 @@
             return obs;
          }
       })
+
+      .factory('listDiff', ['$log', function($log) {
+         function _map(list, hashFn) {
+            var out = {};
+            _.each(list, function(x) {
+               out[ hashFn(x) ] = x;
+            });
+            return out;
+         }
+
+         function diff(old, curr, hashFn) {
+            var out = {
+               count: 0,
+               added: [],
+               removed: []
+            };
+
+            if( !old && curr ) {
+               out.added = curr.slice(0);
+            }
+            else if( !curr && old ) {
+               out.removed = old.slice(0);
+            }
+            else if( hashFn ) {
+               //todo this could be more efficient (it's possibly worse than o(n) right now)
+               var oldMap = _map(old, hashFn), newMap = _map(curr, hashFn);
+               out.removed = _.filter(oldMap, function(x,k) { return !_.has(newMap, k); });
+               out.added = _.filter(newMap, function(x,k) { return !_.has(oldMap, k); });
+            }
+            else {
+               // these don't work for angularFire because it returns different objects in each set and === is used to compare
+               out.removed = _.difference(old, curr);
+               out.added = _.difference(curr, old);
+            }
+            out.count = out.removed.length + out.added.length;
+            return out;
+         }
+
+         return {
+            diff: diff,
+            watch: function($scope, varName, callback, hashFn) {
+               //todo add a dispose method
+               return $scope.$watch(varName, function(newVal, oldVal) {
+                  var out = diff(oldVal, newVal, hashFn);
+                  if( out.count ) {
+                     callback(out);
+                  }
+               }, true);
+            }
+         };
+      }])
 
       .factory('treeDiff', function() {
          return function($scope, variableName) {
@@ -206,7 +235,7 @@
       .factory('authScopeManager', ['$rootScope', '$timeout', 'localStorage', function($rootScope, $timeout, localStorage) {
          $rootScope.auth = {
             authenticated: false,
-            user: localStorage.get('authUser'),
+            user: null,
             provider: localStorage.get('authProvider')
          };
 
@@ -222,20 +251,21 @@
                   provider: args.user.provider
                };
                localStorage.set('authProvider', args.user.provider);
-               localStorage.set('authUser', args.user.id);
             });
          }
 
          function _unset() {
-            $timeout(function(evt, args) {
-               $rootScope.auth.authenticated = false;
+            $timeout(function() {
+               $rootScope.auth = {
+                  authenticated: false,
+                  user: null,
+                  provider: $rootScope.auth && $rootScope.auth.provider
+               };
             });
          }
       }])
 
-      .factory('firebaseAuth', ['$rootScope', 'FIREBASE_URL', function($rootScope, FIREBASE_URL) {
-
-         var logger = $rootScope.logger;
+      .factory('firebaseAuth', ['$log', '$rootScope', 'FIREBASE_URL', '$location', function($log, $rootScope, FIREBASE_URL, $location) {
 
          // establish Firebase auth monitoring
          var authClient = new FirebaseAuthClient(new Firebase(FIREBASE_URL), _statusChange);
@@ -243,27 +273,28 @@
          // whenever authentication status changes, broadcast change to all scopes
          function _statusChange(error, user) {
             if( error ) {
-               logger.error('FirebaseAuth::error', error, user);
+               $log.error('FirebaseAuth::error', error, user);
                $rootScope.$broadcast('firebaseAuth::error', {error: error, user: user});
             }
             else if( user ) {
-               logger.info('FirebaseAuth::login', user);
+               $log.info('FirebaseAuth::login', user);
                $rootScope.$broadcast('firebaseAuth::login', {user: user});
             }
             else {
-               logger.info('FirebaseAuth::logout');
+               $log.info('FirebaseAuth::logout');
                $rootScope.$broadcast('firebaseAuth::logout', {});
+               $location.path('/login');
             }
          }
 
          // provide some convenience methods to log in and out
          var fns = {
             login: function(providerId) {
-               logger('logging in', providerId);
+               $log.log('logging in', providerId);
                authClient.login(providerId, { rememberMe: true });
             },
             logout: function() {
-               logger('logging out');
+               $log.log('logging out');
                authClient.logout();
             }
          };
@@ -273,7 +304,7 @@
          return fns;
       }])
 
-      .factory('FeedManager', ['angularFire', 'fbUrl', 'localStorage', '$timeout', 'observable', 'treeDiff', function(angularFire, fbUrl, localStorage, $timeout, observable, treeDiff) {
+      .factory('FeedManager', ['$log', 'angularFire', 'fbUrl', 'localStorage', '$timeout', 'observable', 'treeDiff', function($log, angularFire, fbUrl, localStorage, $timeout, observable, treeDiff) {
          return function($scope, userId) {
             var activatedFeeds = {};
             var inst = {
@@ -301,21 +332,30 @@
             };
             var obs = observable(inst);
 
-            $scope.noFeeds = false;
-            _.delay(function() {
-               $scope.noFeeds = _.isEmpty($scope.feeds);
-            }, 1000);
+            $scope.noFeeds = true;
 
             $scope.getFeed = function(feedId) {
                return $scope.feeds[feedId]||{};
             };
-            angularFire(fbUrl('myfeeds', userId), $scope, 'feeds', {});
+
+            if( $scope.isDemo ) {
+               $timeout(function() {
+                  $scope.feeds = {};
+                  angular.forEach(['dilbert', 'engadget', 'firebase', 'techcrunch', 'xkcd'], function(f) {
+                     $scope.feeds[f] = inst.makeFeed(f);
+                     ( f !== 'xkcd' && f !== 'firebase' ) && ($scope.feeds[f].active = false);
+                  });
+               });
+            }
+            else {
+               angularFire(fbUrl('myfeeds', userId), $scope, 'feeds', {});
+            }
 
             treeDiff($scope, 'feeds').watch(changed);
 
             // observer model
             function changed(changes, newVals, orig) {
-               $scope.logger('FeedManager::changes', changes, newVals, orig);
+               $log.debug('FeedManager::changes', changes, newVals, orig);
                _.each(['added', 'updated', 'removed'], function(type) {
                   _.each(changes[type], function(key) {
                      var feed = type === 'removed'? orig[key] : newVals[key];
@@ -333,6 +373,15 @@
                return feed && feed.active && !activatedFeeds[feed.id];
             }
 
+            var resetFilters = _.debounce(function() {
+               $timeout(function() {
+                  var filters = $scope.filters = [];
+                  _.each($scope.feeds, function(f) { if( !inst.isActive(f.id) ) { filters.push(f.id); } });
+                  $log.debug('resetFilters', filters); //debug
+               });
+            }, 100);
+            $scope.$watch('feeds', resetFilters, true);
+
             var findChoice = _.memoize(function(feedId) {
                return _.find($scope.feedChoices, function(f) { return f.$id === feedId })||{};
             });
@@ -341,7 +390,7 @@
          }
       }])
 
-      .factory('ArticleManager', ['angularFireAggregate', function(angularFireAggregate) {
+      .factory('ArticleManager', ['$log', 'angularFireAggregate', '$filter', '$timeout', function($log, angularFireAggregate, $filter, $timeout) {
          return function(feedManager, $scope) {
             // we use a custom article factory because all the isotope and angular iterators run very slowly
             // when the Firebase reference is included in the object; $scope.$watch becomes completely unstable
@@ -360,11 +409,19 @@
             }
 
             $scope.counts = {};
+            $scope.filteredArticles = [];
             $scope.articles = angularFireAggregate($scope, { factory: articleFactory });
+
+            var filterArticles = _.debounce(function() {
+               $timeout(function() {
+                  $scope.filteredArticles = $filter('filter')($scope.articles, $scope.articleFilter);
+               });
+            }, 100);
+            $scope.$watch('articles', filterArticles, true);
+            $scope.$watch('articleFilter', filterArticles);
 
             feedManager.on('added activated', initFeed);
             $scope.articles.on('added', incFeed);
-
             angular.forEach(feedManager.getFeeds(), initFeed);
 
             function incFeed(article) {
@@ -373,16 +430,18 @@
 
             function initFeed(feed) {
                if( feed.active && !_.has($scope.counts, feed.id)) {
-                  $scope.logger('initFeed', feed);
+                  $log.debug('initFeed', feed);
                   $scope.articles.addPath(feedPath(feed.id));
                   $scope.counts[feed.id] = 0;
                }
             }
 
             $scope.isFiltered = function(article) {
+               $log.debug('isFiltered?', article.feed, !feedManager.isActive(article.feed)); //debug
                return !feedManager.isActive(article.feed);
             };
 
+            //todo move to an article parser service
             function fixRelativeLinks(txt, baseUrl) {
                if( !baseUrl ) { return txt; }
                return txt.replace(/(href|src)=(['"])([^'"]+)['"]/g, function(match, p1, p2, p3) {
@@ -407,7 +466,7 @@
          }
       }])
 
-      .factory('SortManager', ['localStorage', function(localStorage) {
+      .factory('SortManager', ['$log', 'localStorage', function($log, localStorage) {
          return function($scope) {
             $scope.sortBy = localStorage.get('sortBy')||'Newest';
             $scope.sortField = 'time';
@@ -420,68 +479,12 @@
                $scope.sortField = $scope.sortBy === 'Title'? 'title' : 'time';
                $scope.sortDesc = $scope.sortBy === 'Newest';
             }
-
-            return {
-               sortCallback: function(sortFn) {
-                  return function() {
-                     sortFn($scope.sortField, $scope.sortDesc);
-                  }
-               },
-               sortWhen: function(sortFn) {
-                  _.each(['sortField', 'sortDesc'].concat(_.toArray(arguments).slice(1)), function(key) {
-                     console.log('watching', key); //debug
-                     $scope.$watch(key, function() {
-                        console.log('resorted by', key); //debug
-                        sortFn($scope.sortField, $scope.sortDesc, true);
-                     })
-                  });
-               }
-            }
-         }
-      }])
-
-      .factory('masonry', ['logger', function(logger) {
-         return function(elementSelector, sortBy, sortDescending) {
-            logger('masonry loaded', elementSelector);
-
-            var $el = $(elementSelector);
-
-            logger('$el', $el);
-
-            $el.isotope({
-               itemSelector : 'article',
-               resizable: true,
-               layoutMode: 'masonry',
-               masonry: {
-                  columnWidth:  10,
-                  columnHeight: 10
-               },
-               filter: ":not(.filtered)",
-               sortBy: sortBy,
-               sortAscending: !sortDescending,
-               getSortData: {
-                  time: function($elem) {
-                     return parseInt($elem.attr('data-time'));
-                  },
-                  title: function($elem) {
-                     return $elem.find('h2').text();
-                  }
-               }
-            });
-
-            // allows the grid to be resorted at any time by calling this function
-            // since it is throttled (via _.debounce) there is no concern about performance
-            // if it is called repeatedly
-            return _.debounce(function(sortBy, sortDescending) {
-               logger('resorting', elementSelector, sortBy, sortDescending); //debug
-               $el.isotope( 'reloadItems' ).isotope({ sortBy: sortBy, sortAscending: !sortDescending });
-            }, 250);
          }
       }])
 
       .factory('DemoFeedManager', ['FeedManager', function(FeedManager) {
          return function($scope) {
-            $scope.isDemoFeed = true;
+            $scope.isDemo = true;
             return angular.extend(new FeedManager($scope, 'demo'), {
                addFeed: function() { throw new Error('addFeed not available for demo mode'); },
                addCustomFeed: function() { throw new Error('addCustomFeed not available for demo mode'); }
@@ -492,7 +495,10 @@
       //todo-hack get these services that set rootScope items initialized
       //todo-hack should probably be their own modules?
       //todo-hack or maybe give these init() methods and put them in app.run()
-      .run(['logger', /*'userScopeManager',*/ 'authScopeManager', 'firebaseAuth', function() {}]);
+      .run(['authScopeManager', 'firebaseAuth', '$rootScope', function(asm, fa, $rs) {
+         $rs.login = fa.login;
+         $rs.logout = fa.logout;
+      }]);
 
    function cookie(key, value, options) {
       // key and at least value given, set cookie...
@@ -524,23 +530,6 @@
       options = value || {};
       var result, decode = options.raw ? function (s) { return s; } : decodeURIComponent;
       return (result = new RegExp('(?:^|; )' + encodeURIComponent(key) + '=([^;]*)').exec(document.cookie)) ? decode(result[1]) : null;
-   }
-
-   function Logger(debugLevel) {
-      var fn = function() {
-         debugLevel <= 0 && console.log.apply(console, Array.prototype.slice.call(arguments, 0));
-      };
-      fn.log = fn;
-      fn.info = function() {
-         debugLevel <= 1 && console.info.apply(console, Array.prototype.slice.call(arguments, 0));
-      };
-      fn.warn = function() {
-         debugLevel <= 2 && console.warn.apply(console, Array.prototype.slice.call(arguments, 0));
-      };
-      fn.error = function() {
-         debugLevel <= 3 && console.error.apply(console, Array.prototype.slice.call(arguments, 0));
-      };
-      return fn;
    }
 
 })(angular);

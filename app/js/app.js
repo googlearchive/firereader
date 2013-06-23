@@ -2,7 +2,7 @@
 
 
 // Declare app level module which depends on filters, and services
-angular.module('myApp', ['myApp.filters', 'myApp.services', 'myApp.directives', 'myApp.controllers', 'ngSanitize']).
+angular.module('myApp', ['myApp.config', 'myApp.filters', 'myApp.services', 'myApp.directives', 'myApp.controllers', 'ngSanitize']).
    config(['$routeProvider', function($routeProvider) {
       $routeProvider.when('/account', {
          templateUrl: 'partials/account.html',
@@ -17,7 +17,7 @@ angular.module('myApp', ['myApp.filters', 'myApp.services', 'myApp.directives', 
          pathTo: '/hearth'
       });
       $routeProvider.when('/demo', {
-         templateUrl: 'partials/demo.html',
+         templateUrl: 'partials/hearth.html',
          controller: 'DemoCtrl',
          authRequired: false,
          pathTo: '/demo'
@@ -38,7 +38,6 @@ angular.module('myApp', ['myApp.filters', 'myApp.services', 'myApp.directives', 
          $rootScope.redirectPath = null;
          if(next.authRequired && !$rootScope.auth.authenticated) {
             $rootScope.redirectPath = next.pathTo === '/login'? '/hearth' : next.pathTo;
-            $rootScope.logger('must log in before going to this page', $rootScope.redirectPath);
             $location.path('/login');
          }
       });
