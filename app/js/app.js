@@ -30,13 +30,16 @@ angular.module('myApp', ['myApp.config', 'myApp.filters', 'myApp.services', 'myA
       });
       $routeProvider.otherwise({redirectTo: '/demo'});
    }])
-   .run(['$rootScope', '$location', 'fbUrl', 'angularFireCollection', function($rootScope, $location, fbUrl, angularFireCollection) {
-      $rootScope.feedChoices = angularFireCollection(fbUrl('feeds'));
+   .run(['$rootScope', '$location', 'fbUrl', 'angularFireCollection', '$log', function($rootScope, $location, fbUrl, angularFireCollection, $log) {
+      // use angularFireCollection because this list should be read-only, and it should be filterable
+      // by using | filter command, which doesn't work with key/value iterators
+      $rootScope.feedChoices = angularFireCollection(fbUrl('meta'));
 
-      //todo make this a service
+      //todo make this a service?
       $rootScope.$on("$routeChangeStart", function (event, next, current) {
          $rootScope.redirectPath = null;
          if(next.authRequired && !$rootScope.auth.authenticated) {
+            console.log('redirecting', next); //debug
             $rootScope.redirectPath = next.pathTo === '/login'? '/hearth' : next.pathTo;
             $location.path('/login');
          }

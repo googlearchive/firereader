@@ -76,23 +76,18 @@ angular.module('myApp.controllers', ['firebase'])
          window.alert('I don\'t know how to do custom feeds yet; I\'ll probably learn soon.');
       };
 
-      $scope.addFeed = function(choice) {
-         $log.debug('addFeed', choice); //debug
-         $scope.feeds[choice.$id] = feedMgr.makeFeed(choice.$id);
+      $scope.addFeed = function(feedId) {
+         $log.debug('addFeed', feedId, _.keys($scope.feedChoices)); //debug
+         $scope.feeds[feedId] = feedMgr.makeFeed(feedId);
       };
 
       $scope.removeFeed = function(feedId) {
          delete $scope.feeds[feedId];
       };
-
-      $scope.timestamp = function(article) {
-         return new Date(article.date).getTime();
-      };
    }])
 
    .controller('DemoCtrl', ['$log', '$scope', '$timeout', 'DemoFeedManager', 'ArticleManager', 'SortManager', function($log, $scope, $timeout, DemoFeedManager, ArticleManager, SortManager) {
-
-      var feedMgr = new DemoFeedManager($scope, $scope.auth.user);
+      var feedMgr = new DemoFeedManager($scope);
       new ArticleManager(feedMgr, $scope);
       new SortManager($scope);
 
@@ -106,9 +101,5 @@ angular.module('myApp.controllers', ['firebase'])
          $timeout(function() {
             angular.forEach($scope.feeds, function(f) {f.active = false;});
          });
-      };
-
-      $scope.timestamp = function(article) {
-         return new Date(article.date).getTime();
       };
    }]);

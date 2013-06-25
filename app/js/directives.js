@@ -9,6 +9,7 @@ angular.module('myApp.directives', [])
          elm.text(version);
       };
    }])
+
    .directive('preventDefault', function() {
       return function(scope, element, attrs) {
          $(element).click(function(event) {
@@ -16,16 +17,10 @@ angular.module('myApp.directives', [])
          });
       }
    })
-   .directive('fbIsotope', ['listDiff', '$log', '$interpolate', function (listDiff, $log, $interpolate) {
-      // derived from this fiddle: http://jsfiddle.net/macfee/spUM6/
-      $log.debug('fbIsotope'); //debug
 
-      var itemTpl = $interpolate('<article data-time="{{timestamp(article)}}" id="{{article.feed}}-{{article.$id}}" data-feed="{{article.feed}}" ng-class="{filtered:isFiltered(article)}" class="span3">\
-                  <h2 title="{{article.title}}"><a href="{{article.link}}" class="pull-right" target="_blank"><i class="icon-external-link"></i></a> {{article.title}}</h2>\
-                     <div>{{article.description}}</div>\
-                     <p>&nbsp;{{article.filtered}}</p>\
-                  </article>');
-
+   .directive('fbIsotope', ['listDiff', '$log', function (listDiff, $log) {
+      // requires jquery.isotope.js: http://isotope.metafizzy.co
+      // derived from ideas in this fiddle: http://jsfiddle.net/macfee/spUM6/
       return {
 //         scope: {
 //            items: '=fbIsotope',
@@ -34,8 +29,8 @@ angular.module('myApp.directives', [])
 //            fbFiltered: '&',
 //            fbTimestamp: '&'
 //         },
-//         transclude: true,
-         compile: function(containerElement, attrs/*, transcludeFn*/) {
+         transclude: true,
+         compile: function(containerElement, attrs, transcludeFn) {
             return function(scope, element, attrs) {
                var articleKey = attrs.fbIsotope;
                var options = {
@@ -70,11 +65,18 @@ angular.module('myApp.directives', [])
                function buildItem(article) {
                   var s = scope.$new();
                   s.article = article;
-                  return angular.element(s.$eval(itemTpl));
+                  var c = null;
+                  transcludeFn(s, function(clone) {
+                     c = clone;
+                     s.$apply();
+                  });
+                  //return angular.element();
+                  return c;
                }
 
                function findEls(list) {
-                  return angular.element(_.map(list, function(item) { return '#'+ item.feed + '-' + item.$id }).join(','));
+                  //todo assumes that all feeds have unique ids
+                  return angular.element(_.map(list, function(item) { return '#'+ item.$id }).join(','));
                }
 
                var resort = _.debounce(function() {
@@ -86,6 +88,7 @@ angular.module('myApp.directives', [])
                   $log.debug('fbIsotope:setup', adds.length, deletes.length);
                   adds.length && element.isotope('insert', build(adds)) && (adds = []);
                   deletes.length && element.isotope('remove', findEls(deletes)) && (deletes = []);
+                  element.isotope('reloadItems');
                }, 100);
 
                var refilter = _.debounce(function() {

@@ -283,7 +283,6 @@
             else {
                $log.info('FirebaseAuth::logout');
                $rootScope.$broadcast('firebaseAuth::logout', {});
-               $location.path('/login');
             }
          }
 
@@ -296,6 +295,7 @@
             logout: function() {
                $log.log('logging out');
                authClient.logout();
+               $location.path('/login');
             }
          };
 
@@ -332,19 +332,18 @@
             };
             var obs = observable(inst);
 
+            //todo shouldn't need this; can't get feeds.length === 0 to work from directives
             $scope.noFeeds = true;
 
             $scope.getFeed = function(feedId) {
                return $scope.feeds[feedId]||{};
             };
 
-            if( $scope.isDemo ) {
-               $timeout(function() {
-                  $scope.feeds = {};
-                  angular.forEach(['dilbert', 'engadget', 'firebase', 'techcrunch', 'xkcd'], function(f) {
-                     $scope.feeds[f] = inst.makeFeed(f);
-                     ( f !== 'xkcd' && f !== 'firebase' ) && ($scope.feeds[f].active = false);
-                  });
+            if( userId === 'demo' ) {
+               new Firebase(fbUrl('myfeeds', 'demo')).once('value', function(ss) {
+                  $timeout(function() {
+                     $scope.feeds = ss.val();
+                  })
                });
             }
             else {
@@ -377,7 +376,6 @@
                $timeout(function() {
                   var filters = $scope.filters = [];
                   _.each($scope.feeds, function(f) { if( !inst.isActive(f.id) ) { filters.push(f.id); } });
-                  $log.debug('resetFilters', filters); //debug
                });
             }, 100);
             $scope.$watch('feeds', resetFilters, true);
@@ -437,7 +435,6 @@
             }
 
             $scope.isFiltered = function(article) {
-               $log.debug('isFiltered?', article.feed, !feedManager.isActive(article.feed)); //debug
                return !feedManager.isActive(article.feed);
             };
 

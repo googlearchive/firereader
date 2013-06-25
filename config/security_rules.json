@@ -1,0 +1,33 @@
+{
+   "rules": {
+      "meta": {
+         // list of feeds are read only
+         ".read": true,
+         ".write": false
+      },
+      "myfeeds": {
+         "$feed": {
+            // the demo feed is read-only for everyone
+            // all other feeds are exclusively read/write by their owner
+            ".read": "$feed === 'demo' || auth.id === $feed",
+            ".write": "$feed !== 'demo' && auth.id === $feed",
+            "active": {
+               ".validate": "newData.isBoolean()"
+            },
+            "id": {
+               // feed id should match one of the entries in "meta"
+               ".validate": "newData.isString() && root.child('meta').child(newData.val()).exists()"
+            },
+            "last": {
+               ".validate": "newData.isNumber()"
+            },
+            "title": {
+               ".validate": "newData.isString()"
+            },
+            "$other": {
+               ".validate": false
+            }
+         }
+      }
+   }
+}
