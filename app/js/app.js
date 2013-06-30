@@ -7,40 +7,41 @@ angular.module('myApp', ['myApp.config', 'myApp.filters', 'myApp.services', 'myA
       $routeProvider.when('/account', {
          templateUrl: 'partials/account.html',
          controller: 'AccountCtrl',
-         authRequired: true,
-         pathTo: '/account'
+         authRequired: true
       });
       $routeProvider.when('/hearth', {
          templateUrl: 'partials/hearth.html',
          controller: 'HearthCtrl',
-         authRequired: true,
-         pathTo: '/hearth'
+         authRequired: true
       });
       $routeProvider.when('/demo', {
          templateUrl: 'partials/hearth.html',
          controller: 'DemoCtrl',
-         authRequired: false,
-         pathTo: '/demo'
+         authRequired: false
+      });
+      $routeProvider.when('/about', {
+         templateUrl: 'partials/about.html',
+         controller: 'AboutCtrl',
+         authRequired: false
       });
       $routeProvider.when('/login', {
          templateUrl: 'partials/login.html',
          controller: 'LoginCtrl',
-         authRequired: false,
-         pathTo: '/login'
+         authRequired: false
       });
-      $routeProvider.otherwise({redirectTo: '/demo'});
+      $routeProvider.otherwise({redirectTo: '/about'});
    }])
    .run(['$rootScope', '$location', 'fbUrl', 'angularFireCollection', '$log', function($rootScope, $location, fbUrl, angularFireCollection, $log) {
       // use angularFireCollection because this list should be read-only, and it should be filterable
       // by using | filter command, which doesn't work with key/value iterators
       $rootScope.feedChoices = angularFireCollection(fbUrl('meta'));
+      $rootScope.redirectPath = null;
 
       //todo make this a service?
       $rootScope.$on("$routeChangeStart", function (event, next, current) {
-         $rootScope.redirectPath = null;
          if(next.authRequired && !$rootScope.auth.authenticated) {
-            console.log('redirecting', next); //debug
-            $rootScope.redirectPath = next.pathTo === '/login'? '/hearth' : next.pathTo;
+            console.log('redirecting from', $location.path(), next); //debug
+            $rootScope.redirectPath = $location.path();
             $location.path('/login');
          }
       });

@@ -236,6 +236,7 @@
          $rootScope.auth = {
             authenticated: false,
             user: null,
+            name: null,
             provider: localStorage.get('authProvider')
          };
 
@@ -243,11 +244,21 @@
          $rootScope.$on('firebaseAuth::error', _unset);
          $rootScope.$on('firebaseAuth::logout', _unset);
 
+         function parseName(user) {
+            switch(user.provider) {
+               case 'persona':
+                  return (user.id||'').replace(',', '.');
+               default:
+                  return user.id;
+            }
+         }
+
          function _set(evt, args) {
             $timeout(function() {
                $rootScope.auth = {
                   authenticated: true,
                   user: args.user.id,
+                  name: parseName(args.user),
                   provider: args.user.provider
                };
                localStorage.set('authProvider', args.user.provider);
@@ -265,7 +276,7 @@
          }
       }])
 
-      .factory('firebaseAuth', ['$log', '$rootScope', 'FIREBASE_URL', '$location', function($log, $rootScope, FIREBASE_URL, $location) {
+      .factory('firebaseAuth', ['$log', '$rootScope', 'FIREBASE_URL', '$location', '$route', function($log, $rootScope, FIREBASE_URL, $location, $route) {
 
          // establish Firebase auth monitoring
          var authClient = new FirebaseAuthClient(new Firebase(FIREBASE_URL), _statusChange);
@@ -279,10 +290,17 @@
             else if( user ) {
                $log.info('FirebaseAuth::login', user);
                $rootScope.$broadcast('firebaseAuth::login', {user: user});
+               if( $location.path() === '/login' ) {
+                  $location.path($rootScope.redirectPath || '/hearth');
+               }
             }
             else {
                $log.info('FirebaseAuth::logout');
                $rootScope.$broadcast('firebaseAuth::logout', {});
+               var path = $route.routes[$location.path()];
+               if( path && path.authRequired ) {
+                  $location.path('/login');
+               }
             }
          }
 
@@ -295,7 +313,6 @@
             logout: function() {
                $log.log('logging out');
                authClient.logout();
-               $location.path('/login');
             }
          };
 
@@ -333,7 +350,7 @@
             var obs = observable(inst);
 
             //todo shouldn't need this; can't get feeds.length === 0 to work from directives
-            $scope.noFeeds = true;
+            $scope.noFeeds = false;
 
             $scope.getFeed = function(feedId) {
                return $scope.feeds[feedId]||{};

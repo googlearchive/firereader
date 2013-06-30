@@ -3,10 +3,9 @@
 [ng\:cloak], [ng-cloak], .ng-cloak { display: none; }
 
 body {
-   font-size: 20px;
-   line-height: 1.25em;
    font-family: 'Open Sans', sans-serif;
-   background-color: #999;
+   background-color: #FAFAFA;
+   padding: 50px 40px;
 }
 
 h1 {
@@ -29,112 +28,72 @@ h2 {
    line-height: 36px;
 }
 
-section.intro {
-   position: relative;
-   margin: 10px;
-   padding: 20px 30px;
-   box-shadow: 0 2px 2px rgba(0, 0, 0, .5);
-   background-color: #ffffff;
-}
-
-section.intro a.dismiss {
-   display: block;
-   font-weight: bold;
-   font-size: 24px;
-   line-height: 24px;
-   text-decoration: none;
-}
-
-section.intro h1, section.intro h2 {
-   text-align: center;
-}
-
-ul.unstyled {
-   list-style: none;
-   margin: 0;
-}
-
-ul.unstyled li {
-   display: inline;
-}
-
-button {
-   font-size: 20px;
-   line-height: 28px;
+/* we leave the href="" off of ng events so we don't trigger angular's router,
+   but that causes the pointer to disappear in IE, so add it back here */
+button, a {
    cursor: pointer;
 }
 
-/* we leave the href="" off of ng events so we don't trigger angular's router,
-   but that causes the pointer to disappear in IE, so add it back here */
-a { cursor: pointer; }
+nav a, .nav a, .sidebar a {
+   color: #E59E37;
+}
+
+nav a:hover, .nav a:hover, .sidebar a:hover {
+   color: #E7852E;
+}
+
+div[ng-view] {
+   min-height: 350px;
+}
 
 nav {
-   background-color: #eee;
-   padding: 10px;
-   margin: 0;
-   box-shadow: 0 1px 2px rgba(0, 0, 0, .3);
+   padding: 0;
+   margin: 0 0 20px;
    position: relative;
    z-index: 2;
+}
+
+nav .nav {
+   font-size: 16px;
+   line-height: 46px;
+   margin: 15px 0 0;
 }
 
 .pull-right {
    margin-left: 15px;
 }
 
-nav .btn {
-   margin-top: 2px;
-}
-
-.brand {
-   font-size: 28px;
+a.brand {
+   font-size: 42px;
    font-weight: bold;
-   line-height: 32px;
+   line-height: 46px;
    text-decoration: none;
-   color: #E7852E;
+   color: #E59E37;
    background: -webkit-linear-gradient(#E7852E, #f3c445);
    -webkit-background-clip: text;
    -webkit-text-fill-color: transparent;
 }
 
-.brand img {
-   height: 30px;
-   margin-right: 10px;
+a.brand:hover {
+   text-decoration: none;
+}
+
+a.brand img {
+   height: 42px;
+   margin-right: 6px;
    position: relative;
-   top: -2px;
-}
-
-section.settings {
-   background-color: #e5e5e5;
-   padding: 5px 15px;
-   margin: 0;
-   box-shadow: 0 1px 1px rgba(0, 0, 0, .2);
-}
-
-#filters {
-   display: inline;
-}
-
-#filters li {
-   border-radius: 5px;
-   border: 1px solid #999;
-   padding: 2px 4px;
-   margin: 3px;
-}
-
-#filters li:hover {
-   background-color: #fafafa;
-}
-
-#filters li label {
-   padding: 0;
+   top: -8px;
 }
 
 #filters li i {
    opacity: .8;
    margin-left: 4px;
-   font-size: 14px;
-   line-height: 20px;
    cursor: pointer;
+   margin-top: 4px;
+}
+
+#filters li span {
+   color: #9A9A9A;
 }
 
 i.icon-remove-sign {
@@ -145,38 +104,6 @@ i.icon-remove-sign {
    opacity: 1;
    color: red;
 }
-
-#filters li.link {
-   border: none;
-   padding: 0;
-   font-size: 14px;
-   line-height: 20px;
-}
-
-#info-button {
-   color: #0088CC;
-   font-size: 28px;
-   line-height: 32px;
-   cursor: pointer;
-}
-
-#info-button:hover {
-   text-decoration: none;
-}
-
-#info-button i {
-   cursor: pointer;
-}
-
-#info-button.active {
-   opacity: .4;
-   color: #aaa;
-}
-
-section.intro i {
-   color: #E7852E;
-}
-
 
 .isotope-item {
    z-index: 2;
@@ -225,67 +152,53 @@ section.intro i {
    transition-duration: 0s;
 }
 
-section.feeds {
-   width: 100%;
+#feeds {
+   /*width: 100%;*/
    position: relative;
-   padding: 0;
-   margin: 0;
+   /*padding: 0;*/
+   /*margin: 0;*/
 }
 
-section.feeds article {
+#feeds article {
    float: left;
-   max-width: 270px;
-   min-width: 190px;
-   max-height: 350px;
-   min-height: 150px;
+   /*max-width: 270px;*/
+   /*min-width: 190px;*/
+   /*max-height: 350px;*/
+   /*min-height: 150px;*/
    overflow: hidden;
    position: relative;
    border-radius: 10px;
    background-color: white;
-   padding: 10px;
-   margin: 5px;
+   /*margin: 5px;*/
    text-overflow: ellipsis;
+   width: 245px;
+   margin: 5px;
+   height: 350px;
+   border: 1px solid #dddddd;
+   padding: 5px;
 }
 
-section.feeds article h2 {
+#feeds article h2 {
    max-height: 2.6em;
    text-overflow: ellipsis;
    overflow: hidden;
 }
 
-/* using bootstrap for these */
-/*@media (max-width: 900px) {*/
-   /*section.feeds article {*/
-      /*max-width: 45%;*/
-      /*margin: 10px 2.48%;*/
-   /*}*/
-/*}*/
-
-/*@media (max-width: 700px) {*/
-   /*section.feeds article {*/
-      /*max-width: none;*/
-      /*min-width: inherit;*/
-      /*min-height: inherit;*/
-      /*width: auto;*/
-      /*margin: 5px 0;*/
-   /*}*/
-/*}*/
-
 a [class^="icon-"]:before, a [class*=" icon-"]:before {
    cursor: pointer;
 }
 
-section.feeds article .left {
+#feeds article .left {
    float: left;
    margin-right: 5px;
 }
 
-section.feeds article .right {
+#feeds article .right {
    float: right;
    margin-left: 5px;
 }
 
-section.feeds article:after {
+#feeds article:after {
    position: absolute;
    bottom: 0;
    left: -10%;
@@ -302,113 +215,122 @@ section.feeds article:after {
    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00ffffff', endColorstr='#ffffff',GradientType=0 ); /* IE6-9 */
 }
 
+#feeds article[data-feed="whatif"] h1 {
+   display: none;
+}
+
 #foot {
    text-align: center;
    margin: 20px 10px;
-   color: #eee;
+   color: #bbbbbb;
+}
+
+#foot a {
+   text-decoration: underline;
+   color: #bbbbbb;
 }
 
 #foot ul li:last-child:after {
    content: "";
 }
 
-div.login {
-   margin: 20px auto 20px;
-   font-size: 24px;
-   line-height: 32px;
-   background-color: white;
-   border-radius: 20px;
-   box-shadow: 0 2px 2px rgba(0,0,0,.4);
-   max-width: 600px;
+article.box {
+   /*font-size: 24px;*/
+   /*line-height: 32px;*/
+   /*background-color: white;*/
+   /*border-radius: 20px;*/
+   /*box-shadow: 0 2px 2px rgba(0,0,0,.4);*/
+   padding: 25px;
+   border: 1px solid #bbbbbb;
 }
 
-div.login h2 {
+code {
+   /*font-size: 20px;*/
+   /*line-height: 1.25em;*/
+}
+
+#login h2 {
    margin-top: 0;
    text-align: center;
 }
 
-div.login ul {
+#login ul {
    text-align: center;
 }
 
-div.login ul li {
+#login ul li {
    margin-bottom: 10px;
 }
 
-div.login ul li.block {
+#login ul li.block {
    display: block;
    margin: 0 50px 10px;
 }
 
-div.login ul li.block button {
+#login ul li.block button {
    height: 3em;
 }
 
 
-#addfeeds {
-   margin: 5px 25px 5px 0;
-   padding: 0;
-   position: relative;
-   display: inline-block;
-}
-
 #addfeeds a {
-   display: inline-block;
-   height: 24px;
-   line-height: 24px;
-   position: relative;
-   margin: 0;
-   padding: 0 10px 0 14px;
-   background: #0ac92b;
-   color: #fff;
+   display: block;
    font-size: 16px;
    text-decoration: none;
-   cursor: default;
-}
-
-#addfeeds a:after {
-   content: "";
-   position: absolute;
-   top: 0;
-   right: -12px;
-   width: 0;
-   height: 0;
-   border-color: transparent transparent transparent #0ac92b;
-   border-style: solid;
-   border-width: 12px 0 12px 12px;
-}
-
-section.settings .dropdown-menu {
-   max-height: 250px;
-   overflow: auto;
-}
-
-#feeds article[data-feed="whatif"] h1 {
-   display: none;
 }
 
 #demoBanner {
    font-size: 24px;
    line-height: 28px;
    text-transform: uppercase;
-   color: #6c5f55;
+   background-color: #E59E37;
+   color: #ffffff;
    text-shadow: 0 1px 0 rgba(251, 255, 223, 0.49);
-   margin: 0 30px 10px;
+   margin: 0 0 20px;
    text-align: center;
    padding: 5px;
-   border-bottom: 1px solid #6c6c6c;
    position: relative;
 }
 
-#demoBanner:after {
-   content: " ";
-   display: block;
-   position: absolute;
-   bottom: -2px;
-   left: -1px;
-   margin: 0;
-   height: 1px;
-   background-color: #CCCCCC;
-   z-index: 25;
-   width: 100%;
+#about h2, #about h3 {
+   /*text-align: center;*/
 }
+
+#about i {
+   color: #E7852E;
+}
+
+section.sidebar {
+   min-height: 500px;
+}
+
+.nav-list li {
+   line-height: 28px;
+   font-size: 20px;
+}
+
+ul.nav-pills li.active a,
+ul.nav-pills li.active a:hover,
+ul.nav-pills li.active a:focus {
+   border-radius: 0;
+   background-color: #fbfbfb;
+   color: #E7852E;
+   border-bottom: 1px solid rgba(231,133,46,.2);
+}
+
+/* using bootstrap for these */
+/*@media (max-width: 900px) {*/
+/*#feeds article {*/
+/*max-width: 45%;*/
+/*margin: 10px 2.48%;*/
+/*}*/
+/*}*/
+
+/*@media (max-width: 700px) {*/
+/*#feeds article {*/
+/*max-width: none;*/
+/*min-width: inherit;*/
+/*min-height: inherit;*/
+/*width: auto;*/
+/*margin: 5px 0;*/
+/*}*/
+/*}*/

@@ -3,7 +3,7 @@
 /* Controllers */
 
 angular.module('myApp.controllers', ['firebase'])
-   .controller('LoginCtrl', ['$log', '$scope', 'firebaseAuth', 'authProviders', '$location', function($log, $scope, firebaseAuth, authProviders, $location) {
+   .controller('LoginCtrl', ['$log', '$rootScope', '$scope', 'firebaseAuth', 'authProviders', '$location', function($log, $rootScope, $scope, firebaseAuth, authProviders, $location) {
       $scope.providers = {};
       angular.forEach(authProviders, function(p) {
          $scope.providers[p.id] = angular.extend({preferred: $scope.auth.provider === p.id}, p);
@@ -22,28 +22,30 @@ angular.module('myApp.controllers', ['firebase'])
          $scope.preferred = provider? angular.extend({}, $scope.providers[provider]) : null;
          angular.forEach($scope.providers, function(p, k) {p.preferred = (k === provider)});
       }
-
-      var fn = $scope.$watch('auth.authenticated', function(auth) {
-         if( auth ) {
-            fn();
-            var redirect = !$scope.redirectPath||$scope.redirectPath==='/login'? '/hearth' : $scope.redirectPath;
-            $log.debug('LoginCtrl auth event received', redirect, $scope.redirectPath); //debug
-            $location.path(redirect);
-         }
-      });
-
    }])
 
-   .controller('NavCtrl', ['$scope',  'localStorage', function($scope, localStorage) {
+   .controller('NavCtrl', ['$scope',  'localStorage', '$location', function($scope, localStorage, $location) {
       //todo NavCtrl is attached to <body> tag, use a pseudo element to limit scope?
       $scope.showInfo = localStorage.get('hideInfo')? false : true;
       $scope.toggleInfo = function() {
          $scope.showInfo = !$scope.showInfo;
          localStorage.set('hideInfo', $scope.showInfo? null : 1);
       };
+      $scope.isActive = function(page) {
+         console.log('isActive', page, $location.path(), !!$location.path().match('/'+page)); //debug
+         return !!$location.path().match('/'+page);
+      }
    }])
 
    .controller('AccountCtrl', ['$scope', function($scope) {
+      $scope.deleteAccount = function() {
+         if( confirm('Permanently delete this account, including all your reading history?') ) {
+
+         }
+      }
+   }])
+
+   .controller('AboutCtrl', ['$scope', function($scope) {
       //todo
       //todo
       //todo
