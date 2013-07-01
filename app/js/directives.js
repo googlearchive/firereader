@@ -33,9 +33,10 @@ angular.module('myApp.directives', [])
          compile: function(containerElement, attrs, transcludeFn) {
             return function(scope, element, attrs) {
                var articleKey = attrs.fbIsotope;
+               var selector = attrs.fbSelector || 'article';
                var options = {
                   animationEngine : 'jquery',
-                  itemSelector: 'article',
+                  itemSelector: selector,
                   resizable: true,
                   layoutMode: 'masonry',
                   masonry: {
@@ -44,10 +45,8 @@ angular.module('myApp.directives', [])
                   },
                   getSortData : {
                      time: function(elem) {
+                        $log.log('sort by time', parseInt(elem.attr('data-time')), elem.attr('data-time')); //debug
                         return parseInt(elem.attr('data-time'));
-                     },
-                     title: function(elem) {
-                        return elem.find('h2').text();
                      }
                   },
                   sortBy: scope.sortField,
@@ -69,6 +68,7 @@ angular.module('myApp.directives', [])
                   transcludeFn(s, function(clone) {
                      c = clone;
                      s.$apply();
+                     _.defer(function() { s.$apply() });
                   });
                   //return angular.element();
                   return c;
@@ -76,6 +76,7 @@ angular.module('myApp.directives', [])
 
                function findEls(list) {
                   //todo assumes that all feeds have unique ids
+                  $log.log('removing', _.map(list, function(item) { return '#'+ item.$id }).join(',')); //debug
                   return angular.element(_.map(list, function(item) { return '#'+ item.$id }).join(','));
                }
 
@@ -88,7 +89,7 @@ angular.module('myApp.directives', [])
                   $log.debug('fbIsotope:setup', adds.length, deletes.length);
                   adds.length && element.isotope('insert', build(adds)) && (adds = []);
                   deletes.length && element.isotope('remove', findEls(deletes)) && (deletes = []);
-                  element.isotope('reloadItems');
+                  resort();
                }, 100);
 
                var refilter = _.debounce(function() {
@@ -103,8 +104,8 @@ angular.module('myApp.directives', [])
                var adds = [];
                var deletes = [];
                function changes(changes) {
+                  $log.debug('fbIsotope:changes', changes); //debug
                   if( changes.count ) {
-//                     $log.log('fbIsotope:changes found', {added: changes.added.length, removed: changes.removed.length});
                      adds = adds.concat(changes.added);
                      deletes = deletes.concat(changes.removed);
                      setup();

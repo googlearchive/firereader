@@ -1,11 +1,40 @@
 /* app css stylesheet */
+/**
+
+Background: FAFAFA
+
+Fireplace logo
+inner: E59E37
+outer: DC7B05
+
+search button:
+inner: DE8B1F
+outer: C46500
+
+Link text:
+DE8B21
+DC8616
+
+Newest dropdown button:
+inner: CCCCCC
+outer: B0B0B0
+
+Gray text: 9A9A9A
+
+
+  text-shadow:
+   -1px -1px 0 #DC7B05,
+    1px -1px 0 #DC7B05,
+    -1px 1px 0 #DC7B05,
+     1px 1px 0 #DC7B05;
+**/
 
 [ng\:cloak], [ng-cloak], .ng-cloak { display: none; }
 
 body {
    font-family: 'Open Sans', sans-serif;
    background-color: #FAFAFA;
-   padding: 50px 40px;
+   padding: 50px 0;
 }
 
 h1 {
@@ -85,19 +114,53 @@ a.brand img {
    top: -8px;
 }
 
-#filters li i {
+#searchbox {
+   position: relative;
+}
+
+#searchbox .input-append {
+   width: 90%;
+}
+
+#searchbox button.btn {
+   background-color: #DE8B1F;
+   color: white;
+}
+
+.sidebar label.checkbox {
+   display: block;
+   color: #555;
+}
+
+#filters {
+   margin-bottom: 15px;
+}
+
+#filters li.all a {
+   font-weight: bold;
+}
+
+#filters li a {
+   color: #555;
+   font-size: 14px;
+   padding: 0 15px 0 5px;
+}
+
+#filters li a:hover {
+   color: #000;
+}
+
+#filters li i.icon-remove-sign {
    opacity: .8;
-   margin-left: 4px;
    cursor: pointer;
-   margin-top: 4px;
+   margin-right: -10px;
+   margin-top: 8px;
+   color: #946b6e;
 }
 
 #filters li span {
    color: #9A9A9A;
-}
-
-i.icon-remove-sign {
-   color: #946b6e;
+   padding-left: 5px;
 }
 
 #filters li i:hover {
@@ -159,7 +222,7 @@ i.icon-remove-sign {
    /*margin: 0;*/
 }
 
-#feeds article {
+#feeds > article {
    float: left;
    /*max-width: 270px;*/
    /*min-width: 190px;*/
@@ -167,19 +230,72 @@ i.icon-remove-sign {
    /*min-height: 150px;*/
    overflow: hidden;
    position: relative;
-   border-radius: 10px;
+   border-radius: 2px;
    background-color: white;
-   /*margin: 5px;*/
    text-overflow: ellipsis;
-   width: 245px;
-   margin: 5px;
    height: 350px;
+   margin: 0 0 10px;
+   width: 31%;
    border: 1px solid #dddddd;
-   padding: 5px;
+   cursor: pointer;
 }
 
-#feeds article h2 {
+#feeds > article:hover {
+   border-color: orange;
+}
+
+#feeds > article:hover:after {
+   opacity: .3;
+   position: absolute;
+   left: 0;
+   bottom: 0;
+   top: 0;
+   right: 0;
+   height: auto;
+   border-radius: 2px;
+   content: " ";
+   z-index: 250;
+   background: #555;
+   filter: none;
+}
+
+#feeds > article footer {
+   display: none;
+   position: absolute;
+   bottom: 0;
+   min-height: 3em;
+   width: 100%;
+   border-radius: 2px;
+   z-index: 251;
+   text-align: center;
+   background-color: #444;
+   color: #ffe7bb;
+}
+
+#feeds > article:hover footer {
+   display: block;
+}
+
+#feeds > article:hover footer {
+   display: block;
+}
+
+#feeds > article div[ng-bind-html-unsafe] > *,
+#feeds > article h2 {
+   margin-left: 10px;
+   margin-right: 10px;
+}
+
+#feeds > article div[ng-bind-html-unsafe] > img:first-child {
+   margin-left: 0;
+   margin-right: 0;
+   max-width: 100%;
+}
+
+#feeds > article h2 {
    max-height: 2.6em;
+   font-size: 16px;
+   line-height: 20px;
    text-overflow: ellipsis;
    overflow: hidden;
 }
@@ -188,17 +304,17 @@ a [class^="icon-"]:before, a [class*=" icon-"]:before {
    cursor: pointer;
 }
 
-#feeds article .left {
+#feeds > article .left {
    float: left;
    margin-right: 5px;
 }
 
-#feeds article .right {
+#feeds > article .right {
    float: right;
    margin-left: 5px;
 }
 
-#feeds article:after {
+#feeds > article:after {
    position: absolute;
    bottom: 0;
    left: -10%;
@@ -215,13 +331,12 @@ a [class^="icon-"]:before, a [class*=" icon-"]:before {
    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00ffffff', endColorstr='#ffffff',GradientType=0 ); /* IE6-9 */
 }
 
-#feeds article[data-feed="whatif"] h1 {
+#feeds > article[data-feed="whatif"] h1 {
    display: none;
 }
 
 #foot {
    text-align: center;
-   margin: 20px 10px;
    color: #bbbbbb;
 }
 
@@ -271,12 +386,37 @@ code {
    height: 3em;
 }
 
-
-#addfeeds a {
+#addFeeds {
    display: block;
-   font-size: 16px;
-   text-decoration: none;
 }
+
+#addFeeds a.dropdown-toggle {
+   display: block;
+   width: auto;
+   font-size: 18px;
+   line-height: 24px;
+   text-decoration: none;
+   padding: 5px;
+   margin: 15px 0;
+}
+
+#addFeeds a.dropdown-toggle:hover {
+   background-color: #eee;
+}
+
+#addFeeds a.dropdown-toggle i {
+   display: inline-block;
+}
+
+#addFeeds .dropdown-menu {
+   max-height: 200px;
+   overflow: auto;
+}
+
+/*#addfeeds a {*/
+   /*font-size: 16px;*/
+   /*text-decoration: none;*/
+/*}*/
 
 #demoBanner {
    font-size: 24px;
@@ -317,20 +457,36 @@ ul.nav-pills li.active a:focus {
    border-bottom: 1px solid rgba(231,133,46,.2);
 }
 
-/* using bootstrap for these */
-/*@media (max-width: 900px) {*/
-/*#feeds article {*/
-/*max-width: 45%;*/
-/*margin: 10px 2.48%;*/
-/*}*/
+
+/*@media (max-width:480px) {*/
+   /*#feeds > article {*/
+      /*width: auto;*/
+   /*}*/
 /*}*/
 
-/*@media (max-width: 700px) {*/
-/*#feeds article {*/
-/*max-width: none;*/
-/*min-width: inherit;*/
-/*min-height: inherit;*/
-/*width: auto;*/
-/*margin: 5px 0;*/
-/*}*/
-/*}*/
+@media (max-width:767px) {
+   #feeds > article {
+      width: auto;
+      margin: 10px;
+   }
+
+   section.sidebar {
+      width: auto;
+      min-height: inherit;
+      margin: 15px;
+      background-color: #ddd;
+      padding: 10px;
+   }
+}
+
+@media (min-width:768px) and (max-width:979px) {
+   #feeds > article {
+      width: 45%;
+   }
+}
+
+@media (min-width:1200px) {
+   #feeds > article {
+      width: 23%;
+   }
+}

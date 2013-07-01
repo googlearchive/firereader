@@ -32,7 +32,6 @@ angular.module('myApp.controllers', ['firebase'])
          localStorage.set('hideInfo', $scope.showInfo? null : 1);
       };
       $scope.isActive = function(page) {
-         console.log('isActive', page, $location.path(), !!$location.path().match('/'+page)); //debug
          return !!$location.path().match('/'+page);
       }
    }])
@@ -56,11 +55,9 @@ angular.module('myApp.controllers', ['firebase'])
       new ArticleManager(feedMgr, $scope);
       new SortManager($scope);
 
-//      var resort = masonry('#feeds', $scope.sortField, $scope.sortDesc);
-//      $.resort = resort;
-//      sortMgr.sortWhen(resort, 'articleFilter');
-//      artMgr.on(sortMgr.sortCallback(resort));
-//      feedMgr.on(sortMgr.sortCallback(resort));
+      $scope.showArticle = function(article) {
+         $log.debug('showArticle', article);
+      };
 
       $scope.activateAllFeeds = function() {
          $timeout(function() {
@@ -83,8 +80,20 @@ angular.module('myApp.controllers', ['firebase'])
          $scope.feeds[feedId] = feedMgr.makeFeed(feedId);
       };
 
-      $scope.removeFeed = function(feedId) {
-         delete $scope.feeds[feedId];
+      $scope.activateOneFeed = function(feedId) {
+         $timeout(function() {
+            angular.forEach($scope.feeds, function(f) { f.active = f.id === feedId; })
+         })
+      };
+
+      $scope.removeFeed = function(feedId, $event) {
+         if( $event ) {
+            $event.preventDefault();
+            $event.stopPropagation();
+         }
+         $timeout(function() {
+            delete $scope.feeds[feedId];
+         })
       };
    }])
 
@@ -97,6 +106,12 @@ angular.module('myApp.controllers', ['firebase'])
          $timeout(function() {
             angular.forEach($scope.feeds, function(f) {f.active = true;});
          });
+      };
+
+      $scope.activateOneFeed = function(feedId) {
+         $timeout(function() {
+            angular.forEach($scope.feeds, function(f) { f.active = f.id === feedId; })
+         })
       };
 
       $scope.deactivateAllFeeds = function() {

@@ -14,6 +14,7 @@ angular.module('firebase').factory('angularFireAggregate', ['$timeout', '$q', fu
       var collection = [];
       var indexes = {};
       var listeners = [];
+      var paths = {};
 
       /**
        * This can be invoked to add additional paths after initialization
@@ -24,8 +25,16 @@ angular.module('firebase').factory('angularFireAggregate', ['$timeout', '$q', fu
       collection.addPath = function(path) {
          console.log('addPath', path); //debug
          var def = $q.defer();
-         new Path(path, function(ss) { def.resolve(ss); });
+         var p = new Path(path, function(ss) { def.resolve(ss); });
+         paths[p.toString()] = p;
          return def.promise;
+      };
+
+      collection.removePath = function(path) {
+         console.log('angularFireAggreate.removePath', path, paths); //debug
+         if( paths[path] ) {
+            paths[path].dispose();
+         }
       };
 
       /**
@@ -67,7 +76,7 @@ angular.module('firebase').factory('angularFireAggregate', ['$timeout', '$q', fu
        * @constructor
        */
       function Path(collectionUrlOrRef, initialCb) {
-         var pathRef;
+         var pathRef, subs = [];
          if (typeof collectionUrlOrRef == "string") {
             pathRef = new Firebase(collectionUrlOrRef);
          } else {
@@ -75,47 +84,48 @@ angular.module('firebase').factory('angularFireAggregate', ['$timeout', '$q', fu
             pathRef = collectionUrlOrRef;
          }
 
-         pathRef.on('child_added', function(data, prevId) {
-            $timeout(function() {
-               var index = getIndex(prevId), item = processItem(data, index);
-               addChild(index, item);
-               updateIndexes(index);
-            });
-         });
+         var pathString = this.pathString = pathRef.toString();
+         console.log('Path', pathString); //debug
 
-         pathRef.on('child_removed', function(data) {
+         subs.push(['child_added', pathRef.on('child_added', function(data, prevId) {
+            $timeout(function() {
+               var index = getIndex(prevId), item = processItem(data, index, pathString);
+               addChild(index, item);
+            });
+         })]);
+
+         subs.push(['child_removed', pathRef.on('child_removed', function(data) {
             //todo broakdacst to scope
             $timeout(function() {
                var id = data.name();
                var pos = indexes[id];
                var item = collection[pos];
                removeChild(id);
-               updateIndexes(pos);
             });
-         });
+         })]);
 
-         pathRef.on('child_changed', function(data, prevId) {
+         subs.push(['child_changed', pathRef.on('child_changed', function(data, prevId) {
             //todo broadcast to scope
             $timeout(function() {
                var index = indexes[data.name()];
                var newIndex = getIndex(prevId);
-               var item = processItem(data, index);
+               var item = processItem(data, index, pathString);
 
                updateChild(index, item);
                if (newIndex !== index) {
                   moveChild(index, newIndex, item);
                }
             });
-         });
+         })]);
 
-         pathRef.on('child_moved', function(ref, prevId) {
+         subs.push(['child_moved', pathRef.on('child_moved', function(ref, prevId) {
             $timeout(function() {
                var oldIndex = indexes[ref.name()];
                var newIndex = getIndex(prevId);
                var item = collection[oldIndex];
                moveChild(oldIndex, newIndex, item);
             });
-         });
+         })]);
 
          // putting this at the end makes performance appear considerably faster
          // since child_added callbacks start immediately instead of after entire
@@ -123,7 +133,28 @@ angular.module('firebase').factory('angularFireAggregate', ['$timeout', '$q', fu
          if (initialCb && typeof initialCb == 'function') {
             pathRef.once('value', initialCb);
          }
+
+         this.dispose = function() {
+            _.each(subs, function(s) {
+               pathRef.off(s[0], s[1]);
+            });
+            pathRef = null;
+            $timeout(function() {
+               //todo this will not work if using two refs that access the same path
+               //todo which seems unlikely but certainly valid
+               angular.forEach(collection, function(item) {
+                  if( item.$path === pathString ) {
+                     console.log('removing child', item.$id, item.$path); //debug
+                     removeChild(item.$id);
+                  }
+               });
+            })
+         };
+
       }
+      Path.prototype.toString = function() {
+         return this.pathString;
+      };
 
       ///////////// internal functions
 
@@ -136,6 +167,7 @@ angular.module('firebase').factory('angularFireAggregate', ['$timeout', '$q', fu
       function addChild(index, item) {
          indexes[item.$id] = index;
          collection.splice(index, 0, item);
+         updateIndexes(index);
          notify('added', item, index);
       }
 
@@ -144,6 +176,7 @@ angular.module('firebase').factory('angularFireAggregate', ['$timeout', '$q', fu
          // Remove the item from the collection.
          var item = collection.splice(index, 1);
          indexes[id] = undefined;
+         updateIndexes(index);
          notify('removed', item, index);
       }
 
@@ -171,10 +204,11 @@ angular.module('firebase').factory('angularFireAggregate', ['$timeout', '$q', fu
          }
       }
 
-      function processItem(data, index) {
+      function processItem(data, index, pathString) {
          var out = opts.factory(data, index);
          out.$id = data.name();
          out.$index = index;
+         out.$path = pathString;
          return out;
       }
 

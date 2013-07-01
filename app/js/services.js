@@ -350,7 +350,7 @@
             var obs = observable(inst);
 
             //todo shouldn't need this; can't get feeds.length === 0 to work from directives
-            $scope.noFeeds = false;
+            $scope.noFeeds = true;
 
             $scope.getFeed = function(feedId) {
                return $scope.feeds[feedId]||{};
@@ -436,6 +436,7 @@
             $scope.$watch('articleFilter', filterArticles);
 
             feedManager.on('added activated', initFeed);
+            feedManager.on('removed', removeFeed);
             $scope.articles.on('added', incFeed);
             angular.forEach(feedManager.getFeeds(), initFeed);
 
@@ -451,8 +452,17 @@
                }
             }
 
+            function removeFeed(feed) {
+               console.log('removing a path', feed); //debug
+               $scope.articles.removePath('https://feeds.firebaseio.com/'+feed.id+'/articles');
+            }
+
             $scope.isFiltered = function(article) {
                return !feedManager.isActive(article.feed);
+            };
+
+            $scope.feedName = function(article) {
+               return feedManager.getFeed(article.feed).title || article.feed;
             };
 
             //todo move to an article parser service
@@ -482,16 +492,15 @@
 
       .factory('SortManager', ['$log', 'localStorage', function($log, localStorage) {
          return function($scope) {
-            $scope.sortBy = localStorage.get('sortBy')||'Newest';
             $scope.sortField = 'time';
-            $scope.sortDesc = true;
 
-            $scope.$watch('sortBy', setSortField);
-            setSortField();
+            $scope.$watch('sortDesc', function() {
+               localStorage.set('sortDesc', $scope.sortDesc);
+            });
 
-            function setSortField() {
-               $scope.sortField = $scope.sortBy === 'Title'? 'title' : 'time';
-               $scope.sortDesc = $scope.sortBy === 'Newest';
+            $scope.sortDesc = localStorage.get('sortDesc');
+            if( $scope.sortDesc === null ) {
+               $scope.sortDesc = true;
             }
          }
       }])

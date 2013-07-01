@@ -46,3 +46,18 @@ angular.module('myApp', ['myApp.config', 'myApp.filters', 'myApp.services', 'myA
          }
       });
    }]);
+//
+//jQuery(function($) {
+//   var _size = _.debounce(function() {
+//      var $w = $(window);
+//      $('#windowSize').text( $w.height() + ' x ' + $w.width() );
+//   }, 50);
+//   var _move = _.debounce(function(e) {
+//      $('#mouseCoords').text( 'x: '+ e.pageX + ', y: '+ e.pageY );
+//   }, 50);
+//
+//   $('nav > div').append('<span id="windowSize"></span>').append(' / ').append('<span id="mouseCoords"></span>');
+//   $(window).resize(_size);
+//   $(document).on('mousemove', _move);
+//   _size();
+//});
