@@ -1,11 +1,8 @@
-
 <div id="hearth" class="container">
     <div class="row">
 
         <!-- CONTROLS FOR SELECTING FEEDS AND SEARCHING -->
         <section class="span3 sidebar">
-            <h3 id="demoBanner" ng-cloak ng-hide="auth.authenticated">Demo Feeds</h3>
-
             <!--<form class="form-search">
                 <div class="input-append">
                     <input type="text" class="span2 search-query" ng-model="articleFilter">
@@ -20,7 +17,7 @@
             </form>
 
 
-            <div id="addFeeds" class="btn-group">
+            <div id="addFeeds" class="btn-group" ng-cloak ng-hide="isDemo">
                 <a class="dropdown-toggle" data-toggle="dropdown"><i class="icon-plus pull-right"></i>Add Feed...</a>
                 <ul class="dropdown-menu">
                     <!--<li><input ng-model="feedChoiceFilter" placeholder="filter" /></li>-->
@@ -31,8 +28,8 @@
             </div>
 
             <ul id="filters" class="nav nav-list" ng-cloak ng-hide="noFeeds">
-                <li class="all"><a ng-click="activateAllFeeds()"><!--<a href="#/hearth">--><i class="icon-double-angle-right"></i> All Feeds</a></li>
-                <li ng-repeat="feed in feeds | orderBy:title"><a ng-click="activateOneFeed(feed.id)"><!--<a href="#/hearth/{{feed.id}}">--><i class="icon-angle-right"></i> {{feed.title}}<span ng-show="counts[feed.id] > 0"> ({{counts[feed.id]}})</span><i class="icon-remove-sign pull-right" ng-cloak ng-hide="isDemo" ng-click="removeFeed(feed.id, $event)"></i></a></li>
+                <li class="all" ng-class="{active:showAllFeeds()}"><a href="#{{link}}"><i class="icon-double-angle-right"></i> All {{isDemo? 'Demo ' : ''}}Feeds</a></li>
+                <li ng-repeat="feed in feeds | orderBy:title" ng-class="{active:isActive(feed.id)}"><a href="#{{link}}?feed={{feed.id}}"><i class="icon-angle-right"></i> {{feed.title}}<span ng-show="counts[feed.id] > 0"> ({{counts[feed.id]}})</span><i class="icon-remove-sign pull-right" ng-cloak ng-hide="isDemo" ng-click="removeFeed(feed.id, $event)"></i></a></li>
             </ul>
 
             <label class="checkbox" ng-cloak ng-hide="noFeeds">
@@ -41,14 +38,45 @@
         </section>
 
         <!-- THE LIST OF FEEDS I WANT TO READ -->
-        <section class="span9" id="feeds" fb-isotope="filteredArticles" fb-selector="article[data-feed]">
-           <article data-time="{{article.date}}" data-feed="{{article.feed}}" ng-click="showArticle(article)" ng-class="{filtered:isFiltered(article)}" id="{{article.$id}}">
+        <section class="span9">
+            <article class="box" ng-cloak ng-show="showAbout" id="about">
+                <a class="pull-right" data-dismiss="box" ng-click="dismissAbout()"><i class="icon-remove"></i></a>
+                <h2>A real-time content aggregator</h2>
+                <h3>Built with Angular <i class="icon-heart"></i> Firebase</h3>
+
+                <p>Create a custom list of feeds, bookmark it, and come back any time for your real-time digital scoop.</p>
+
+                <p><a href="https://github.com/firebase/firereader">Fork on GitHub</a> to build your own Angular + Firebase apps.</p>
+
+                <p ng-cloak ng-hide="auth.authenticated"><a href="#hearth" class="btn">Customize Your Feeds</a></p>
+            </article>
+
+            <div id="feeds" fb-isotope="filteredArticles" fb-selector="article[data-feed]">
+           <article data-time="{{article.date}}" data-feed="{{article.feed}}" ng-click="showArticle(article)" id="{{article.$id}}">
                <h2 title="{{article.title}}">{{article.title}}</h2>
-               <div ng-bind-html-unsafe="article.description"></div>
+               <div ng-bind-html="article.summary"></div>
                <p>&nbsp;</p>
                <footer>{{feedName(article)}}<br />{{article.date | date:'short'}}</footer>
            </article>
+           </div>
         </section>
 
     </div>
+</div>
+
+<div class="modal hide colspan10 offset1" modal="openArticle" close="closeArticle()" options="opts" ui-keypress="{enter: enter}">
+    <div class="modal-header"><h3>{{article.title}}</h3></div>
+    <div class="modal-footer">
+        <ul class="inline pull-right">
+            <li class="divider"></li>
+            <li><a target="_BLANK" href="{{article.link}}" title="Visit original web page"><i class="icon-external-link"></i></a></li>
+            <li class="divider"></li>
+            <li><a ng-click="prevArticle(article.$id)" title="Previous article"><i class="icon-chevron-left"></i></a></li>
+            <li><a ng-click="nextArticle(article.$id)" title="Next article"><i class="icon-chevron-right"></i></a></li>
+            <li class="divider"></li>
+            <li><a ng-click="closeArticle(article.$id)" title="Next article"><i class="icon-remove"></i></a></li>
+            <li class="divider"></li>
+        </ul>
+    </div>
+    <div class="modal-body" ng-bind-html="article.description"></div>
 </div>

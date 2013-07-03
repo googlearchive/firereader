@@ -14,27 +14,18 @@ angular.module('firebase').factory('angularFireAggregate', ['$timeout', '$q', fu
       var collection = [];
       var indexes = {};
       var listeners = [];
-      var paths = {};
 
       /**
        * This can be invoked to add additional paths after initialization
        *
-       * @param {Firebase|String} path
-       * @return {Promise}
+       * The path can be an array so that you can pass a unique id, which will be used later if dispose() is called
+       * on the path. This is necessary when using limit() because Firebase.toString() no longer returns a unique path.
+       *
+       * @param {Firebase|String|Array} path see above
+       * @return {Path}
        */
       collection.addPath = function(path) {
-         console.log('addPath', path); //debug
-         var def = $q.defer();
-         var p = new Path(path, function(ss) { def.resolve(ss); });
-         paths[p.toString()] = p;
-         return def.promise;
-      };
-
-      collection.removePath = function(path) {
-         console.log('angularFireAggreate.removePath', path, paths); //debug
-         if( paths[path] ) {
-            paths[path].dispose();
-         }
+         return new Path(path);
       };
 
       /**
@@ -50,6 +41,21 @@ angular.module('firebase').factory('angularFireAggregate', ['$timeout', '$q', fu
          angular.forEach(type.split(' '), function(t) {
             listeners.push([callback, t]);
          });
+      };
+
+      collection.find = function(id, index) {
+         if( angular.isNumber(index) && indexes[index] && indexes[index].$id === id ) {
+            return collection[index];
+         }
+         else {
+            var i = collection.length;
+            while(i--) {
+               if( collection[i].$id === id ) {
+                  return collection[i];
+               }
+            }
+            return null;
+         }
       };
 
       /**
@@ -71,21 +77,22 @@ angular.module('firebase').factory('angularFireAggregate', ['$timeout', '$q', fu
        * A single Firebase path from which data objects are going to be aggregated into the Collection. Each
        * item in the path is converted using  into an object by using opts.factory.
        *
-       * @param {String|Firebase} collectionUrlOrRef
+       * The urlOrRef can be an array so that you can pass a unique id, which will be used later if dispose() is called
+       * on the path. This is necessary when using limit() because Firebase.toString() no longer returns a unique path.
+       *
+       * @param {String|Firebase|Array} urlOrRef
        * @param {Function} [initialCb]
        * @constructor
        */
-      function Path(collectionUrlOrRef, initialCb) {
-         var pathRef, subs = [];
-         if (typeof collectionUrlOrRef == "string") {
-            pathRef = new Firebase(collectionUrlOrRef);
-         } else {
-            // if it is not a string, it is already a Firebase ref
-            pathRef = collectionUrlOrRef;
+      function Path(urlOrRef, initialCb) {
+         var subs = [];
+         var pathRef = angular.isArray(urlOrRef)? urlOrRef[0] : urlOrRef;
+         if (typeof pathRef == "string") {
+            pathRef = new Firebase(pathRef);
          }
+         var pathString = angular.isArray(urlOrRef)? urlOrRef[1] : pathRef.toString();
 
-         var pathString = this.pathString = pathRef.toString();
-         console.log('Path', pathString); //debug
+         console.log('new Path', pathString); //debug
 
          subs.push(['child_added', pathRef.on('child_added', function(data, prevId) {
             $timeout(function() {
@@ -97,10 +104,7 @@ angular.module('firebase').factory('angularFireAggregate', ['$timeout', '$q', fu
          subs.push(['child_removed', pathRef.on('child_removed', function(data) {
             //todo broakdacst to scope
             $timeout(function() {
-               var id = data.name();
-               var pos = indexes[id];
-               var item = collection[pos];
-               removeChild(id);
+               removeChild(data.name);
             });
          })]);
 
@@ -142,9 +146,8 @@ angular.module('firebase').factory('angularFireAggregate', ['$timeout', '$q', fu
             $timeout(function() {
                //todo this will not work if using two refs that access the same path
                //todo which seems unlikely but certainly valid
-               angular.forEach(collection, function(item) {
+               angular.forEach(collection.slice(), function(item) {
                   if( item.$path === pathString ) {
-                     console.log('removing child', item.$id, item.$path); //debug
                      removeChild(item.$id);
                   }
                });
@@ -152,9 +155,6 @@ angular.module('firebase').factory('angularFireAggregate', ['$timeout', '$q', fu
          };
 
       }
-      Path.prototype.toString = function() {
-         return this.pathString;
-      };
 
       ///////////// internal functions
 
@@ -165,6 +165,7 @@ angular.module('firebase').factory('angularFireAggregate', ['$timeout', '$q', fu
       }
 
       function addChild(index, item) {
+//         console.log('adding child', item.$id, item.$path);
          indexes[item.$id] = index;
          collection.splice(index, 0, item);
          updateIndexes(index);
@@ -174,8 +175,9 @@ angular.module('firebase').factory('angularFireAggregate', ['$timeout', '$q', fu
       function removeChild(id) {
          var index = indexes[id];
          // Remove the item from the collection.
-         var item = collection.splice(index, 1);
-         indexes[id] = undefined;
+         var item = (collection.splice(index, 1)||[])[0];
+         delete indexes[id];
+//         console.log('removing child', item.$id, item.$path);
          updateIndexes(index);
          notify('removed', item, index);
       }
@@ -188,7 +190,7 @@ angular.module('firebase').factory('angularFireAggregate', ['$timeout', '$q', fu
       function moveChild (from, to, item) {
          collection.splice(from, 1);
          collection.splice(to, 0, item);
-         updateIndexes(from, to);
+         updateIndexes(from, to+1);
          notify('moved', item, to, from);
       }
 
@@ -228,14 +230,22 @@ angular.module('firebase').factory('angularFireAggregate', ['$timeout', '$q', fu
          callback: null
       }, opts);
 
-      if( opts.paths ) {
+      if( opts.paths && opts.callback ) {
          // if any paths were passed in via opts, then add and fetch them now
          var promises = [];
          for(var i = 0; i < opts.paths.length; i++) {
-            promises.push(collection.addPath(opts.paths[i]));
+            (function(def, path) {
+               new Path(path, function() { def.resolve() });
+               promises.push(def.promise());
+            })($q.defer(), opts.paths[i]);
          }
          // if there is a callback, wait for all the paths to initialize and then invoke it
-         opts.callback && $q.all(promises).then(opts.callback);
+         $q.all(promises).then(opts.callback);
+      }
+      else if( opts.path ) {
+         angular.forEach(opts.paths, function(p) {
+            new Path(p);
+         });
       }
 
       return collection;
