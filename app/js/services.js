@@ -299,7 +299,28 @@
          var fns = {
             login: function(providerId) {
                $log.log('logging in', providerId);
-               authClient.login(providerId, { rememberMe: true });
+               switch(providerId) {
+                  case 'persona':
+                     authClient.login('persona', { rememberMe: true });
+                     break;
+                  case 'github':
+                     authClient.login('github', {
+                        rememberMe: true,
+                        scope: 'user:email'
+                     });
+                     break;
+                  case 'twitter':
+                     authClient.login('twitter', { rememberMe: true });
+                     break;
+                  case 'facebook':
+                     authClient.login('facebook', {
+                        rememberMe: true,
+                        scope: 'email'
+                     });
+                     break;
+                  default:
+                     throw new Error('I do not know this provider: '+providerId);
+               }
             },
             logout: function() {
                $log.log('logging out');
