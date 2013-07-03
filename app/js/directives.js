@@ -32,26 +32,13 @@ angular.module('myApp.directives', [])
          transclude: true,
          compile: function(containerElement, attrs, transcludeFn) {
             return function(scope, element, attrs) {
+               // you can override these by adding fb-* attributes to the HTML element
+               // e.g. fb-isotope="widgets" fb-selector="selectorName" and so on
                var articleKey = attrs.fbIsotope;
                var selector = attrs.fbSelector || 'article';
-               var options = {
-                  animationEngine : 'jquery',
-                  itemSelector: selector,
-                  resizable: true,
-                  layoutMode: 'masonry',
-                  masonry: {
-                     columnWidth:  10,
-                     columnHeight: 10
-                  },
-                  getSortData : {
-                     time: function(elem) {
-                        $log.log('sort by time', parseInt(elem.attr('data-time')), elem.attr('data-time')); //debug
-                        return parseInt(elem.attr('data-time'));
-                     }
-                  },
-                  sortBy: scope.sortField,
-                  sortAscending: !scope.sortDesc
-               };
+               var sortKey = attrs.fbSort || 'sortField';
+               var sortDescKey = attrs.fbDesc || 'sortDesc';
+               var filterKey = attrs.fbFilter || 'sortFilter';
 
                function build(list) {
                   var articles = angular.element('<div />');
@@ -76,35 +63,56 @@ angular.module('myApp.directives', [])
 
                function findEls(list) {
                   //todo assumes that all feeds have unique ids
-                  $log.log('removing', _.map(list, function(item) { return '#'+ item.$id }).join(',')); //debug
+                  $log.debug('removing', _.map(list, function(item) { return '#'+ item.$id }).join(',')); //debug
                   return angular.element(_.map(list, function(item) { return '#'+ item.$id }).join(','));
                }
 
-               var resort = _.debounce(function() {
-                  $log.debug('fbIsotope.resort', scope.sortField, scope.sortDesc);
-                  element.isotope({ sortBy: scope.sortField, sortAscending: !scope.sortDesc });
-               }, 100);
+               var redraw = _.debounce(function() {
+                  var opts = getOpts();
+                  $log.debug('fbIsotope:redraw', opts); //debug
+                  element.isotope(opts);
+               });
 
                var setup = _.debounce(function () {
                   $log.debug('fbIsotope:setup', adds.length, deletes.length);
                   adds.length && element.isotope('insert', build(adds)) && (adds = []);
                   deletes.length && element.isotope('remove', findEls(deletes)) && (deletes = []);
-                  resort();
-               }, 100);
+                  redraw();
+               }, 50);
 
-               var refilter = _.debounce(function() {
-                  var filter = '';
-                  if( scope.filters && scope.filters.length ) {
-                     filter = ':not('+_.map(scope.filters, function(f) { return '[data-feed="'+f+'"]'; }).join(',')+')';
+               function getOpts() {
+                  return {
+                     animationEngine : 'jquery',
+                     itemSelector: selector,
+                     resizable: true,
+                     filter: buildFilter(),
+                     layoutMode: 'masonry',
+                     masonry: {
+                        columnWidth: 10,
+                        columnHeight: 10
+                     },
+                     getSortData : {
+                        time: function(elem) {
+//                        $log.log('sort by time', parseInt(elem.attr('data-time')), elem.attr('data-time')); //debug
+                           return parseInt(elem.attr('data-time'));
+                        }
+                     },
+                     sortBy: scope[sortKey],
+                     sortAscending: !scope[sortDescKey]
+                  };
+               }
+
+               function buildFilter() {
+                  var filters = scope[filterKey];
+                  if( filters && !angular.isArray(filters) ) {
+                     filters = [filters];
                   }
-                  $log.debug('fbIsotope:refilter', filter, scope.filters);
-                  element.isotope({ filter: filter });
-               }, 100);
+                  return filters? filters.join(',') : '*'
+               }
 
                var adds = [];
                var deletes = [];
                function changes(changes) {
-                  $log.debug('fbIsotope:changes', changes); //debug
                   if( changes.count ) {
                      adds = adds.concat(changes.added);
                      deletes = deletes.concat(changes.removed);
@@ -115,7 +123,8 @@ angular.module('myApp.directives', [])
                function hashFn(article) { return article.$id; }
 
                // initialize the grid
-               element.isotope(options);
+//               element.isotope(options);
+               redraw();
 
                // add any existing items
                scope[articleKey].length && setup(listDiff.diff(null, scope[articleKey], hashFn));
@@ -124,9 +133,9 @@ angular.module('myApp.directives', [])
                listDiff.watch(scope, articleKey, changes, hashFn);
 
                // resort as necessary
-               scope.$watch('sortField', resort);
-               scope.$watch('sortDesc', resort);
-               scope.$watch('filters', refilter);
+               scope.$watch(sortKey, redraw);
+               scope.$watch(sortDescKey, redraw);
+               scope.$watch(filterKey, redraw);
             }
          }
       };
