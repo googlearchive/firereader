@@ -6,15 +6,22 @@
   <link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.no-icons.min.css" rel="stylesheet">
   <link href="https://netdna.bootstrapcdn.com/font-awesome/3.2.0/css/font-awesome.css" rel="stylesheet">
   <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400,800' rel='stylesheet' type='text/css'>
-  <link rel="stylesheet" href="css/app.css"/>
+  <link rel="stylesheet" href="css/app.css" type="text/css" />
+    <!--[if lt ie 9]>
+        <link rel="stylesheet" type="text/css" href="css/ie.css" />
+        <script src="lib/util/html5shiv.js"></script>
+    <![endif]-->
 </head>
 <body ng-controller="NavCtrl" ui-keypress="{enter: enter}">
+
+<a id="GitHubBanner" href="https://github.com/firebase/firereader"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_orange_ff7600.png" alt="Fork me on GitHub"></a>
+
 <div class="container">
   <nav class="row">
       <div class="span12">
         <a href="#" class="brand"><img src="img/logo.png" />FireReader</a>
         <ul class="nav nav-pills pull-right">
-            <li><a href="https://github.com/firebase/firereader">GitHub</a></li>
+            <!--<li><a href="https://github.com/firebase/firereader">GitHub</a></li>-->
             <li><a ng-click="toggleAbout()">About</a></li>
             <li ng-cloak ng-hide="auth.authenticated"><a href="#hearth">Log in</a></li>
             <li ng-cloak ng-show="auth.authenticated"><a ng-click="logout()">Log out</a></li>
@@ -29,7 +36,7 @@
   <footer id="foot" class="row clearfix">
       <div class="span12">
           <a class="pull-right" href="http://www.firebase.com"><img src="img/powered-by-firebase-dim.png" /></a>
-          <aside><a href="https://github.com/firebase/firereader">FireReader</a> is licensed under the <a href="http://firereader.mit-license.org/">MIT License</a>
+          <aside>FireReader is licensed under the <a href="http://firereader.mit-license.org/">MIT License</a> and <a href="https://github.com/firebase/firereader">available on GitHub</a>.
           </aside>
       </div>
   </footer>
