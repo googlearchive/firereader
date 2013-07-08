@@ -477,8 +477,8 @@
     * A change listener that updates the feedManager and articleManager, as well as
     * making some minor scope manipulations
     */
-   appServices.factory('feedChangeApplier', ['$log', 'treeDiff', 'fbUrl', 'angularFire', '$timeout',
-      function($log, treeDiff, fbUrl, angularFire, $timeout) {
+   appServices.factory('feedChangeApplier', ['$log', 'treeDiff', 'fbUrl', 'angularFire', '$timeout', '$location',
+      function($log, treeDiff, fbUrl, angularFire, $timeout, $location) {
          return function($scope, feedManager, articleManager, userId) {
             // treeDiff gives a change list for the feeds object
             treeDiff($scope, 'feeds').watch(changed);
@@ -521,7 +521,13 @@
             }
             else {
                // 2-way synchronize
-               angularFire(fbUrl('myfeeds', userId), $scope, 'feeds', {});
+               angularFire(fbUrl('myfeeds', userId), $scope, 'feeds', {}).then(function() {
+                  var feed = ($location.search()||{}).feed;
+                  if( feed && !($scope.feeds||{})[feed] ) {
+                     $location.replace();
+                     $location.search(null);
+                  }
+               });
             }
          }
       }]);
