@@ -73,7 +73,7 @@ angular.module('myApp.directives', [])
 //                  $log.debug('fbIsotope:redraw', opts); //debug
                   element.isotope(opts);
                   initialized = true;
-               }, 500);
+               }, 250);
 
                var setup = _.debounce(function () {
 //                  $log.debug('fbIsotope:setup', adds.length, deletes.length);

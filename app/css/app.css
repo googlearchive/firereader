@@ -183,6 +183,16 @@ a.brand img {
    text-shadow: none;
 }
 
+#filters li.active i.icon-circle-blank,
+#filters li.active i.icon-bullseye,
+#filters li i.icon-circle {
+   display: none;
+}
+
+#filters li.active i.icon-circle {
+   display: inline-block;
+}
+
 .isotope-item {
    z-index: 2;
 }
