@@ -127,7 +127,7 @@
     * A common set of controller logic used by DemoCtrl and HearthCtrl for managing
     * scope and synching feeds and articles with Firebase
     */
-   appServices.factory('FeedManager', ['feedChangeApplier', 'feedScopeUtils', 'feedTheFire', '$timeout', function(feedChangeApplier, feedScopeUtils, feedTheFire, $timeout) {
+   appServices.factory('FeedManager', ['feedChangeApplier', 'feedScopeUtils', 'feedTheFire', '$timeout', '$location', function(feedChangeApplier, feedScopeUtils, feedTheFire, $timeout, $location) {
       return function($scope, provider, userId) {
          var inst = {
             getFeeds: function() {
@@ -166,7 +166,8 @@
                            title: title,
                            last: Date.now(),
                            isCustom: true
-                        }
+                        };
+                        $location.search('feed', id);
                      })
                   }
                });

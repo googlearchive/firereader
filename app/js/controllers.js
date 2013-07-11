@@ -45,6 +45,7 @@ angular.module('myApp.controllers', ['firebase', 'feedTheFire'])
 
       $scope.addFeed = function(feedId) {
          $scope.feeds[feedId] = feedMgr.fromChoice(feedId);
+         $location.search('feed', feedId);
       };
 
       $scope.removeFeed = function(feedId, $event) {

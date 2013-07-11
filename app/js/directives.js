@@ -79,6 +79,7 @@ angular.module('myApp.directives', [])
 //                  $log.debug('fbIsotope:setup', adds.length, deletes.length);
                   adds.length && element.isotope('insert', build(adds)) && (adds = []);
                   deletes.length && element.isotope('remove', findEls(deletes)) && (deletes = []);
+                  redraw();
                }, 500);
 
                function getOpts() {
