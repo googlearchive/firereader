@@ -92,8 +92,6 @@ angular.module('firebase').factory('angularFireAggregate', ['$timeout', '$q', fu
          }
          var pathString = angular.isArray(urlOrRef)? urlOrRef[1] : pathRef.toString();
 
-         console.log('new Path', pathString); //debug
-
          subs.push(['child_added', pathRef.on('child_added', function(data, prevId) {
             $timeout(function() {
                var index = getIndex(prevId), item = processItem(data, index, pathString);

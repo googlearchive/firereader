@@ -1,10 +1,16 @@
 
 angular.module('myApp.config', [])
-   .value('version', '0.1')
+   .constant('version', '0.1')
 
-   .value('FIREBASE_URL', 'https://fireplace.firebaseio.com/')
+   // end this with a trailing slash
+   .constant('FIREBASE_URL', 'https://fireplace.firebaseio.com/')
 
-   .value('authProviders', [
+   // max number of feeds to display
+   .constant('FB_DEMO_LIMIT', 5)
+   .constant('FB_LIVE_LIMIT', 25)
+
+
+   .constant('authProviders', [
       { id: 'persona',  name: 'Persona',  icon: 'icon-user'     },
       { id: 'twitter',  name: 'Twitter',  icon: 'icon-twitter'  },
       { id: 'facebook', name: 'Facebook', icon: 'icon-facebook' },

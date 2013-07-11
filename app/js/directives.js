@@ -39,6 +39,7 @@ angular.module('myApp.directives', [])
                var sortKey = attrs.fbSort || 'sortField';
                var sortDescKey = attrs.fbDesc || 'sortDesc';
                var filterKey = attrs.fbFilter || 'sortFilter';
+               var initialized = false;
 
                function build(list) {
                   var articles = angular.element('<div />');
@@ -63,22 +64,22 @@ angular.module('myApp.directives', [])
 
                function findEls(list) {
                   //todo assumes that all feeds have unique ids
-                  $log.debug('removing', _.map(list, function(item) { return '#'+ item.$id }).join(',')); //debug
+//                  $log.debug('removing', _.map(list, function(item) { return '#'+ item.$id }).join(',')); //debug
                   return angular.element(_.map(list, function(item) { return '#'+ item.$id }).join(','));
                }
 
                var redraw = _.debounce(function() {
                   var opts = getOpts();
-                  $log.debug('fbIsotope:redraw', opts); //debug
+//                  $log.debug('fbIsotope:redraw', opts); //debug
                   element.isotope(opts);
-               });
+                  initialized = true;
+               }, 500);
 
                var setup = _.debounce(function () {
-                  $log.debug('fbIsotope:setup', adds.length, deletes.length);
+//                  $log.debug('fbIsotope:setup', adds.length, deletes.length);
                   adds.length && element.isotope('insert', build(adds)) && (adds = []);
                   deletes.length && element.isotope('remove', findEls(deletes)) && (deletes = []);
-                  redraw();
-               }, 50);
+               }, 500);
 
                function getOpts() {
                   return {
@@ -93,7 +94,7 @@ angular.module('myApp.directives', [])
                      },
                      getSortData : {
                         time: function(elem) {
-//                        $log.log('sort by time', parseInt(elem.attr('data-time')), elem.attr('data-time')); //debug
+//                           $log.log('sort by time', elem.attr('id'), parseInt(elem.attr('data-time')), elem.attr('data-time')); //debug
                            return parseInt(elem.attr('data-time'));
                         }
                      },
@@ -123,8 +124,8 @@ angular.module('myApp.directives', [])
                function hashFn(article) { return article.$id; }
 
                // initialize the grid
-//               element.isotope(options);
                redraw();
+               element.isotope(getOpts());
 
                // add any existing items
                scope[articleKey].length && setup(listDiff.diff(null, scope[articleKey], hashFn));

@@ -2,7 +2,8 @@
 
 /* Controllers */
 
-angular.module('myApp.controllers', ['firebase'])
+angular.module('myApp.controllers', ['firebase', 'feedTheFire'])
+
    .controller('LoginCtrl', ['$log', '$rootScope', '$scope', 'firebaseAuth', 'authProviders', '$location', function($log, $rootScope, $scope, firebaseAuth, authProviders) {
       $scope.providers = {};
       angular.forEach(authProviders, function(p) {
@@ -24,7 +25,7 @@ angular.module('myApp.controllers', ['firebase'])
       }
    }])
 
-   .controller('NavCtrl', ['$scope',  'localStorage', '$location', function($scope, localStorage, $location) {
+   .controller('NavCtrl', ['$scope',  'localStorage', function($scope, localStorage) {
       //todo NavCtrl is attached to <body> tag, use a pseudo element to limit scope?
       $scope.showAbout = !localStorage.get('hideAbout');
 
@@ -39,34 +40,135 @@ angular.module('myApp.controllers', ['firebase'])
       };
    }])
 
-   .controller('HearthCtrl', ['$log', '$scope', 'FeedManager', 'showArticle', '$location', function($log, $scope, FeedManager, showArticle, $location) {
-      var feedMgr = new FeedManager($scope, $scope.auth.user);
-
-      showArticle.init($scope);
-
-      $scope.addCustomFeed = function() {
-         window.alert('I don\'t know how to do custom feeds yet; I\'ll probably learn soon.');
-      };
+   .controller('HearthCtrl', ['$scope', 'FeedManager', '$location', '$dialog', function($scope, FeedManager, $location, $dialog) {
+      var feedMgr = new FeedManager($scope, $scope.auth.provider, $scope.auth.user);
 
       $scope.addFeed = function(feedId) {
-         $scope.feeds[feedId] = feedMgr.makeFeed(feedId);
+         $scope.feeds[feedId] = feedMgr.fromChoice(feedId);
       };
 
       $scope.removeFeed = function(feedId, $event) {
-         if( $scope.activeFeed === feedId ) {
-            $scope.activeFeed = null;
-            $location.search('feed', null);
-         }
-         if( $event ) {
-            $event.preventDefault();
-            $event.stopPropagation();
-         }
-         feedMgr.removeFeed(feedId);
+         $dialog.dialog({
+            backdrop: true,
+            keyboard: true,
+            backdropClick: true,
+            templateUrl: 'partials/confirmDialog.html',
+            controller: 'ConfirmDialogCtrl'
+         }).open().then(function(confirmed) {
+            if( confirmed ) {
+               if( $scope.activeFeed === feedId ) {
+                  $scope.activeFeed = null;
+                  $location.replace();
+                  $location.search('feed', null);
+               }
+               if( $event ) {
+                  $event.preventDefault();
+                  $event.stopPropagation();
+               }
+               feedMgr.removeFeed(feedId);
+            }
+         });
       };
    }])
 
-   .controller('DemoCtrl', ['$log', '$scope', 'FeedManager', 'showArticle', function($log, $scope, FeedManager, showArticle) {
+   .controller('DemoCtrl', ['$scope', 'FeedManager', function($scope, FeedManager) {
       $scope.isDemo = true;
-      var fm = new FeedManager($scope, 'demo');
-      showArticle.init($scope);
+      new FeedManager($scope, 'demo', 'demo');
+   }])
+
+   .controller('ArticleCtrl', ['$scope', function($scope) {
+      var $log = $scope.$log;
+
+      $scope.$on('modal:article', function(event, article) {
+         $scope.open(article);
+      });
+
+      $scope.open = function(article) {
+         $scope.article = article;
+         $scope.isOpen = true;
+         if( angular.element(window).width() <= 480 ) {
+            window.scrollTo(0,0);
+         }
+      };
+      $scope.close = function() {
+         $scope.isOpen = false;
+      };
+
+      $scope.closed = function() {
+         $scope.article = null;
+      };
+
+      $scope.next = function(id) {
+         // we can't look these up using $scope.filteredArticles because they
+         // are not sorted until they get to isotope, so look at actual dom elements
+         var els = angular.element('#feeds').data('isotope').$filteredAtoms;
+         var i = els.length, nextId;
+         while(i--) {
+            if( els[i].id === id ) {
+               nextId = els[i+1] && els[i+1].id;
+               break;
+            }
+         }
+         if( nextId ) {
+            //todo this requires two iterations of the list; one as isotope objects
+            //todo and a second inside angularFireAggregate's find() method; optimize?
+            $scope.article = $scope.articles.find(nextId);
+         }
+         else {
+            $scope.close();
+         }
+      };
+
+      $scope.prev = function(id) {
+         // we can't look these up using $scope.filteredArticles because they
+         // are not sorted until they get to isotope, so look at actual dom elements
+         var els = angular.element('#feeds').data('isotope').$filteredAtoms;
+         var i = els.length, prevId;
+         while(i--) {
+            if( els[i].id === id ) {
+               prevId = els[i-1] && els[i-1].id;
+               break;
+            }
+         }
+         if( prevId ) {
+            //todo this requires two iterations of the list; one as isotope objects
+            //todo and a second inside angularFireAggregate's find() method; optimize?
+            $scope.article = $scope.articles.find(prevId);
+         }
+         else {
+            $scope.close();
+         }
+      }
+   }])
+
+   .controller('CustomFeedCtrl', ['$scope', 'feedTheFire', '$timeout', function($scope, feedTheFire, $timeout) {
+      var $log = $scope.$log;
+      $scope.isOpen = false;
+
+      $scope.$on('modal:customFeed', function() {
+         $scope.open();
+      });
+
+      $scope.open = function() {
+         $scope.isOpen = true;
+      };
+
+      $scope.close = function() {
+         $scope.isOpen = false;
+      };
+
+      $scope.add = function() {
+         var auth = $scope.auth||{};
+         $log.debug('addFeed', $scope.title, $scope.url);
+         $scope.feedManager.addFeed($scope.title, $scope.url);
+         $scope.close();
+         $scope.title = null;
+         $scope.url = null;
+      };
+   }])
+
+   .controller('ConfirmDialogCtrl', ['$scope', 'dialog', function($scope, dialog) {
+      $scope.close = function(result) {
+         dialog.close(result);
+      }
    }]);

@@ -4,9 +4,12 @@
    //todo config() can't access $rootScope, how can we check $rootScope.auth.authenticated indirectly?
    var isAuthenticated = false;
 
+   var dependencyModules = ['ngSanitize', 'ui.bootstrap', 'ui.keypress'];
+   var myAppComponents = ['myApp.config', 'myApp.filters', 'myApp.utils', 'myApp.services', 'myApp.directives', 'myApp.controllers'];
+
    // Declare app level module which depends on filters, and services
-   angular.module('myApp', ['myApp.config', 'myApp.filters', 'myApp.services', 'myApp.directives', 'myApp.controllers', 'ngSanitize', 'ui.bootstrap', 'ui.keypress']).
-      config(['$routeProvider', function($routeProvider) {
+   angular.module('myApp', dependencyModules.concat(myAppComponents))
+      .config(['$routeProvider', function($routeProvider) {
          $routeProvider.when('/hearth', {
             templateUrl: 'partials/hearth.html',
             controller: 'HearthCtrl',
@@ -26,12 +29,14 @@
          });
          $routeProvider.otherwise({redirectTo: function() { console.log('otherwise', isAuthenticated); return isAuthenticated? '/hearth' : '/demo'; }});
       }])
-      .run(['$rootScope', '$location', 'fbUrl', 'angularFireCollection', 'firebaseAuth', function($rootScope, $location, fbUrl, angularFireCollection, firebaseAuth) {
+      .run(['$rootScope', '$location', 'fbUrl', 'angularFireCollection', 'firebaseAuth', '$log', function($rootScope, $location, fbUrl, angularFireCollection, firebaseAuth, $log) {
          firebaseAuth();
 
-         $rootScope.enter = function() {
-            console.log('enter key pressed'); //debug
-         }
+         $rootScope.$log = $log;
+
+         $rootScope.keypress = function(key, $event) {
+            console.log('key pressed', arguments); //debug
+         };
 
          // use angularFireCollection because this list should be read-only, and it should be filterable
          // by using | filter command, which doesn't work with key/value iterators
