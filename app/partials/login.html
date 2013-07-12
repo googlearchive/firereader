@@ -5,11 +5,11 @@
         <div class="span6">
             <article class="box">
                 <h2>Please Log In</h2>
-                <ul class="inline">
-                    <li class="block" ng-show="preferred">
-                        <button ng-click="login(preferred.id)" class="btn btn-block btn-primary"><i class="{{preferred.icon}}"></i> {{preferred.name}}</button>
+                <ul class="inline clearfix">
+                    <li ng-show="preferred" class="big">
+                        <a ng-click="login(preferred.id)" class="btn" ng-class="colorMe(preferred.id)"><i class="{{preferred.icon}}"></i> {{preferred.name}}</a>
                     </li>
-                    <li ng-repeat="provider in filteredProviders()"><button class="btn" ng-class="{'btn-large':!auth.provider}" ng-click="login(provider.id)"><i class="{{provider.icon}}"></i> {{provider.name}}</button></li>
+                    <li ng-repeat="provider in filteredProviders()" ng-class="{'small':preferred !== null}"><a class="btn" ng-class="colorMe(provider.id)" ng-click="login(provider.id)"><i class="{{provider.icon}}"></i> {{provider.name}}</a></li>
                 </ul>
             </article>
         </div>

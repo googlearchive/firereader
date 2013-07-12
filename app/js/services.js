@@ -63,6 +63,7 @@
 
          // establish Firebase auth monitoring
          var authClient = new FirebaseSimpleLogin(new Firebase(FIREBASE_URL), _statusChange);
+         var initialized = false;
 
          // whenever authentication status changes, broadcast change to all scopes
          function _statusChange(error, user) {
@@ -80,8 +81,9 @@
             else {
                $log.info('FirebaseAuth::logout');
                $rootScope.$broadcast('firebaseAuth::logout', {});
-               $location.path('/demo');
+               initialized && $location.path('/demo');
             }
+            initialized = true;
          }
 
          // provide some convenience methods to log in and out

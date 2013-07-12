@@ -123,7 +123,7 @@ a.brand img {
 }
 
 #searchbox .input-append {
-   width: 90%;
+   width: 85%;
 }
 
 #searchbox button.btn {
@@ -415,20 +415,33 @@ code {
 
 #login ul {
    text-align: center;
+   position: relative;
 }
 
 #login ul li {
-   margin-bottom: 10px;
+   width: 50%;
+   float: left;
+   padding: 0;
+   position: relative;
 }
 
-#login ul li.block {
+#login ul li .btn {
    display: block;
-   margin: 0 50px 10px;
+   width: auto;
+   margin-right: 10px;
+   margin-bottom: 10px;
+   line-height: 2em;
 }
 
-#login ul li.block button {
-   height: 3em;
+/*#login ul li.big {
+   width: 96%;
 }
+
+#login ul li.small {
+   width: 32%;
+   height: 2em;
+   font-size:
+}*/
 
 #addFeeds {
    display: block;
@@ -440,7 +453,7 @@ code {
    font-size: 18px;
    line-height: 24px;
    text-decoration: none;
-   padding: 5px;
+   padding: 8px;
    margin: 15px 0;
 }
 
@@ -450,6 +463,7 @@ code {
 
 #addFeeds a.dropdown-toggle i {
    display: inline-block;
+   margin: 4px 0;
 }
 
 #addFeeds .dropdown-menu {
@@ -496,119 +510,6 @@ section.sidebar {
    font-size: 20px;
 }
 
-.modal {
-   width: 650px;
-   margin-left: -325px;
-   left: 50%;
-   top: 10%;
-}
-
-.modal-footer {
-   padding: 2px;
-}
-
-div.modal[ng-controller="ArticleCtrl"] .modal-footer {
-   -webkit-border-top-left-radius: 10px;
-   -webkit-border-top-right-radius: 10px;
-   -moz-border-radius-topleft: 10px;
-   -moz-border-radius-topright: 10px;
-   border-top-left-radius: 10px;
-   border-top-right-radius: 10px;
-   border-bottom: 1px solid #ddd;
-}
-
-.modal-footer ul {
-   margin-bottom: 0;
-}
-
-.modal-footer ul li {
-   font-size: 24px;
-   line-height: 28px;
-   padding: 2px 4px;
-   margin: 0 2px;
-}
-
-.modal-footer ul li:hover {
-   background-color: #ddd;
-}
-
-@media (max-width:480px) {
-   .modal {
-      position: absolute;
-      margin: 10px;
-      left: 0;
-      top: 0;
-   }
-
-   .modal-body {
-      max-height: none;
-      overflow: visible;
-   }
-}
-
-@media (max-width:767px) {
-   #feeds > article {
-      width: 100%;
-      height: auto;
-      min-height: 100px;
-      max-height: 350px;
-      margin: 10px;
-   }
-
-   section.sidebar {
-      width: auto;
-      min-height: inherit;
-      margin: 15px;
-      background-color: #ddd;
-      padding: 10px;
-   }
-
-   .modal {
-      width: 96%;
-      margin: 2%;
-      top: 0;
-      left: 0;
-      font-size: 12px;
-   }
-
-   .modal-body {
-      max-height: 85%;
-   }
-
-   .modal-footer ul li {
-      font-size: 18px;
-      line-height: 22px;
-   }
-}
-
-
-@media (min-width:768px) and (max-width:979px) {
-   #feeds > article {
-      width: 43%;
-   }
-
-   #searchbox .input-append {
-      width: 75%;
-   }
-
-   .modal {
-      width: 550px;
-      margin-left: -225px;
-      left: 50%;
-      top: 10%;
-   }
-}
-
-@media (min-width:1200px) {
-   #feeds > article {
-      width: 23%;
-   }
-}
-
-@media (max-width:870px) {
-   #GitHubBanner { display: none; }
-}
-
 label {
    font-weight: bold;
 }
@@ -653,4 +554,114 @@ form[novalidate].ng-invalid button[disabled] {
 
 .modal-footer.bigbuttons .btn {
    margin-left: 20px;
+}
+
+.modal {
+   width: 800px;
+   margin-left: -400px;
+   left: 50%;
+   top: 10%;
+}
+
+.modal-footer {
+   padding: 2px;
+}
+
+div.modal.article .modal-footer {
+   border-bottom: 1px solid #ddd;
+   -webkit-border-top-left-radius: 10px;
+   -webkit-border-top-right-radius: 6px;
+   -moz-border-radius-topleft: 6px;
+   -moz-border-radius-topright: 6px;
+   border-top-left-radius: 6px;
+   border-top-right-radius: 6px;
+   -webkit-border-bottom-left-radius: 0;
+   -webkit-border-bottom-right-radius: 0;
+   -moz-border-radius-bottomleft: 0;
+   -moz-border-radius-bottomright: 0;
+   border-bottom-left-radius: 0;
+   border-bottom-right-radius: 0;
+}
+
+.modal-footer ul {
+   margin-bottom: 0;
+}
+
+.modal-footer ul li {
+   font-size: 24px;
+   line-height: 28px;
+   padding: 2px 4px;
+   margin: 0 2px;
+}
+
+.modal-footer ul li:hover {
+   background-color: #ddd;
+}
+
+@media (max-width:480px) {
+   .modal {
+      margin: 5px;
+   }
+}
+
+@media (max-width:767px) {
+   #feeds > article {
+      width: 100%;
+      height: auto;
+      min-height: 100px;
+      max-height: 350px;
+      margin: 10px;
+   }
+
+   section.sidebar {
+      width: auto;
+      min-height: inherit;
+      margin: 15px;
+      background-color: #ddd;
+      padding: 10px;
+   }
+}
+
+/* the sizing of this @media tag, and its contents, are coupled with controllers.js ArticleCtrl's ABSOLUTE_WIDTH */
+@media (max-width:850px) {
+   .modal {
+      position: absolute;
+      width: auto;
+      margin: 20px;
+      top: 0;
+      left: 0;
+      font-size: 14px;
+      max-height: none;
+   }
+
+   .modal-body {
+      max-height: none;
+      overflow: visible;
+   }
+
+   .modal-footer ul li {
+      font-size: 18px;
+      line-height: 22px;
+   }
+}
+
+
+@media (min-width:768px) and (max-width:979px) {
+   #feeds > article {
+      width: 43%;
+   }
+
+   #searchbox .input-append {
+      width: 75%;
+   }
+}
+
+@media (min-width:1200px) {
+   #feeds > article {
+      width: 23%;
+   }
+}
+
+@media (max-width:870px) {
+   #GitHubBanner { display: none; }
 }

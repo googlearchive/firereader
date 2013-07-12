@@ -19,6 +19,27 @@ angular.module('myApp.controllers', ['firebase', 'feedTheFire'])
          });
       };
 
+      $scope.colorMe = function(id) {
+         var c;
+         switch(id) {
+            case 'facebook':
+               c = 'btn-primary';
+               break;
+            case 'github':
+               c = 'btn-inverse';
+               break;
+            case 'twitter':
+               c = 'btn-info';
+               break;
+            case 'persona':
+               c = 'btn-success';
+               break;
+            default:
+               c = '';
+         }
+         return !$scope.preferred || $scope.preferred.id === id? c : '';
+      };
+
       function setPreferred(provider) {
          $scope.preferred = provider? angular.extend({}, $scope.providers[provider]) : null;
          angular.forEach($scope.providers, function(p, k) {p.preferred = (k === provider)});
@@ -80,6 +101,12 @@ angular.module('myApp.controllers', ['firebase', 'feedTheFire'])
    .controller('ArticleCtrl', ['$scope', function($scope) {
       var $log = $scope.$log;
 
+      var ABSOLUTE_WIDTH = 850;
+
+      $scope.opts = {
+         dialogClass: 'modal article'
+      };
+
       $scope.$on('modal:article', function(event, article) {
          $scope.open(article);
       });
@@ -87,7 +114,8 @@ angular.module('myApp.controllers', ['firebase', 'feedTheFire'])
       $scope.open = function(article) {
          $scope.article = article;
          $scope.isOpen = true;
-         if( angular.element(window).width() <= 480 ) {
+         resize();
+         if( angular.element(window).width() <= ABSOLUTE_WIDTH ) {
             window.scrollTo(0,0);
          }
       };
@@ -139,7 +167,24 @@ angular.module('myApp.controllers', ['firebase', 'feedTheFire'])
          else {
             $scope.close();
          }
-      }
+      };
+
+      // resize height of element dynamically
+      var resize = _.debounce(function() {
+         if( $scope.isOpen ) {
+            var $article = angular.element('div.modal.article');
+            var maxHeight = 'none';
+            if( angular.element(window).width() > ABSOLUTE_WIDTH ) {
+               var windowHeight = angular.element(window).height();
+               var headHeight = $article.find('.modal-header').outerHeight() + $article.find('.modal-footer').outerHeight();
+               maxHeight = (windowHeight * .8 - headHeight)+'px';
+            }
+            console.log('resizing', maxHeight, windowHeight, headHeight); //debug
+            $article.find('.modal-body').css('max-height', maxHeight);
+         }
+      }, 50);
+
+      angular.element(window).on('resize', resize);
    }])
 
    .controller('CustomFeedCtrl', ['$scope', 'feedTheFire', '$timeout', function($scope, feedTheFire, $timeout) {
