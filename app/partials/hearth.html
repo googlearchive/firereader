@@ -44,17 +44,34 @@
                 <p ng-cloak ng-hide="auth.authenticated"><a href="#hearth" class="btn">Customize Your Feeds</a></p>
             </article>
 
-            <div id="feeds" fb-isotope="filteredArticles" fb-selector="article[data-feed]">
+            <!--<div id="feeds" fb-isotope="filteredArticles" fb-selector="article[data-feed]">
                <article data-time="{{article.date}}" data-feed="{{article.feed}}" ng-click="openArticle(article)" id="{{article.$id}}">
                    <h2 title="{{article.title}}">{{article.title}}</h2>
                    <div ng-bind-html="article.summary"></div>
                    <p>&nbsp;</p>
                    <footer>{{feedName(article)}}<br />{{article.date | date:'short'}}</footer>
                </article>
-           </div>
+           </div>-->
+            <div id="feeds" masonry="article.masonry-brick">
+                <i class="icon-cog icon-spin icon-large" ng-show="articles.length < 1"></i>
+                <article class="masonry-brick" ng-repeat="article in articles | orderBy:orderMethod | filter:filterMethod" ng-click="openArticle(article)" id="{{article.$id}}">
+                    <h2 title="{{article.title}}">{{article.title}}</h2>
+                    <div ng-bind-html="article.summary"></div>
+                    <p>&nbsp;</p>
+                    <footer>{{feedName(article)}}<br />{{article.date | date:'short'}}</footer>
+                </article>
+            </div>
         </section>
-
     </div>
+
+    <div class="row">
+        <div class="span12">
+            <div class="container">
+
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <div class="modal hide" modal="isOpen" close="closed()" options="opts" ng-controller="ArticleCtrl">

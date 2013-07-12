@@ -259,7 +259,7 @@ a.brand img {
    background-color: white;
    text-overflow: ellipsis;
    height: 350px;
-   margin: 0 0 10px;
+   margin: 0 .5% .5% 0;
    width: 31%;
    border: 1px solid #dddddd;
    cursor: pointer;
@@ -320,6 +320,15 @@ a.brand img {
    line-height: 20px;
    text-overflow: ellipsis;
    overflow: hidden;
+}
+
+#feeds i.icon-spin {
+   position: absolute;
+   top: 20%;
+   left: 20%;
+   font-size: 10em;
+   color: orange;
+   opacity: .5;
 }
 
 a [class^="icon-"]:before, a [class*=" icon-"]:before {
@@ -665,3 +674,4 @@ div.modal.article .modal-footer {
 @media (max-width:870px) {
    #GitHubBanner { display: none; }
 }
+

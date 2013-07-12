@@ -141,4 +141,91 @@ angular.module('myApp.directives', [])
             }
          }
       };
-   }]);
+   }])
+
+   .directive("masonry", ['$parse', '$timeout', '$log', function($parse, $timeout, $log) {
+      return {
+         restrict: 'A',
+         link: function (scope, elem, attrs) {
+            elem.masonry({ itemSelector: attrs.masonry });
+            // Opitonal Params, delimited in class name like:
+            // class="masonry:70;"
+            //elem.masonry({ itemSelector: '.masonry-brick', columnWidth: 200 /*$parse(attrs.gutter)(scope)*/ });
+         },
+         controller : function($scope,$element){
+            var addBricks = [], dropBricks = [], brickIndex = {};
+
+            $scope.$on('grid:resort', function() {
+               console.log('grid:resort controller');
+            });
+
+            var runAppend = _.debounce(function() {
+               $element.masonry('addItems', addBricks);
+               addBricks = [];
+               $timeout(function(){
+                  $element.masonry('resize');
+               }, 25);
+            }, 50);
+
+            var runRemove = _.debounce(function() {
+               $element.masonry('remove', dropBricks);
+               dropBricks = [];
+               $timeout(function() {
+                  $element.masonry('resize');
+               }, 25);
+            }, 50);
+
+            var reload = _.debounce(function() {
+               $log.debug('masonry::reload');
+               $scope.$evalAsync(function(){
+                  $element.masonry();
+               });
+            }, 50);
+
+            this.appendBrick = function(child, brickId, waitForImage){
+               function addBrick() {
+                  // Store the brick id
+                  if (!_.has(brickIndex, brickId)) {
+                     brickIndex[brickId] = true;
+                     runAppend();
+                  }
+               }
+
+               if (waitForImage) {
+                  child.imagesLoaded(reload);
+               } else {
+                  reload();
+               }
+//               if (waitForImage) {
+//                  child.imagesLoaded(addBrick);
+//               } else {
+//                  addBrick();
+//               }
+            };
+
+            this.removeBrick = function(brick, brickId){
+               if(_.has(brickIndex, brickId)) {
+                  dropBricks.push(brickIndex[brickId]);
+                  delete brickIndex[brickId];
+//                  runRemove();
+                  reload();
+               }
+            };
+
+            $scope.$on('masonry:resort', reload);
+         }
+      };
+   }])
+   .directive('masonryBrick', function ($compile) {
+      return {
+         restrict: 'AC',
+         require : '^masonry',
+         link: function (scope, elem, attrs, MasonryCtrl) {
+            MasonryCtrl.appendBrick(elem, scope.$id, true);
+
+            scope.$on("$destroy",function(){
+               MasonryCtrl.removeBrick(elem);
+            });
+         }
+      };
+   });

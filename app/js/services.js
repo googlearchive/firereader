@@ -227,16 +227,34 @@
             $scope.$broadcast('modal:article', article);
          };
 
-         $scope.sortField = 'time';
+         $scope.filterMethod = function(article) {
+            return passesFilter(article) && (!$scope.activeFeed || $scope.activeFeed === article.feed);
+         };
+
+         $scope.orderMethod = function(article) {
+            var v = article[$scope.sortField];
+            return $scope.sortDesc? 0 - parseInt(v) : parseInt(v);
+         };
+
+         $scope.sortField = 'date';
 
          $scope.$watch('sortDesc', function() {
             //todo store in firebase
             localStorage.set('sortDesc', $scope.sortDesc);
+            $scope.$emit('masonry:resort');
+            $scope.$broadcast('masonry:resort');
          });
 
-         $scope.sortDesc = localStorage.get('sortDesc');
-         if( $scope.sortDesc === null ) {
-            $scope.sortDesc = true;
+         $scope.sortDesc = !!localStorage.get('sortDesc');
+
+         function passesFilter(article) {
+            if(_.isEmpty($scope.articleFilter)) {
+               return true;
+            }
+            var txt = ($scope.articleFilter||'').toLowerCase();
+            return _.find(article, function(v,k) {
+               return !!(v && (v+'').toLowerCase().indexOf(txt) >= 0);
+            });
          }
       }
    }]);
@@ -277,11 +295,11 @@
 
             // when the active feed is changed (generally by url hash; see app.js routing) then
             // we update the sort filter used by isotope
-            $scope.$watch('activeFeed', setFilter);
-            function setFilter() {
-               $scope.sortFilter = $scope.activeFeed? '[data-feed="'+$scope.activeFeed+'"]' : false;
-            }
-            setFilter();
+//            $scope.$watch('activeFeed', setFilter);
+//            function setFilter() {
+//               $scope.sortFilter = $scope.activeFeed? '[data-feed="'+$scope.activeFeed+'"]' : false;
+//            }
+//            setFilter();
 
             var path = fbUrl('user', provider, userId, 'list');
             if( userId === 'demo' && provider === 'demo' ) {
@@ -305,14 +323,12 @@
          }
       }]);
 
-   appServices.factory('ArticleManager', ['angularFireAggregate', 'articleFactory', 'articleFilter', 'feedUrl', function(angularFireAggregate, articleFactory, articleFilter, feedUrl) {
+   appServices.factory('ArticleManager', ['angularFireAggregate', 'articleFactory', 'feedUrl', function(angularFireAggregate, articleFactory, feedUrl) {
       return function(feedManager, $scope) {
          var feeds = {};
 
          $scope.counts = {};
          $scope.articles = angularFireAggregate($scope, { factory: articleFactory(feedManager) });
-
-         articleFilter($scope);
 
          $scope.articles.on('added', incFeed);
          angular.forEach(feedManager.getFeeds(), initFeed);
@@ -345,19 +361,6 @@
             removeFeed: removeFeed
          }
       }
-   }]);
-
-   appServices.factory('articleFilter', ['$timeout', '$filter', function($timeout, $filter) {
-      return function($scope) {
-         $scope.filteredArticles = [];
-         var filterArticles = _.debounce(function() {
-            $timeout(function() {
-               $scope.filteredArticles = $filter('filter')($scope.articles, $scope.articleFilter);
-            });
-         }, 100);
-         $scope.articles.on('added removed', filterArticles);
-         $scope.$watch('articleFilter', filterArticles);
-      };
    }]);
 
    appServices.factory('articleFactory', [function() {
