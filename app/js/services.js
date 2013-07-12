@@ -224,7 +224,6 @@
 
          $scope.openArticle = function(article, $event) {
             $event && $event.preventDefault();
-            $log.debug('openArticle', article); //debug
             $scope.$broadcast('modal:article', article);
          };
 

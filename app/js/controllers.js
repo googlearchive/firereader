@@ -179,7 +179,6 @@ angular.module('myApp.controllers', ['firebase', 'feedTheFire'])
                var headHeight = $article.find('.modal-header').outerHeight() + $article.find('.modal-footer').outerHeight();
                maxHeight = (windowHeight * .8 - headHeight)+'px';
             }
-            console.log('resizing', maxHeight, windowHeight, headHeight); //debug
             $article.find('.modal-body').css('max-height', maxHeight);
          }
       }, 50);
