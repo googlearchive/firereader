@@ -241,8 +241,6 @@
          $scope.$watch('sortDesc', function() {
             //todo store in firebase
             localStorage.set('sortDesc', $scope.sortDesc);
-            $scope.$emit('masonry:resort');
-            $scope.$broadcast('masonry:resort');
          });
 
          $scope.sortDesc = !!localStorage.get('sortDesc');
@@ -293,14 +291,6 @@
                $scope.noFeeds = _.isEmpty($scope.feeds);
             }
 
-            // when the active feed is changed (generally by url hash; see app.js routing) then
-            // we update the sort filter used by isotope
-//            $scope.$watch('activeFeed', setFilter);
-//            function setFilter() {
-//               $scope.sortFilter = $scope.activeFeed? '[data-feed="'+$scope.activeFeed+'"]' : false;
-//            }
-//            setFilter();
-
             var path = fbUrl('user', provider, userId, 'list');
             if( userId === 'demo' && provider === 'demo' ) {
                // read only
@@ -339,7 +329,6 @@
 
          function initFeed(feed) {
             if( !_.has(feeds, feed.id)) {
-//               $log.debug('initFeed', feed);
                feeds[feed.id] = $scope.articles.addPath(feedUrl(feed, $scope.isDemo));
                $scope.counts[feed.id] = 0;
             }
@@ -383,9 +372,9 @@
          return base+url.replace(/^\//, '');
       }
 
-      // we use a custom article factory because all the isotope and angular iterators run very slowly
-      // when the Firebase reference is included in the object; $scope.$watch becomes completely unstable
-      // and results in recursion errors; so don't include any of that in our objects
+      // we use a custom article factory because Angular becomes very slow when a Firebase reference
+      // is included in the object; $scope.$watch becomes completely unstable and results in recursion errors;
+      // so don't include any of that in our objects; also gives us a chance to parse dates and such
       return function(feedManager) {
          return function(snapshot, index) {
             var out = _.extend({

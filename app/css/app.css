@@ -148,6 +148,8 @@ a.brand img {
    color: #555;
    font-size: 14px;
    padding: 0 15px 0 5px;
+   white-space: nowrap;
+   text-overflow: ellipsis;
 }
 
 #filters li a:hover {
@@ -193,52 +195,8 @@ a.brand img {
    display: inline-block;
 }
 
-.isotope-item {
-   z-index: 2;
-}
-
-.isotope-hidden.isotope-item {
-   pointer-events: none;
-   z-index: 1;
-}
-
-.isotope,
-.isotope .isotope-item {
-   /* change duration value to whatever you like */
-   -webkit-transition-duration: 0.8s;
-   -moz-transition-duration: 0.8s;
-   -ms-transition-duration: 0.8s;
-   -o-transition-duration: 0.8s;
-   transition-duration: 0.8s;
-}
-
-.isotope {
-   -webkit-transition-property: height, width;
-   -moz-transition-property: height, width;
-   -ms-transition-property: height, width;
-   -o-transition-property: height, width;
-   transition-property: height, width;
-}
-
-.isotope .isotope-item {
-   -webkit-transition-property: -webkit-transform, opacity;
-   -moz-transition-property:    -moz-transform, opacity;
-   -ms-transition-property:     -ms-transform, opacity;
-   -o-transition-property:      -o-transform, opacity;
-   transition-property:         transform, opacity;
-}
-
-/**** disabling Isotope CSS3 transitions ****/
-
-.isotope.no-transition,
-.isotope.no-transition .isotope-item,
-.isotope .isotope-item.no-transition {
-   -webkit-transition-duration: 0s;
-   -moz-transition-duration: 0s;
-   -ms-transition-duration: 0s;
-   -o-transition-duration: 0s;
-   transition-duration: 0s;
-}
+/** FEEDS (the article grid)
+  *********************************/
 
 #feeds {
    /*width: 100%;*/
@@ -259,8 +217,8 @@ a.brand img {
    background-color: white;
    text-overflow: ellipsis;
    height: 350px;
-   margin: 0 .5% .5% 0;
-   width: 31%;
+   margin: 0 .49% .49% 0;
+   width: 32%;
    border: 1px solid #dddddd;
    cursor: pointer;
 }
@@ -322,7 +280,7 @@ a.brand img {
    overflow: hidden;
 }
 
-#feeds i.icon-spin {
+#feeds > i.icon-spin {
    position: absolute;
    top: 20%;
    left: 20%;
@@ -330,6 +288,25 @@ a.brand img {
    color: orange;
    opacity: .5;
 }
+
+#feeds > h3 {
+   margin-top: 2.4em;
+   color: #ddb;
+}
+
+#feeds > i.icon-spin, #feeds > h3 {
+   display: none;
+}
+
+#feeds.noArticles > i.icon-spin {
+   display: block;
+}
+
+#feeds.noFeeds > h3 {
+   display: block;
+}
+
+
 
 a [class^="icon-"]:before, a [class*=" icon-"]:before {
    cursor: pointer;
@@ -435,11 +412,13 @@ code {
 }
 
 #login ul li .btn {
+   white-space: nowrap;
    display: block;
    width: auto;
    margin-right: 10px;
    margin-bottom: 10px;
    line-height: 2em;
+   padding: 6px;
 }
 
 /*#login ul li.big {
@@ -656,10 +635,6 @@ div.modal.article .modal-footer {
 
 
 @media (min-width:768px) and (max-width:979px) {
-   #feeds > article {
-      width: 43%;
-   }
-
    #searchbox .input-append {
       width: 75%;
    }
@@ -667,11 +642,10 @@ div.modal.article .modal-footer {
 
 @media (min-width:1200px) {
    #feeds > article {
-      width: 23%;
+      width: 24%;
    }
 }
 
 @media (max-width:870px) {
    #GitHubBanner { display: none; }
 }
-

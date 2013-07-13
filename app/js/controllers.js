@@ -130,18 +130,11 @@ angular.module('myApp.controllers', ['firebase', 'feedTheFire'])
       $scope.next = function(id) {
          // we can't look these up using $scope.filteredArticles because they
          // are not sorted until they get to isotope, so look at actual dom elements
-         var els = angular.element('#feeds').data('isotope').$filteredAtoms;
-         var i = els.length, nextId;
-         while(i--) {
-            if( els[i].id === id ) {
-               nextId = els[i+1] && els[i+1].id;
-               break;
-            }
-         }
-         if( nextId ) {
+         var next = angular.element('#'+id).next('article');
+         if( next.length ) {
             //todo this requires two iterations of the list; one as isotope objects
             //todo and a second inside angularFireAggregate's find() method; optimize?
-            $scope.article = $scope.articles.find(nextId);
+            $scope.article = $scope.articles.find(next.attr('id'));
          }
          else {
             $scope.close();
@@ -151,18 +144,11 @@ angular.module('myApp.controllers', ['firebase', 'feedTheFire'])
       $scope.prev = function(id) {
          // we can't look these up using $scope.filteredArticles because they
          // are not sorted until they get to isotope, so look at actual dom elements
-         var els = angular.element('#feeds').data('isotope').$filteredAtoms;
-         var i = els.length, prevId;
-         while(i--) {
-            if( els[i].id === id ) {
-               prevId = els[i-1] && els[i-1].id;
-               break;
-            }
-         }
-         if( prevId ) {
+         var prev = angular.element('#'+id).prev('article');
+         if( prev.length ) {
             //todo this requires two iterations of the list; one as isotope objects
             //todo and a second inside angularFireAggregate's find() method; optimize?
-            $scope.article = $scope.articles.find(prevId);
+            $scope.article = $scope.articles.find(prev.attr('id'));
          }
          else {
             $scope.close();
@@ -183,7 +169,7 @@ angular.module('myApp.controllers', ['firebase', 'feedTheFire'])
          }
       }, 50);
 
-      angular.element(window).on('resize', resize);
+      angular.element(window).bind('resize', resize);
    }])
 
    .controller('CustomFeedCtrl', ['$scope', 'feedTheFire', '$timeout', function($scope, feedTheFire, $timeout) {

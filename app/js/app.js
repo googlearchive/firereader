@@ -5,7 +5,7 @@
    var isAuthenticated = false;
 
    var dependencyModules = ['ngSanitize', 'ui.bootstrap', 'ui.keypress'];
-   var myAppComponents = ['myApp.config', 'myApp.filters', 'myApp.utils', 'myApp.services', 'myApp.directives', 'myApp.controllers'];
+   var myAppComponents = ['myApp.utils', 'myApp.animate', 'myApp.config', 'myApp.filters', 'myApp.services', 'myApp.directives', 'myApp.controllers'];
 
    // Declare app level module which depends on filters, and services
    angular.module('myApp', dependencyModules.concat(myAppComponents))

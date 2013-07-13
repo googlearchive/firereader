@@ -22,7 +22,7 @@
 
             <ul id="filters" class="nav nav-list" ng-cloak ng-hide="noFeeds">
                 <li class="all" ng-class="{active:showAllFeeds()}"><a href="#{{link}}"><i class="icon-bullseye"></i><i class="icon-circle"></i> All {{isDemo? 'Demo ' : ''}}Feeds</a></li>
-                <li ng-repeat="feed in feeds | orderBy:title" ng-class="{active:isActive(feed.id)}"><a href="#{{link}}?feed={{feed.id}}"><i class="icon-circle-blank"></i><i class="icon-circle"></i> {{feed.title}}<span ng-show="counts[feed.id] > 0"> ({{counts[feed.id]}})</span><i class="icon-remove-sign pull-right" ng-cloak ng-hide="isDemo" ng-click="removeFeed(feed.id, $event)"></i></a></li>
+                <li ng-repeat="feed in feeds | orderBy:title" ng-class="{active:isActive(feed.id)}"><a href="#{{link}}?feed={{feed.id}}"><i class="icon-remove-sign pull-right" ng-cloak ng-hide="isDemo" ng-click="removeFeed(feed.id, $event)"></i><i class="icon-circle-blank"></i><i class="icon-circle"></i> {{feed.title}}<span ng-show="counts[feed.id] > 0"> ({{counts[feed.id]}})</span></a></li>
             </ul>
 
             <label class="checkbox" ng-cloak ng-hide="noFeeds">
@@ -44,17 +44,10 @@
                 <p ng-cloak ng-hide="auth.authenticated"><a href="#hearth" class="btn">Customize Your Feeds</a></p>
             </article>
 
-            <!--<div id="feeds" fb-isotope="filteredArticles" fb-selector="article[data-feed]">
-               <article data-time="{{article.date}}" data-feed="{{article.feed}}" ng-click="openArticle(article)" id="{{article.$id}}">
-                   <h2 title="{{article.title}}">{{article.title}}</h2>
-                   <div ng-bind-html="article.summary"></div>
-                   <p>&nbsp;</p>
-                   <footer>{{feedName(article)}}<br />{{article.date | date:'short'}}</footer>
-               </article>
-           </div>-->
-            <div id="feeds" masonry="article.masonry-brick">
-                <i class="icon-cog icon-spin icon-large" ng-show="articles.length < 1"></i>
-                <article class="masonry-brick" ng-repeat="article in articles | orderBy:orderMethod | filter:filterMethod" ng-click="openArticle(article)" id="{{article.$id}}">
+            <div id="feeds" ng-class="{noFeeds:noFeeds,noArticles:!noFeeds && articles.length === 0}">
+                <i class="icon-cog icon-spin icon-large"></i>
+                <h3><i class="icon-chevron-sign-left"></i> Get started by adding some feeds!</h3>
+                <article ng-animate="'animate'" ng-repeat="article in articles | orderBy:orderMethod | filter:filterMethod" ng-click="openArticle(article)" id="{{article.$id}}">
                     <h2 title="{{article.title}}">{{article.title}}</h2>
                     <div ng-bind-html="article.summary"></div>
                     <p>&nbsp;</p>
