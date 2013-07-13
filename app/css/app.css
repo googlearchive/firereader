@@ -1,33 +1,4 @@
 /* app css stylesheet */
-/**
-
-Background: FAFAFA
-
-Fireplace logo
-inner: E59E37
-outer: DC7B05
-
-search button:
-inner: DE8B1F
-outer: C46500
-
-Link text:
-DE8B21
-DC8616
-
-Newest dropdown button:
-inner: CCCCCC
-outer: B0B0B0
-
-Gray text: 9A9A9A
-
-
-  text-shadow:
-   -1px -1px 0 #DC7B05,
-    1px -1px 0 #DC7B05,
-    -1px 1px 0 #DC7B05,
-     1px 1px 0 #DC7B05;
-**/
 
 [ng\:cloak], [ng-cloak], .ng-cloak { display: none; }
 
@@ -42,7 +13,7 @@ h1 {
    color: #E7852E;
    margin: 20px 0;
    background: -webkit-linear-gradient(#E7852E, #f3c445);
-   -webkit-background-clip: text;
+   -webkit-background-clip: content-box;
    -webkit-text-fill-color: transparent;
 }
 
@@ -199,18 +170,11 @@ a.brand img {
   *********************************/
 
 #feeds {
-   /*width: 100%;*/
    position: relative;
-   /*padding: 0;*/
-   /*margin: 0;*/
 }
 
 #feeds > article {
    float: left;
-   /*max-width: 270px;*/
-   /*min-width: 190px;*/
-   /*max-height: 350px;*/
-   /*min-height: 150px;*/
    overflow: hidden;
    position: relative;
    border-radius: 2px;
@@ -326,12 +290,6 @@ a [class^="icon-"]:before, a [class*=" icon-"]:before {
    margin-left: 5px;
 }
 
-/*#feeds > article img.left, #feeds > article img.right {*/
-   /*width: 100%;*/
-   /*max-height: 200px;*/
-   /*display: block;*/
-/*}*/
-
 #feeds > article:after {
    position: absolute;
    bottom: 0;
@@ -373,11 +331,6 @@ a [class^="icon-"]:before, a [class*=" icon-"]:before {
 }
 
 article.box {
-   /*font-size: 24px;*/
-   /*line-height: 32px;*/
-   /*background-color: white;*/
-   /*border-radius: 20px;*/
-   /*box-shadow: 0 2px 2px rgba(0,0,0,.4);*/
    padding: 25px;
    border: 1px solid #bbbbbb;
    position: relative;
@@ -392,11 +345,6 @@ article.box a[data-dismiss="box"] {
    top: 10px;
    right: 10px;
    font-size: 20px;
-}
-
-code {
-   /*font-size: 20px;*/
-   /*line-height: 1.25em;*/
 }
 
 #login h2 {
@@ -426,16 +374,6 @@ code {
    padding: 6px;
 }
 
-/*#login ul li.big {
-   width: 96%;
-}
-
-#login ul li.small {
-   width: 32%;
-   height: 2em;
-   font-size:
-}*/
-
 #addFeeds {
    display: block;
 }
@@ -462,24 +400,6 @@ code {
 #addFeeds .dropdown-menu {
    max-height: 200px;
    overflow: auto;
-}
-
-/*#addfeeds a {*/
-   /*font-size: 16px;*/
-   /*text-decoration: none;*/
-/*}*/
-
-#demoBanner {
-   font-size: 24px;
-   line-height: 28px;
-   text-transform: uppercase;
-   background-color: #E59E37;
-   color: #ffffff;
-   text-shadow: 0 1px 0 rgba(251, 255, 223, 0.49);
-   margin: 0 0 20px;
-   text-align: center;
-   padding: 5px;
-   position: relative;
 }
 
 #about {
