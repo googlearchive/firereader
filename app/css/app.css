@@ -356,6 +356,11 @@ a [class^="icon-"]:before, a [class*=" icon-"]:before {
 #foot {
    text-align: center;
    color: #bbbbbb;
+   margin-top: 40px;
+}
+
+#foot aside {
+   line-height: 34px;
 }
 
 #foot a {
