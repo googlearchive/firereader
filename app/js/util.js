@@ -20,6 +20,20 @@
    }]);
 
    /**
+    * Just a wrapper to create a Firebase reference based on a url and possible limit or startAt/endAt parms
+    */
+   appUtils.factory('fbRef', ['fbUrl', 'Firebase', function(fbUrl, Firebase) {
+      // url can be an array or string
+      return function(url, limit) {
+         var ref = new Firebase(fbUrl(url));
+         if( limit ){
+            ref = ref.limit(limit);
+         }
+         return ref;
+      }
+   }]);
+
+   /**
     * A utility to store variables in local storage, with a fallback to cookies if localStorage isn't supported.
     */
    appUtils.factory('localStorage', ['$log', function($log) {
@@ -225,6 +239,15 @@
             path = 'https://feeds.firebaseio.com/'+feedId+'/articles';
          }
          return [new Firebase(path).limit(limit), feedId];
+      }
+   }]);
+
+   appUtils.factory('readUrl', ['FIREBASE_URL', 'Firebase', '$rootScope', function(URL, Firebase, $rootScope) {
+      return function(opts, isDemo) {
+         if( isDemo ) { return null; }
+         var feedId = opts.id;
+         var path = URL + ['user', $rootScope.auth.provider, $rootScope.auth.user, 'read', feedId].join('/');
+         return new Firebase(path).limit(250);
       }
    }]);
 

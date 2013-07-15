@@ -107,16 +107,18 @@ angular.module('myApp.controllers', ['firebase', 'feedTheFire'])
          dialogClass: 'modal article'
       };
 
-      $scope.$on('modal:article', function(event, article) {
-         $scope.open(article);
-      });
-
       $scope.open = function(article) {
-         $scope.article = article;
-         $scope.isOpen = true;
-         resize();
-         if( angular.element(window).width() <= ABSOLUTE_WIDTH ) {
-            window.scrollTo(0,0);
+         if( !article ) { $scope.close(); }
+         else {
+            $scope.article = article;
+            setNext(article);
+            setPrev(article);
+            $scope.isOpen = true;
+            resize();
+            if( angular.element(window).width() <= ABSOLUTE_WIDTH ) {
+               window.scrollTo(0,0);
+            }
+            $scope.markArticleRead(article);
          }
       };
       $scope.close = function() {
@@ -127,33 +129,6 @@ angular.module('myApp.controllers', ['firebase', 'feedTheFire'])
          $scope.article = null;
       };
 
-      $scope.next = function(id) {
-         // we can't look these up using $scope.filteredArticles because they
-         // are not sorted until they get to isotope, so look at actual dom elements
-         var next = angular.element('#'+id).next('article');
-         if( next.length ) {
-            //todo this requires two iterations of the list; one as isotope objects
-            //todo and a second inside angularFireAggregate's find() method; optimize?
-            $scope.article = $scope.articles.find(next.attr('id'));
-         }
-         else {
-            $scope.close();
-         }
-      };
-
-      $scope.prev = function(id) {
-         // we can't look these up using $scope.filteredArticles because they
-         // are not sorted until they get to isotope, so look at actual dom elements
-         var prev = angular.element('#'+id).prev('article');
-         if( prev.length ) {
-            //todo this requires two iterations of the list; one as isotope objects
-            //todo and a second inside angularFireAggregate's find() method; optimize?
-            $scope.article = $scope.articles.find(prev.attr('id'));
-         }
-         else {
-            $scope.close();
-         }
-      };
 
       // resize height of element dynamically
       var resize = _.debounce(function() {
@@ -169,7 +144,22 @@ angular.module('myApp.controllers', ['firebase', 'feedTheFire'])
          }
       }, 50);
 
+      function setNext(article) {
+         var next = angular.element('#'+article.$id).next('article');
+         $scope.next = next.length? $scope.articles.find(next.attr('id')) : null;
+      }
+
+      function setPrev(article) {
+         var prev = angular.element('#'+article.$id).prev('article');
+         $scope.prev = prev.length? $scope.articles.find(prev.attr('id')) : null;
+      }
+
       angular.element(window).bind('resize', resize);
+
+      $scope.$on('modal:article', function(event, article) {
+         $scope.open(article);
+      });
+
    }])
 
    .controller('CustomFeedCtrl', ['$scope', 'feedTheFire', '$timeout', function($scope, feedTheFire, $timeout) {

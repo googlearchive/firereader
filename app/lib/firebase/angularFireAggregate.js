@@ -1,4 +1,5 @@
 // Read-only collection that monitors multiple paths
+// This is an alpha concept and probably not suitable for general use
 angular.module('firebase').factory('angularFireAggregate', ['$timeout', '$q', function($timeout, $q) {
 
    /**
@@ -22,10 +23,11 @@ angular.module('firebase').factory('angularFireAggregate', ['$timeout', '$q', fu
        * on the path. This is necessary when using limit() because Firebase.toString() no longer returns a unique path.
        *
        * @param {Firebase|String|Array} path see above
+       * @param {Firebase|String} filterPath a path whose ids match ids in `path` and remove values from results
        * @return {Path}
        */
-      collection.addPath = function(path) {
-         return new Path(path);
+      collection.addPath = function(path, filterPath) {
+         return new Path(path, null, filterPath);
       };
 
       /**
@@ -81,53 +83,81 @@ angular.module('firebase').factory('angularFireAggregate', ['$timeout', '$q', fu
        * on the path. This is necessary when using limit() because Firebase.toString() no longer returns a unique path.
        *
        * @param {String|Firebase|Array} urlOrRef
+       * @param {Firebase|String} filterPath a path whose ids match ids in `path` and remove values from results
        * @param {Function} [initialCb]
        * @constructor
        */
-      function Path(urlOrRef, initialCb) {
-         var subs = [];
+      function Path(urlOrRef, initialCb, filterPath) {
+         var subs = [], filters = {}, filtered = {};
          var pathRef = angular.isArray(urlOrRef)? urlOrRef[0] : urlOrRef;
          if (typeof pathRef == "string") {
             pathRef = new Firebase(pathRef);
          }
          var pathString = angular.isArray(urlOrRef)? urlOrRef[1] : pathRef.toString();
 
-         subs.push(['child_added', pathRef.on('child_added', function(data, prevId) {
-            $timeout(function() {
-               var index = getIndex(prevId), item = processItem(data, index, pathString);
-               addChild(index, item);
-            });
-         })]);
-
-         subs.push(['child_removed', pathRef.on('child_removed', function(data) {
-            //todo broakdacst to scope
-            $timeout(function() {
-               removeChild(data.name);
-            });
-         })]);
-
-         subs.push(['child_changed', pathRef.on('child_changed', function(data, prevId) {
-            //todo broadcast to scope
-            $timeout(function() {
-               var index = indexes[data.name()];
-               var newIndex = getIndex(prevId);
-               var item = processItem(data, index, pathString);
-
-               updateChild(index, item);
-               if (newIndex !== index) {
-                  moveChild(index, newIndex, item);
+         this._init = function() {
+            subs.push(['child_added', pathRef.on('child_added', function(ss, prevId) {
+               var id = ss.name();
+               if( filters[id] ) {
+                  filtered[id] = [ss, prevId];
                }
-            });
-         })]);
+               else {
+                  addChild(pathString, ss, prevId);
+               }
+            })]);
 
-         subs.push(['child_moved', pathRef.on('child_moved', function(ref, prevId) {
-            $timeout(function() {
-               var oldIndex = indexes[ref.name()];
-               var newIndex = getIndex(prevId);
-               var item = collection[oldIndex];
-               moveChild(oldIndex, newIndex, item);
-            });
-         })]);
+            subs.push(['child_removed', pathRef.on('child_removed', removeChild)]);
+
+            subs.push(['child_changed', pathRef.on('child_changed', function(data, prevId) {
+               $timeout(function() {
+                  var index = indexes[data.name()];
+                  var newIndex = getIndex(prevId);
+                  var item = processItem(data, index, pathString);
+
+                  updateChild(index, item);
+                  if (newIndex !== index) {
+                     moveChild(index, newIndex, item);
+                  }
+               });
+            })]);
+
+            subs.push(['child_moved', pathRef.on('child_moved', function(ref, prevId) {
+               $timeout(function() {
+                  var oldIndex = indexes[ref.name()];
+                  var newIndex = getIndex(prevId);
+                  var item = collection[oldIndex];
+                  moveChild(oldIndex, newIndex, item);
+               });
+            })]);
+         };
+
+         this._initFilter = function(filterPath, callback) {
+            var ref = _.isString(filterPath)? new Firebase(filterPath) : filterPath;
+            ref.once('value', function(ss) {
+               filters = ss.val()||{};
+               subs.push(['child_added', ref.on('child_added', function(ss) {
+                  var id = ss.name();
+                  filters[id] = true;
+                  removeChild(id);
+               }.bind(this))]);
+               subs.push(['child_removed', ref.on('child_removed', function(ss) {
+                  var id = ss.name();
+                  delete filters[id];
+                  if(filtered[id]) {
+                     addChild(pathString, filtered[id][0], filtered[id][1]);
+                     delete filtered[id];
+                  }
+               }.bind(this))]);
+               callback();
+            }.bind(this));
+         };
+
+         if( filterPath ) {
+            this._initFilter(filterPath, this._init);
+         }
+         else {
+            this._init();
+         }
 
          // putting this at the end makes performance appear considerably faster
          // since child_added callbacks start immediately instead of after entire
@@ -135,6 +165,22 @@ angular.module('firebase').factory('angularFireAggregate', ['$timeout', '$q', fu
          if (initialCb && typeof initialCb == 'function') {
             pathRef.once('value', initialCb);
          }
+
+/*
+         this.expandQuery = function(parms) {
+            _.each(subs, function(s) {
+               pathRef.off(s[0], s[1]);
+            });
+            var newRef = pathRef.ref();
+            _.each(['endAt', 'startAt', 'limit'], function(k) {
+               if(_.has(parms[k])) {
+                  newRef = newRef[k](parms[k]);
+               }
+            });
+            pathRef = newRef;
+            this._init();
+         };
+*/
 
          this.dispose = function() {
             _.each(subs, function(s) {
@@ -151,7 +197,6 @@ angular.module('firebase').factory('angularFireAggregate', ['$timeout', '$q', fu
                });
             })
          };
-
       }
 
       ///////////// internal functions
@@ -162,22 +207,34 @@ angular.module('firebase').factory('angularFireAggregate', ['$timeout', '$q', fu
          return prevId ? indexes[prevId] + 1 : 0;
       }
 
-      function addChild(index, item) {
-//         console.log('adding child', item.$id, item.$path);
-         indexes[item.$id] = index;
-         collection.splice(index, 0, item);
-         updateIndexes(index);
-         notify('added', item, index);
+      function addChild(pathString, data, prevId) {
+         if( !indexes[data.name()] ) {
+            // add item to the collection inside angular scope by using $timeout
+            $timeout(function() {
+               var index = getIndex(prevId), item = processItem(data, index, pathString);
+               indexes[item.$id] = index;
+               collection.splice(index, 0, item);
+               updateIndexes(index);
+               notify('added', item, index);
+            });
+         }
       }
 
       function removeChild(id) {
          var index = indexes[id];
-         // Remove the item from the collection.
-         var item = (collection.splice(index, 1)||[])[0];
-         delete indexes[id];
-//         console.log('removing child', item.$id, item.$path);
-         updateIndexes(index);
-         notify('removed', item, index);
+         if( index >= 0 ) {
+            // Remove the item from the collection inside angular scope by using $timeout
+            $timeout(function() {
+               index = indexes[id];
+               if( index >= 0 ) {
+                  var item = (collection.splice(index, 1)||[])[0];
+                  delete indexes[id];
+         //         console.log('removing child', item.$id, item.$path);
+                  updateIndexes(index);
+                  notify('removed', item, index);
+               }
+            })
+         }
       }
 
       function updateChild (index, item) {

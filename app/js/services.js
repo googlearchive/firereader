@@ -155,7 +155,6 @@
                // create a custom feed
                var auth = $scope.auth||{};
                feedTheFire.add(auth.provider, auth.user, url, function(error, id) {
-                  $scope.$log.debug('addFeed callabck', error, id); //debug
                   if( error ) {
                      //todo put this in the interface?
                      $scope.$log.error(error);
@@ -186,10 +185,11 @@
             return _.find($scope.feedChoices, function(f) { return f.$id === feedId })||{};
          });
 
-         feedScopeUtils($scope);
-         feedChangeApplier($scope, inst, provider, userId);
-
+         $scope.loading = true;
          $scope.feedManager = inst;
+
+         feedScopeUtils($scope, provider, userId);
+         feedChangeApplier($scope, inst, provider, userId);
 
          return inst;
       }
@@ -198,10 +198,11 @@
    /**
     * Some straightforward scope methods for dealing with feeds and articles; these have no dependencies
     */
-   appServices.factory('feedScopeUtils', ['localStorage', '$log', function(localStorage, $log) {
-      return function($scope) {
+   appServices.factory('feedScopeUtils', ['localStorage', 'fbRef', 'angularFire', function(localStorage, fbRef, angularFire) {
+      return function($scope, provider, userId) {
          //todo shouldn't need this; can't get feeds.length === 0 to work from directives
          $scope.noFeeds = true;
+         $scope.showRead = false;
          //todo snag this from $location?
          $scope.link = $scope.isDemo? 'demo' : 'hearth';
 
@@ -223,17 +224,44 @@
          };
 
          $scope.openArticle = function(article, $event) {
-            $event && $event.preventDefault();
+            if( $event ) { $event.preventDefault(); $event.stopPropagation(); }
             $scope.$broadcast('modal:article', article);
          };
 
          $scope.filterMethod = function(article) {
-            return passesFilter(article) && (!$scope.activeFeed || $scope.activeFeed === article.feed);
+            return passesFilter(article) && notRead(article) && activeFeed(article);
          };
 
          $scope.orderMethod = function(article) {
             var v = article[$scope.sortField];
             return $scope.sortDesc? 0 - parseInt(v) : parseInt(v);
+         };
+
+         $scope.markArticleRead = function(article, $event) {
+            if( $event ) { $event.preventDefault(); $event.stopPropagation(); }
+            var f = article.feed;
+            if( !_.has($scope.readArticles, article.feed) ) {
+               $scope.readArticles[f] = {};
+            }
+            $scope.readArticles[f][article.$id] = Date.now();
+         };
+
+         $scope.markFeedRead = function(feedId, $event) {
+            if( $event ) { $event.preventDefault(); $event.stopPropagation(); }
+            angular.forEach($scope.articles, function(article) {
+               if( article.feed === feedId ) { $scope.markArticleRead(article); }
+            });
+         };
+
+         $scope.markAllFeedsRead = function($event) {
+            if( $event ) { $event.preventDefault(); $event.stopPropagation(); }
+            angular.forEach($scope.feeds, function(feed) {
+               $scope.markFeedRead(feed.id, $event);
+            });
+         };
+
+         $scope.noVisibleArticles = function() {
+            return !$scope.loading && !$scope.noFeeds && countActiveArticles() === 0;
          };
 
          $scope.sortField = 'date';
@@ -245,6 +273,11 @@
 
          $scope.sortDesc = !!localStorage.get('sortDesc');
 
+         // 2-way synchronize of the articles this user has marked as read
+         //todo limiting this to 250 is a bit hackish; make this work with infinite scroll if that is added
+         $scope.readArticles = {};
+         angularFire(fbRef(['user', provider, userId, 'read'], 250), $scope, 'readArticles', {});
+
          function passesFilter(article) {
             if(_.isEmpty($scope.articleFilter)) {
                return true;
@@ -253,6 +286,23 @@
             return _.find(article, function(v,k) {
                return !!(v && (v+'').toLowerCase().indexOf(txt) >= 0);
             });
+         }
+
+         function notRead(article) {
+            return $scope.showRead || !_.has($scope.readArticles, article.feed) || !_.has($scope.readArticles[article.feed], article.$id);
+         }
+
+         function activeFeed(article) {
+            return !$scope.activeFeed || $scope.activeFeed === article.feed;
+         }
+
+         function countActiveArticles() {
+            if( $scope.activeFeed ) {
+               return $scope.counts[$scope.activeFeed] || 0;
+            }
+            else {
+               return _.reduce($scope.counts, function(memo, num){ return memo + num; }, 0);
+            }
          }
       }
    }]);
@@ -265,7 +315,6 @@
       function($log, ArticleManager, treeDiff, fbUrl, angularFire, $timeout, $location) {
          return function($scope, feedManager, provider, userId) {
             var articleManager = new ArticleManager(feedManager, $scope);
-
             $scope.feeds = {};
 
             // treeDiff gives a change list for the feeds object
@@ -297,39 +346,54 @@
                new Firebase(path).once('value', function(ss) {
                   $timeout(function() {
                      $scope.feeds = ss.val();
+                     $scope.loading = false;
                   })
                });
             }
             else {
-               // 2-way synchronize
+               // 2-way synchronize of the list of feeds this user has picked
                angularFire(path, $scope, 'feeds', {}).then(function() {
                   var feed = ($location.search()||{}).feed;
                   if( feed && !($scope.feeds||{})[feed] ) {
                      $location.replace();
                      $location.search(null);
                   }
+                  $timeout(function() {
+                     $scope.loading = false;
+                     $scope.$apply();
+                  }, 2500);
                });
             }
          }
       }]);
 
-   appServices.factory('ArticleManager', ['angularFireAggregate', 'articleFactory', 'feedUrl', function(angularFireAggregate, articleFactory, feedUrl) {
+   appServices.factory('ArticleManager', ['angularFireAggregate', 'articleFactory', 'feedUrl', 'readUrl', function(angularFireAggregate, articleFactory, feedUrl, readUrl) {
       return function(feedManager, $scope) {
          var feeds = {};
 
          $scope.counts = {};
          $scope.articles = angularFireAggregate($scope, { factory: articleFactory(feedManager) });
+         $scope.readArticles = {};
 
          $scope.articles.on('added', incFeed);
+         $scope.articles.on('removed', decFeed);
          angular.forEach(feedManager.getFeeds(), initFeed);
 
          function incFeed(article) {
             $scope.counts[article.feed]++;
+            if( $scope.loading ) {
+               $scope.loading = false;
+               $scope.$apply();
+            }
+         }
+
+         function decFeed(article) {
+            $scope.counts[article.feed] = Math.max(0, $scope.counts[article.feed]-1);
          }
 
          function initFeed(feed) {
             if( !_.has(feeds, feed.id)) {
-               feeds[feed.id] = $scope.articles.addPath(feedUrl(feed, $scope.isDemo));
+               feeds[feed.id] = $scope.articles.addPath(feedUrl(feed, $scope.isDemo), readUrl(feed, $scope.isDemo));
                $scope.counts[feed.id] = 0;
             }
          }

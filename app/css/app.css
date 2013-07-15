@@ -89,17 +89,26 @@ a.brand img {
    top: -8px;
 }
 
+/** THE FEED LIST TO THE LEFT */
+#hearth header {
+   text-align: right;
+   margin: 0 0 10px;
+}
+
 #searchbox {
    position: relative;
+   margin-bottom: 0;
 }
 
 #searchbox .input-append {
    width: 85%;
 }
 
-#searchbox button.btn {
+#searchbox button.btn, #searchbox button.btn:focus, #searchbox button.btn:hover {
    background-color: #DE8B1F;
    color: white;
+   background-position: inherit;
+   background-image: none;
 }
 
 .sidebar label.checkbox {
@@ -109,30 +118,71 @@ a.brand img {
 
 #filters {
    margin-bottom: 15px;
+   padding-right: 0;
+   padding-left: 0;
 }
 
-#filters li.all a {
+#filters li {
+   width: 100%;
+   position: relative;
+   font-size: 14px;
+}
 
+#filters li:hover {
+   background-color: #eee;
 }
 
 #filters li a {
    color: #555;
-   font-size: 14px;
-   padding: 0 15px 0 5px;
    white-space: nowrap;
    text-overflow: ellipsis;
+   overflow: hidden;
 }
 
 #filters li a:hover {
    color: #000;
 }
 
-#filters li i.icon-remove-sign {
-   opacity: .8;
+#filters li aside {
+   display: block;
+   position: absolute;
+   right: 0;
+   top: 0;
+   background-color: #fafafa;
+   z-index: 5;
+   font-size: 16px;
+}
+
+#filters li:hover aside {
+   background-color: #eee;
+}
+
+#filters li aside a:hover {
    cursor: pointer;
-   margin-right: -10px;
-   margin-top: 8px;
+   text-decoration: none;
+}
+
+#hearth.isDemo #filters li aside {
+   display: none;
+}
+
+#filters li i.icon-remove-sign {
    color: #946b6e;
+}
+
+#filters li i.icon-remove-sign:hover {
+   color: red;
+}
+
+#filters li i.icon-ok {
+   color: #8a998c;
+   margin-right: 3px;
+}
+#filters li.all i.icon-ok {
+   margin-right: 23px;
+}
+#filters li i.icon-ok:hover {
+   color: #39e03c;
 }
 
 #filters li span {
@@ -141,10 +191,6 @@ a.brand img {
    font-weight: normal;
 }
 
-#filters li i:hover {
-   opacity: 1;
-   color: red;
-}
 
 #filters li.active a,
 #filters li.active a:hover,
@@ -232,6 +278,16 @@ a.brand img {
    display: block;
 }
 
+#feeds > article footer a {
+   color: #8a998c;
+   font-size: 24px;
+
+}
+
+#feeds > article footer a:hover {
+   color: #39e03c;
+}
+
 #feeds > article [ng-bind-html] img {
    max-width: 100%;
 }
@@ -255,22 +311,33 @@ a.brand img {
 
 #feeds > h3 {
    margin-top: 2.4em;
-   color: #ddb;
+   color: #e7b16c;
+   text-align: center;
 }
 
-#feeds > i.icon-spin, #feeds > h3 {
+#feeds > i.icon-spin,
+#feeds > h3,
+#feeds > i.icon-spin,
+#hearth.noArticles.isDemo #feeds > h3.done {
    display: none;
 }
 
-#feeds.noArticles > i.icon-spin {
+#hearth.loading #feeds > i.icon-spin {
    display: block;
 }
 
-#feeds.noFeeds > h3 {
+#hearth.noFeeds #feeds > h3.start {
    display: block;
 }
 
+#hearth.noArticles #feeds > h3.done {
+   display: block;
+}
 
+#feeds > h3.done i.icon-smile {
+   display: block;
+   font-size: 6em;
+}
 
 a [class^="icon-"]:before, a [class*=" icon-"]:before {
    cursor: pointer;
@@ -452,6 +519,10 @@ form[novalidate].ng-invalid button[disabled] {
 
 .modal input.xxlarge {
    max-width: 510px;
+}
+
+button {
+   border-radius: 0;
 }
 
 #login .btn, .modal-footer.bigbuttons button {
