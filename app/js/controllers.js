@@ -66,6 +66,7 @@ angular.module('myApp.controllers', ['firebase', 'feedTheFire'])
 
       $scope.addFeed = function(feedId) {
          $scope.feeds[feedId] = feedMgr.fromChoice(feedId);
+         $scope.startLoading();
          $location.search('feed', feedId);
       };
 

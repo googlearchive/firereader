@@ -149,11 +149,13 @@
                if( f ) {
                   delete $scope.feeds[feedId];
                   f.isCustom && feedTheFire.remove(auth.provider, auth.user, feedId);
+                  //todo remove read articles as well
                }
             },
             addFeed: function(title, url) {
                // create a custom feed
                var auth = $scope.auth||{};
+               $scope.startLoading();
                feedTheFire.add(auth.provider, auth.user, url, function(error, id) {
                   if( error ) {
                      //todo put this in the interface?
@@ -185,7 +187,6 @@
             return _.find($scope.feedChoices, function(f) { return f.$id === feedId })||{};
          });
 
-         $scope.loading = true;
          $scope.feedManager = inst;
 
          feedScopeUtils($scope, provider, userId);
@@ -198,11 +199,13 @@
    /**
     * Some straightforward scope methods for dealing with feeds and articles; these have no dependencies
     */
-   appServices.factory('feedScopeUtils', ['localStorage', 'fbRef', 'angularFire', function(localStorage, fbRef, angularFire) {
+   appServices.factory('feedScopeUtils', ['localStorage', '$timeout', 'angularFire', 'fbRef', function(localStorage, $timeout, angularFire, fbRef) {
       return function($scope, provider, userId) {
          //todo shouldn't need this; can't get feeds.length === 0 to work from directives
          $scope.noFeeds = true;
          $scope.showRead = false;
+         $scope.loading = true;
+
          //todo snag this from $location?
          $scope.link = $scope.isDemo? 'demo' : 'hearth';
 
@@ -262,6 +265,15 @@
 
          $scope.noVisibleArticles = function() {
             return !$scope.loading && !$scope.noFeeds && countActiveArticles() === 0;
+         };
+
+         var to;
+         $scope.startLoading = function() {
+            $scope.loading = true;
+            to && clearTimeout(to);
+            to = $timeout(function() {
+               $scope.loading = false;
+            }, 4000);
          };
 
          $scope.sortField = 'date';
@@ -358,10 +370,7 @@
                      $location.replace();
                      $location.search(null);
                   }
-                  $timeout(function() {
-                     $scope.loading = false;
-                     $scope.$apply();
-                  }, 2500);
+                  $scope.startLoading();
                });
             }
          }

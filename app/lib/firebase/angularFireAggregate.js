@@ -1,6 +1,6 @@
 // Read-only collection that monitors multiple paths
 // This is an alpha concept and probably not suitable for general use
-angular.module('firebase').factory('angularFireAggregate', ['$timeout', '$q', function($timeout, $q) {
+angular.module('firebase').factory('angularFireAggregate', ['$timeout', '$q', '$log', function($timeout, $q, $log) {
 
    /**
     * Opts parms (all optional):
@@ -104,9 +104,9 @@ angular.module('firebase').factory('angularFireAggregate', ['$timeout', '$q', fu
                else {
                   addChild(pathString, ss, prevId);
                }
-            })]);
+            }, function(e) { $log.warn(e); })]);
 
-            subs.push(['child_removed', pathRef.on('child_removed', removeChild)]);
+            subs.push(['child_removed', pathRef.on('child_removed', removeChild, function(e) { $log.warn(e); })]);
 
             subs.push(['child_changed', pathRef.on('child_changed', function(data, prevId) {
                $timeout(function() {
@@ -139,7 +139,7 @@ angular.module('firebase').factory('angularFireAggregate', ['$timeout', '$q', fu
                   var id = ss.name();
                   filters[id] = true;
                   removeChild(id);
-               }.bind(this))]);
+               }.bind(this), function(e) { $log.warn(e); })]);
                subs.push(['child_removed', ref.on('child_removed', function(ss) {
                   var id = ss.name();
                   delete filters[id];
@@ -147,9 +147,11 @@ angular.module('firebase').factory('angularFireAggregate', ['$timeout', '$q', fu
                      addChild(pathString, filtered[id][0], filtered[id][1]);
                      delete filtered[id];
                   }
-               }.bind(this))]);
+               }.bind(this), function(e) { $log.warn(e); })]);
                callback();
-            }.bind(this));
+            }.bind(this), function() {
+
+            });
          };
 
          if( filterPath ) {

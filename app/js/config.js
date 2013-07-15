@@ -19,6 +19,6 @@ angular.module('myApp.config', [])
    ])
 
    .config(function($logProvider) {
-      // set these to false to turn off non-essential console logging
-      $logProvider.debugEnabled && $logProvider.debugEnabled(true);
+      // uncomment to enable dev logging in the app
+      //$logProvider.debugEnabled && $logProvider.debugEnabled(true);
    });
