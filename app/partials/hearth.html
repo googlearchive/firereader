@@ -71,7 +71,7 @@
                     <h2 title="{{article.title}}">{{article.title}}</h2>
                     <div ng-bind-html="article.summary"></div>
                     <p>&nbsp;</p>
-                    <footer><a class="pull-right" ng-click="markArticleRead(article, $event)" title="Mark this article read"><i class="icon-ok"></i></a>{{feedName(article)}}<br />{{article.date | date:'short'}}</footer>
+                    <footer><a class="pull-right" ng-hide="isDemo" ng-click="markArticleRead(article, $event)" title="Mark this article read"><i class="icon-ok"></i></a>{{feedName(article)}}<br />{{article.date | date:'short'}}</footer>
                 </article>
             </div>
         </section>

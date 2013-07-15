@@ -241,6 +241,7 @@
          };
 
          $scope.markArticleRead = function(article, $event) {
+            if( $scope.isDemo ) { return; }
             if( $event ) { $event.preventDefault(); $event.stopPropagation(); }
             var f = article.feed;
             if( !_.has($scope.readArticles, article.feed) ) {
