@@ -29,10 +29,10 @@
                 </li>
                 <li ng-repeat="feed in feeds | orderBy:title" ng-class="{active:isActive(feed.id)}">
                     <aside>
-                        <a ng-click="markFeedRead(feed.id, $event)" ng-show="counts[feed.id] > 0"><i class="icon-ok" title="Mark articles for this feed as read"></i></a>
-                        <a ng-click="removeFeed(feed.id, $event)"><i class="icon-remove-sign"></i></a>
+                        <a ng-click="markFeedRead(feed.id, $event)" ng-show="counts[feed.id] > 0" title="Mark articles for this feed as read"><i class="icon-ok"></i></a>
+                        <a ng-click="removeFeed(feed.id, $event)" title="Remove this feed forever"><i class="icon-remove-sign"></i></a>
                     </aside>
-                    <a href="#{{link}}?feed={{feed.id}}"><i class="icon-circle-blank"></i><i class="icon-circle"></i> {{feed.title}}<span> ({{counts[feed.id]||0}})</span></a>
+                    <a href="#{{link}}?feed={{feed.id}}" title="{{feed.title}}"><i class="icon-circle-blank"></i><i class="icon-circle"></i> {{feed.title}}<span> ({{counts[feed.id]||0}})</span></a>
                 </li>
             </ul>
 

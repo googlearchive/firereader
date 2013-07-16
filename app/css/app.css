@@ -42,6 +42,12 @@ nav a, .nav a, .sidebar a, .modal-footer a {
    color: #E59E37;
 }
 
+.nav li, .nav li a {
+   -moz-user-select: none;
+   -webkit-user-select: none;
+   -ms-user-select: none;
+}
+
 nav a:hover, .nav a:hover, .sidebar a:hover, .modal-footer a:hover {
    color: #E7852E;
 }
@@ -128,7 +134,7 @@ a.brand img {
    font-size: 14px;
 }
 
-#filters li:hover {
+#filters li:hover a, #filters li.active:hover a {
    background-color: #eee;
 }
 
@@ -147,10 +153,11 @@ a.brand img {
    display: block;
    position: absolute;
    right: 0;
-   top: 0;
+   top: 2px;
    background-color: #fafafa;
    z-index: 5;
    font-size: 16px;
+   padding-left: 4px;
 }
 
 #filters li:hover aside {
@@ -197,9 +204,17 @@ a.brand img {
 #filters li.active a:focus {
    font-weight: bold;
    border-radius: 0;
-   background-color: transparent;
    color: #000000;
    text-shadow: none;
+}
+#filters li.active a {
+   background-color: transparent;
+}
+
+#filters li:hover,
+#filters li.active:hover,
+#filters li:hover aside {
+   background-color: #eee;
 }
 
 #filters li.active i.icon-circle-blank,
