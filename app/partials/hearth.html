@@ -45,19 +45,21 @@
             <!-- THE ABOUT TEXT -->
             <article class="box" ng-cloak ng-show="showAbout" id="about">
                 <a data-dismiss="box" ng-click="dismissAbout()"><i class="icon-remove"></i></a>
-                <h2>A real-time RSS feed reader</h2>
-                <h3>Built with AngularJS &amp; Firebase</h3>
+                <h2 style="text-align:center;">A real-time RSS feed reader</h2>
+                <p style="font-size:1.4em;text-align:center;"><b>
+                    Built with <a href="http://angularjs.org/"><img style="vertical-align:middle;" src="img/angular.png"/></a> &amp; <a href="https://www.firebase.com"><img style="vertical-align:middle;" src="img/firebase.png"/></a>
+                </b></p>
                 <p>
                     Firereader is a technical demonstration of an app built
-                    with <a href="http://angularjs.org/"><img src="img/angular.png"/></a> and <a href="https://www.firebase.com"><img src="img/firebase.png"/></a>
+                    with <a href="http://angularjs.org">AngularJS</a> and <a href="https://www.firebase.com">Firebase</a>. It is intended as a sample of how to use the two technologies together.
                 </p>
                 <p>
-                    It is intended as a sample of how to use the two technologies together. You can use it as your feed reader too, but it won't be as full featured as other alternatives. Currently you can create an account and manage a list of custom feeds. Feeds are updated in near real-time.
+                    You can use it as your feed reader too, but it won't be as full featured as other alternatives. Currently you can create an account and manage a list of custom feeds. Feeds are updated in near real-time.
                 </p>
                 <p>
                     <a href="https://github.com/firebase/firereader">Fork Firereader on GitHub</a> to build your own Angular + Firebase apps, or send pull requests to add functionality!
                 </p>
-                <p ng-cloak ng-hide="auth.authenticated"><a href="#hearth" class="btn">Customize Your Feeds</a></p>
+                <p style="text-align:center;" ng-cloak ng-hide="auth.authenticated"><a href="#hearth" class="btn btn-warning">Customize Your Feeds</a></p>
             </article>
 
             <!-- THE FEED GRID LISTING ARTICLES -->
