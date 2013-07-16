@@ -163,7 +163,7 @@ angular.module('myApp.controllers', ['firebase', 'feedTheFire'])
 
    }])
 
-   .controller('CustomFeedCtrl', ['$scope', 'feedTheFire', '$timeout', function($scope, feedTheFire, $timeout) {
+   .controller('CustomFeedCtrl', ['$scope', function($scope) {
       var $log = $scope.$log;
       $scope.isOpen = false;
 

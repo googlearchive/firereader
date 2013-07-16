@@ -13,10 +13,10 @@
             <div id="addFeeds" class="btn-group" ng-cloak ng-hide="isDemo">
                 <a class="dropdown-toggle" data-toggle="dropdown"><i class="icon-plus pull-right"></i>Add Feed...</a>
                 <ul class="dropdown-menu">
+                    <li><a ng-click="openFeedBuilder()">Custom Feed</a></li>
+                    <li class="divider"></li>
                     <!--<li><input ng-model="feedChoiceFilter" placeholder="filter" /></li>-->
                     <li ng-repeat="feed in feedChoices | filter:feedChoiceFilter | orderBy:feed.title"><a title="{{feed.description}}" ng-click="addFeed(feed.$id)">{{feed.title}}</a></li>
-                    <li class="divider"></li>
-                    <li><a ng-click="openFeedBuilder()">Something else...</a></li>
                 </ul>
             </div>
 

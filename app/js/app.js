@@ -1,9 +1,7 @@
 (function() {
    'use strict';
 
-   //todo config() can't access $rootScope, how can we check $rootScope.auth.authenticated indirectly?
    var isAuthenticated = false;
-
    var dependencyModules = ['ngSanitize', 'ui.bootstrap', 'ui.keypress'];
    var myAppComponents = ['myApp.utils', 'myApp.animate', 'myApp.config', 'myApp.filters', 'myApp.services', 'myApp.directives', 'myApp.controllers'];
 
@@ -27,7 +25,7 @@
             controller: 'LoginCtrl',
             authRequired: false
          });
-         $routeProvider.otherwise({redirectTo: function() { console.log('otherwise', isAuthenticated); return isAuthenticated? '/hearth' : '/demo'; }});
+         $routeProvider.otherwise({redirectTo: function() { return isAuthenticated? '/hearth' : '/demo'; }});
       }])
       .run(['$rootScope', '$location', 'fbUrl', 'angularFireCollection', 'firebaseAuth', '$log', function($rootScope, $location, fbUrl, angularFireCollection, firebaseAuth, $log) {
          firebaseAuth();
@@ -35,7 +33,7 @@
          $rootScope.$log = $log;
 
          $rootScope.keypress = function(key, $event) {
-            console.log('key pressed', arguments); //debug
+            $rootScope.$broadcast('keypress', key, $event);
          };
 
          // use angularFireCollection because this list should be read-only, and it should be filterable
@@ -60,21 +58,5 @@
             }
          });
       }]);
-
-   //
-   //jQuery(function($) {
-   //   var _size = _.debounce(function() {
-   //      var $w = $(window);
-   //      $('#windowSize').text( $w.height() + ' x ' + $w.width() );
-   //   }, 50);
-   //   var _move = _.debounce(function(e) {
-   //      $('#mouseCoords').text( 'x: '+ e.pageX + ', y: '+ e.pageY );
-   //   }, 50);
-   //
-   //   $('nav > div').append('<span id="windowSize"></span>').append(' / ').append('<span id="mouseCoords"></span>');
-   //   $(window).resize(_size);
-   //   $(document).on('mousemove', _move);
-   //   _size();
-   //});
 
 })();

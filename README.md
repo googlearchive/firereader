@@ -22,3 +22,7 @@ You can test your changes using the Angular built-in tests. See the [angular-see
 ## Contact
 
 Submit questions or bugs using the [issue tracker](http://github.com/firebase/firereader). For Firebase-releated questions, try the [mailing list](https://groups.google.com/forum/#!forum/firebase-talk).
+
+## License
+
+[MIT](http://firebase.mit-license.org/)

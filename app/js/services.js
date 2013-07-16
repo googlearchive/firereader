@@ -115,6 +115,7 @@
             },
             logout: function() {
                $log.log('logging out');
+               $rootScope.$broadcast('firebaseAuth::beforeLogout');
                authClient.logout();
             }
          };
@@ -158,7 +159,6 @@
                $scope.startLoading();
                feedTheFire.add(auth.provider, auth.user, url, function(error, id) {
                   if( error ) {
-                     //todo put this in the interface?
                      $scope.$log.error(error);
                      alert(error);
                   }
@@ -200,124 +200,123 @@
     * Some straightforward scope methods for dealing with feeds and articles; these have no dependencies
     */
    appServices.factory('feedScopeUtils', ['localStorage', '$timeout', 'angularFire', 'fbRef', function(localStorage, $timeout, angularFire, fbRef) {
-      return function($scope, provider, userId) {
-         //todo shouldn't need this; can't get feeds.length === 0 to work from directives
-         $scope.noFeeds = true;
-         $scope.showRead = false;
-         $scope.loading = true;
-
-         //todo snag this from $location?
-         $scope.link = $scope.isDemo? 'demo' : 'hearth';
-
-         $scope.getFeed = function(feedId) {
-            return $scope.feeds[feedId]||{};
-         };
-
-         $scope.isActive = function(feedId) {
-            return $scope.activeFeed === feedId;
-         };
-
-         $scope.showAllFeeds = function() {
-            return !$scope.activeFeed;
-         };
-
-         $scope.openFeedBuilder = function($event) {
-            $event && $event.preventDefault();
-            $scope.$broadcast('modal:customFeed');
-         };
-
-         $scope.openArticle = function(article, $event) {
-            if( $event ) { $event.preventDefault(); $event.stopPropagation(); }
-            $scope.$broadcast('modal:article', article);
-         };
-
-         $scope.filterMethod = function(article) {
-            return passesFilter(article) && notRead(article) && activeFeed(article);
-         };
-
-         $scope.orderMethod = function(article) {
-            var v = article[$scope.sortField];
-            return $scope.sortDesc? 0 - parseInt(v) : parseInt(v);
-         };
-
-         $scope.markArticleRead = function(article, $event) {
-            if( $scope.isDemo ) { return; }
-            if( $event ) { $event.preventDefault(); $event.stopPropagation(); }
-            var f = article.feed;
-            if( !_.has($scope.readArticles, article.feed) ) {
-               $scope.readArticles[f] = {};
-            }
-            $scope.readArticles[f][article.$id] = Date.now();
-         };
-
-         $scope.markFeedRead = function(feedId, $event) {
-            if( $event ) { $event.preventDefault(); $event.stopPropagation(); }
-            angular.forEach($scope.articles, function(article) {
-               if( article.feed === feedId ) { $scope.markArticleRead(article); }
-            });
-         };
-
-         $scope.markAllFeedsRead = function($event) {
-            if( $event ) { $event.preventDefault(); $event.stopPropagation(); }
-            angular.forEach($scope.feeds, function(feed) {
-               $scope.markFeedRead(feed.id, $event);
-            });
-         };
-
-         $scope.noVisibleArticles = function() {
-            return !$scope.loading && !$scope.noFeeds && countActiveArticles() === 0;
-         };
-
-         var to;
-         $scope.startLoading = function() {
+         return function($scope, provider, userId) {
+            $scope.noFeeds = true;
+            $scope.showRead = false;
             $scope.loading = true;
-            to && clearTimeout(to);
-            to = $timeout(function() {
-               $scope.loading = false;
-            }, 4000);
-         };
 
-         $scope.sortField = 'date';
+            //todo snag this from $location?
+            $scope.link = $scope.isDemo? 'demo' : 'hearth';
 
-         $scope.$watch('sortDesc', function() {
-            //todo store in firebase
-            localStorage.set('sortDesc', $scope.sortDesc);
-         });
+            $scope.getFeed = function(feedId) {
+               return $scope.feeds[feedId]||{};
+            };
 
-         $scope.sortDesc = !!localStorage.get('sortDesc');
+            $scope.isActive = function(feedId) {
+               return $scope.activeFeed === feedId;
+            };
 
-         // 2-way synchronize of the articles this user has marked as read
-         //todo limiting this to 250 is a bit hackish; make this work with infinite scroll if that is added
-         $scope.readArticles = {};
+            $scope.showAllFeeds = function() {
+               return !$scope.activeFeed;
+            };
+
+            $scope.openFeedBuilder = function($event) {
+               $event && $event.preventDefault();
+               $scope.$broadcast('modal:customFeed');
+            };
+
+            $scope.openArticle = function(article, $event) {
+               if( $event ) { $event.preventDefault(); $event.stopPropagation(); }
+               $scope.$broadcast('modal:article', article);
+            };
+
+            $scope.filterMethod = function(article) {
+               return passesFilter(article) && notRead(article) && activeFeed(article);
+            };
+
+            $scope.orderMethod = function(article) {
+               var v = article[$scope.sortField];
+               return $scope.sortDesc? 0 - parseInt(v) : parseInt(v);
+            };
+
+            $scope.markArticleRead = function(article, $event) {
+               if( $scope.isDemo ) { return; }
+               if( $event ) { $event.preventDefault(); $event.stopPropagation(); }
+               var f = article.feed;
+               if( !_.has($scope.readArticles, article.feed) ) {
+                  $scope.readArticles[f] = {};
+               }
+               $scope.readArticles[f][article.$id] = Date.now();
+            };
+
+            $scope.markFeedRead = function(feedId, $event) {
+               if( $event ) { $event.preventDefault(); $event.stopPropagation(); }
+               angular.forEach($scope.articles, function(article) {
+                  if( article.feed === feedId ) { $scope.markArticleRead(article); }
+               });
+            };
+
+            $scope.markAllFeedsRead = function($event) {
+               if( $event ) { $event.preventDefault(); $event.stopPropagation(); }
+               angular.forEach($scope.feeds, function(feed) {
+                  $scope.markFeedRead(feed.id, $event);
+               });
+            };
+
+            $scope.noVisibleArticles = function() {
+               return !$scope.loading && !$scope.noFeeds && countActiveArticles() === 0;
+            };
+
+            var to;
+            $scope.startLoading = function() {
+               $scope.loading = true;
+               to && clearTimeout(to);
+               to = $timeout(function() {
+                  $scope.loading = false;
+               }, 4000);
+            };
+
+            $scope.sortField = 'date';
+
+            $scope.$watch('sortDesc', function() {
+               //todo store in firebase
+               localStorage.set('sortDesc', $scope.sortDesc);
+            });
+
+            $scope.sortDesc = !!localStorage.get('sortDesc');
+
+            // 2-way synchronize of the articles this user has marked as read
+            //todo limiting this to 250 is a bit hackish; use infinite scroll instead
+            $scope.readArticles = {};
          angularFire(fbRef(['user', provider, userId, 'read'], 250), $scope, 'readArticles', {});
 
-         function passesFilter(article) {
-            if(_.isEmpty($scope.articleFilter)) {
-               return true;
+            function passesFilter(article) {
+               if(_.isEmpty($scope.articleFilter)) {
+                  return true;
+               }
+               var txt = ($scope.articleFilter||'').toLowerCase();
+               return _.find(article, function(v,k) {
+                  return !!(v && (v+'').toLowerCase().indexOf(txt) >= 0);
+               });
             }
-            var txt = ($scope.articleFilter||'').toLowerCase();
-            return _.find(article, function(v,k) {
-               return !!(v && (v+'').toLowerCase().indexOf(txt) >= 0);
-            });
-         }
 
-         function notRead(article) {
-            return $scope.showRead || !_.has($scope.readArticles, article.feed) || !_.has($scope.readArticles[article.feed], article.$id);
-         }
-
-         function activeFeed(article) {
-            return !$scope.activeFeed || $scope.activeFeed === article.feed;
-         }
-
-         function countActiveArticles() {
-            if( $scope.activeFeed ) {
-               return $scope.counts[$scope.activeFeed] || 0;
+            function notRead(article) {
+               return $scope.showRead || !_.has($scope.readArticles, article.feed) || !_.has($scope.readArticles[article.feed], article.$id);
             }
-            else {
-               return _.reduce($scope.counts, function(memo, num){ return memo + num; }, 0);
+
+            function activeFeed(article) {
+               return !$scope.activeFeed || $scope.activeFeed === article.feed;
+            }
+
+            function countActiveArticles() {
+               if( $scope.activeFeed ) {
+                  return $scope.counts[$scope.activeFeed] || 0;
+               }
+               else {
+                  return _.reduce($scope.counts, function(memo, num){ return memo + num; }, 0);
+               }
             }
          }
-      }
    }]);
 
    /**
@@ -334,7 +333,6 @@
             treeDiff($scope, 'feeds').watch(changed);
 
             function changed(changes, newVals, orig) {
-//               $log.debug('FeedManager::changes', changes, newVals, orig);
                _.each(['added', 'updated', 'removed'], function(type) {
                   _.each(changes[type], function(key) {
                      var feed = type === 'removed'? orig[key] : newVals[key];
@@ -426,6 +424,9 @@
       }
    }]);
 
+   /**
+    * A simple Factory pattern to create the article objects from JSON data
+    */
    appServices.factory('articleFactory', [function() {
       //todo move to an article parser service
       function fixRelativeLinks(txt, baseUrl) {
@@ -461,6 +462,34 @@
             return out;
          }
       };
+   }]);
+
+   /**
+    * A simple utility to monitor privileged Firebase connections and remove them on loss of authentication
+    */
+   appServices.factory('refMgr', ['$rootScope', function($rootScope) {
+      var subs = [];
+      $rootScope.$on('firebaseAuth::beforeLogout', function() {
+         angular.forEach(subs, function(s) { _.isObject(s)? s.dispose() : s(); });
+         subs = [];
+      });
+      return {
+         /**
+          * @param {Firebase} fbRef
+          * @param {String} [event]
+          * @param {Function} [fn]
+          */
+         add: function(fbRef, event, fn) {
+            if(_.isFunction(fbRef)) {
+               subs.push(fbRef);
+            }
+            else {
+               subs.push(function() {
+                  fbRef.off(event, fn);
+               })
+            }
+         }
+      }
    }]);
 
 })(angular);

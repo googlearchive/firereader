@@ -1,5 +1,6 @@
+
 // Read-only collection that monitors multiple paths
-// This is an alpha concept and probably not suitable for general use
+// This is an ALPHA / EXPERIMENTAL concept and probably not suitable for general use
 angular.module('firebase').factory('angularFireAggregate', ['$timeout', '$q', '$log', function($timeout, $q, $log) {
 
    /**
@@ -15,6 +16,7 @@ angular.module('firebase').factory('angularFireAggregate', ['$timeout', '$q', '$
       var collection = [];
       var indexes = {};
       var listeners = [];
+      var paths = [];
 
       /**
        * This can be invoked to add additional paths after initialization
@@ -58,6 +60,15 @@ angular.module('firebase').factory('angularFireAggregate', ['$timeout', '$q', '$
             }
             return null;
          }
+      };
+
+      collection.dispose = function() {
+         notify('dispose');
+         angular.forEach(paths, function(p) {p.dispose();});
+         collection = [];
+         paths = [];
+         indexes = {};
+         listeners = [];
       };
 
       /**
@@ -104,7 +115,7 @@ angular.module('firebase').factory('angularFireAggregate', ['$timeout', '$q', '$
                else {
                   addChild(pathString, ss, prevId);
                }
-            }, function(e) { $log.warn(e); })]);
+            }, function(e) { $log.debug(e); })]);
 
             subs.push(['child_removed', pathRef.on('child_removed', removeChild, function(e) { $log.warn(e); })]);
 
@@ -139,7 +150,7 @@ angular.module('firebase').factory('angularFireAggregate', ['$timeout', '$q', '$
                   var id = ss.name();
                   filters[id] = true;
                   removeChild(id);
-               }.bind(this), function(e) { $log.warn(e); })]);
+               }.bind(this), $log.debug.bind($log))]);
                subs.push(['child_removed', ref.on('child_removed', function(ss) {
                   var id = ss.name();
                   delete filters[id];
@@ -147,7 +158,7 @@ angular.module('firebase').factory('angularFireAggregate', ['$timeout', '$q', '$
                      addChild(pathString, filtered[id][0], filtered[id][1]);
                      delete filtered[id];
                   }
-               }.bind(this), function(e) { $log.warn(e); })]);
+               }.bind(this), $log.debug.bind($log))]);
                callback();
             }.bind(this), function() {
 
@@ -167,22 +178,6 @@ angular.module('firebase').factory('angularFireAggregate', ['$timeout', '$q', '$
          if (initialCb && typeof initialCb == 'function') {
             pathRef.once('value', initialCb);
          }
-
-/*
-         this.expandQuery = function(parms) {
-            _.each(subs, function(s) {
-               pathRef.off(s[0], s[1]);
-            });
-            var newRef = pathRef.ref();
-            _.each(['endAt', 'startAt', 'limit'], function(k) {
-               if(_.has(parms[k])) {
-                  newRef = newRef[k](parms[k]);
-               }
-            });
-            pathRef = newRef;
-            this._init();
-         };
-*/
 
          this.dispose = function() {
             _.each(subs, function(s) {
