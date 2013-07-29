@@ -279,7 +279,6 @@ a.brand img {
    width: 100%;
    border-radius: 2px;
    z-index: 251;
-   text-align: center;
    background-color: #444;
    color: #ffe7bb;
    margin: 0;
@@ -296,7 +295,18 @@ a.brand img {
 #feeds > article footer a {
    color: #8a998c;
    font-size: 24px;
+   line-height: 24px;
+   position: absolute;
+   top: 50%;
+   margin-top: -12px;
+   right: 5px;
+   float: inherit;
+}
 
+#feeds > article > footer p {
+   margin: 4px 30px 4px 10px;
+   font-size: 12px;
+   line-height: 18px;
 }
 
 #feeds > article footer a:hover {

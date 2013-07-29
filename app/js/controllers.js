@@ -128,6 +128,7 @@ angular.module('myApp.controllers', ['firebase', 'feedTheFire'])
 
       $scope.closed = function() {
          $scope.article = null;
+         $scope.isOpen = false;
       };
 
 
