@@ -170,7 +170,7 @@ function launchService(service) {
             return;
          }
 
-         var fbURL = new Firebase(feed.value.firebase).toString();
+         var fbURL = feed.value.firebase;
          //todo-hack see #https://github.com/firebase/firereader/issues/30
          //todo-hack we only write back to our own instance here, so just use the server secret directly
          var secret = process.env.SECRET; //feed.value.secret;
