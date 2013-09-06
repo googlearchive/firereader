@@ -78,7 +78,6 @@
                provider: $scope.auth && $scope.auth.provider
             };
             updateScope($scope, 'auth', $scope.auth, function() {
-               $log.log('_loggedOut scope updated too');
                $location.search('feed', null);
                $location.path('/demo');
             });

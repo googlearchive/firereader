@@ -17,9 +17,15 @@ describe('my app', function() {
          browser().navigateTo('#/hearth');
       });
 
-      it('should render hearth when user navigates to /hearth', function() {
-         expect(element('[ng-view] #feeds').count()).toBe(1);
+      it('should redirect to /login', function() {
+         expect(element('[ng-view] #login').count()).toBe(1);
       });
+
+      //todo need to test authenticated actions, but we don't have a way
+      //todo to OAuth via e2e tests
+      //todo viewing an article
+      //todo marking an article read
+      //todo marking all articles read
    });
 
    describe('demo', function() {
@@ -37,8 +43,11 @@ describe('my app', function() {
       browser().navigateTo('#/account');
     });
 
-     it('should render account when user navigates to /account', function() {
-        expect(element('[ng-view] #account').count()).toBe(1);
+     it('should redirect to /login', function() {
+        expect(element('[ng-view] #login').count()).toBe(1);
      });
+
+     //todo need to test authenticated actions, but we don't have a way
+     //todo to OAuth via e2e tests
   });
 });
