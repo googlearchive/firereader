@@ -3,6 +3,7 @@ basePath = '../';
 files = [
   JASMINE,
   JASMINE_ADAPTER,
+  'https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js',
   'http://static.firebase.com/v0/firebase.js',
   'https://cdn.firebase.com/v0/firebase-auth-client.js',
   'app/lib/angular/angular.js',

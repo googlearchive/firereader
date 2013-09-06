@@ -323,8 +323,8 @@
     * A change listener that updates the feedManager and articleManager, as well as
     * making some minor scope manipulations
     */
-   appServices.factory('feedChangeApplier', ['$log', 'ArticleManager', 'treeDiff', 'fbUrl', 'angularFire', '$timeout', '$location',
-      function($log, ArticleManager, treeDiff, fbUrl, angularFire, $timeout, $location) {
+   appServices.factory('feedChangeApplier', ['$log', 'ArticleManager', 'treeDiff', 'fbRef', 'angularFire', '$timeout', '$location',
+      function($log, ArticleManager, treeDiff, fbRef, angularFire, $timeout, $location) {
          return function($scope, feedManager, provider, userId) {
             var articleManager = new ArticleManager(feedManager, $scope);
             $scope.feeds = {};
@@ -351,10 +351,10 @@
                $scope.noFeeds = _.isEmpty($scope.feeds);
             }
 
-            var path = fbUrl('user', provider, userId, 'list');
+            var userRef = fbRef('user', provider, userId, 'list');
             if( userId === 'demo' && provider === 'demo' ) {
                // read only
-               new Firebase(path).once('value', function(ss) {
+               userRef.once('value', function(ss) {
                   $timeout(function() {
                      $scope.feeds = ss.val();
                      $scope.loading = false;
@@ -363,7 +363,7 @@
             }
             else {
                // 2-way synchronize of the list of feeds this user has picked
-               angularFire(path, $scope, 'feeds', {}).then(function() {
+               angularFire(userRef, $scope, 'feeds').then(function() {
                   var feed = ($location.search()||{}).feed;
                   if( feed && !($scope.feeds||{})[feed] ) {
                      $location.replace();

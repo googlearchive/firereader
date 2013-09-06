@@ -27,7 +27,7 @@
          });
          $routeProvider.otherwise({redirectTo: function() { return isAuthenticated? '/hearth' : '/demo'; }});
       }])
-      .run(['$rootScope', '$location', 'fbUrl', 'angularFireCollection', 'firebaseAuth', '$log', function($rootScope, $location, fbUrl, angularFireCollection, firebaseAuth, $log) {
+      .run(['$rootScope', '$location', 'fbRef', 'angularFireCollection', 'firebaseAuth', '$log', function($rootScope, $location, fbRef, angularFireCollection, firebaseAuth, $log) {
          firebaseAuth();
 
          $rootScope.$log = $log;
@@ -38,7 +38,7 @@
 
          // use angularFireCollection because this list should be read-only, and it should be filterable
          // by using | filter command, which doesn't work with key/value iterators
-         $rootScope.feedChoices = angularFireCollection(fbUrl('meta'));
+         $rootScope.feedChoices = angularFireCollection(fbRef('meta'));
          $rootScope.redirectPath = null;
 
          $rootScope.$watch('auth.authenticated', function() { isAuthenticated = $rootScope.auth.authenticated; });
