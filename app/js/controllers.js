@@ -4,7 +4,7 @@
 
 angular.module('myApp.controllers', ['firebase', 'feedTheFire'])
 
-   .controller('LoginCtrl', ['$log', '$rootScope', '$scope', 'firebaseAuth', 'authProviders', '$location', function($log, $rootScope, $scope, firebaseAuth, authProviders) {
+   .controller('LoginCtrl', ['$scope', 'authProviders', '$location', function($scope, authProviders) {
       $scope.providers = {};
       angular.forEach(authProviders, function(p) {
          $scope.providers[p.id] = angular.extend({preferred: $scope.auth.provider === p.id}, p);

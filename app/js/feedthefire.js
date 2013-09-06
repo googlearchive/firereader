@@ -24,7 +24,6 @@
             });
          },
          remove: function(provider, userId, feedId) {
-            $log.debug('feedTheFire.remove', provider, userId, feedId);
             new Firebase(buildUrl('user', provider, userId, 'feeds', feedId)).remove();
          }
       }
