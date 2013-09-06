@@ -251,6 +251,15 @@
       }
    }]);
 
+   appUtils.factory('updateScope', ['$timeout', '$parse', function($timeout, $parse) {
+      return function(scope, name, val, cb) {
+         $timeout(function() {
+            $parse(name).assign(scope, val);
+            cb && cb();
+         });
+      }
+   }]);
+
    function cookie(key, value, options) {
       // key and at least value given, set cookie...
       if (arguments.length > 1 && String(value) !== "[object Object]") {

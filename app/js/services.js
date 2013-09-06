@@ -1,25 +1,50 @@
 (function(angular) {
-
    "use strict";
-
    var appServices = angular.module('myApp.services', ['myApp.utils']);
 
    /**
-    * A simple utility to monitor changes to authentication and store the results
-    * in the $rootScope for global access
+    * A service that authenticates against Fireabase using simple login
     */
-   appServices.factory('authScopeManager', ['$rootScope', '$timeout', 'localStorage', function($rootScope, $timeout, localStorage) {
-      return function() {
-         $rootScope.auth = {
+   appServices.factory('authManager', ['$rootScope', 'fbRef', 'angularFireAuth', 'authScopeUtil', function($rootScope, fbRef, angularFireAuth, authScopeUtil) {
+      authScopeUtil($rootScope);
+
+      angularFireAuth.initialize(fbRef(), {
+         scope: $rootScope,
+         name: 'user',
+         path: '/login'
+      });
+
+      // provide some convenience methods to log in and out
+      return {
+         login: function(providerId) {
+            angularFireAuth.login(providerId, { rememberMe: true, scope: 'email'});
+         },
+
+         logout: function() {
+            angularFireAuth.logout();
+         }
+      };
+   }]);
+
+   /**
+    * A simple utility to monitor changes to authentication and set some scope values
+    * for use in bindings and directives
+    */
+   appServices.factory('authScopeUtil', ['$log', 'updateScope', 'localStorage', '$location', function($log, updateScope, localStorage, $location) {
+      return function($scope) {
+         $scope.auth = {
             authenticated: false,
             user: null,
             name: null,
             provider: localStorage.get('authProvider')
          };
 
-         $rootScope.$on('firebaseAuth::login', _set);
-         $rootScope.$on('firebaseAuth::error', _unset);
-         $rootScope.$on('firebaseAuth::logout', _unset);
+         $scope.$on('angularFireAuth:login', _loggedIn);
+         $scope.$on('angularFireAuth:error', function(err) {
+            $log.error(err);
+            _loggedOut();
+         });
+         $scope.$on('angularFireAuth:logout', _loggedOut);
 
          function parseName(user) {
             switch(user.provider) {
@@ -30,99 +55,34 @@
             }
          }
 
-         function _set(evt, args) {
-            $timeout(function() {
-               $rootScope.auth = {
-                  authenticated: true,
-                  user: args.user.id,
-                  name: parseName(args.user),
-                  provider: args.user.provider
-               };
-               localStorage.set('authProvider', args.user.provider);
-            });
-         }
-
-         function _unset() {
-            $timeout(function() {
-               $rootScope.auth = {
-                  authenticated: false,
-                  user: null,
-                  provider: $rootScope.auth && $rootScope.auth.provider
-               };
-            });
-         }
-      }
-   }]);
-
-   /**
-    * A service that authenticates against Fireabase using simple login
-    */
-   appServices.factory('firebaseAuth', ['$log', '$rootScope', 'FIREBASE_URL', '$location', 'authScopeManager', function($log, $rootScope, FIREBASE_URL, $location, authScopeManager) {
-      return function() {
-         authScopeManager();
-
-         // establish Firebase auth monitoring
-         var authClient = new FirebaseSimpleLogin(new Firebase(FIREBASE_URL), _statusChange);
-         var initialized = false;
-
-         // whenever authentication status changes, broadcast change to all scopes
-         function _statusChange(error, user) {
-            if( error ) {
-               $log.error('FirebaseAuth::error', error, user);
-               $rootScope.$broadcast('firebaseAuth::error', {error: error, user: user});
-            }
-            else if( user ) {
-               $log.info('FirebaseAuth::login', user);
-               $rootScope.$broadcast('firebaseAuth::login', {user: user});
+         function _loggedIn(evt, user) {
+            localStorage.set('authProvider', user.provider);
+            $scope.auth = {
+               authenticated: true,
+               user: user.id,
+               name: parseName(user),
+               provider: user.provider
+            };
+            updateScope($scope, 'auth', $scope.auth, function() {
                if( !($location.path()||'').match('/hearth') ) {
                   $location.path('/hearth');
                }
-            }
-            else {
-               $log.info('FirebaseAuth::logout');
-               $rootScope.$broadcast('firebaseAuth::logout', {});
-               initialized && $location.path('/demo');
-            }
-            initialized = true;
+            });
          }
 
-         // provide some convenience methods to log in and out
-         var fns = {
-            login: function(providerId) {
-               $log.log('logging in', providerId);
-               switch(providerId) {
-                  case 'persona':
-                     authClient.login('persona', { rememberMe: true });
-                     break;
-                  case 'github':
-                     authClient.login('github', {
-                        rememberMe: true,
-                        scope: 'user:email'
-                     });
-                     break;
-                  case 'twitter':
-                     authClient.login('twitter', { rememberMe: true });
-                     break;
-                  case 'facebook':
-                     authClient.login('facebook', {
-                        rememberMe: true,
-                        scope: 'email'
-                     });
-                     break;
-                  default:
-                     throw new Error('I do not know this provider: '+providerId);
-               }
-            },
-            logout: function() {
-               $log.log('logging out');
-               $rootScope.$broadcast('firebaseAuth::beforeLogout');
-               authClient.logout();
-            }
-         };
-
-         angular.extend($rootScope, fns);
-
-         return fns;
+         function _loggedOut() {
+            $scope.auth = {
+               authenticated: false,
+               user: null,
+               name: null,
+               provider: $scope.auth && $scope.auth.provider
+            };
+            updateScope($scope, 'auth', $scope.auth, function() {
+               $log.log('_loggedOut scope updated too');
+               $location.search('feed', null);
+               $location.path('/demo');
+            });
+         }
       }
    }]);
 
@@ -200,123 +160,122 @@
     * Some straightforward scope methods for dealing with feeds and articles; these have no dependencies
     */
    appServices.factory('feedScopeUtils', ['localStorage', '$timeout', 'angularFire', 'fbRef', function(localStorage, $timeout, angularFire, fbRef) {
-         return function($scope, provider, userId) {
-            $scope.noFeeds = true;
-            $scope.showRead = false;
-            $scope.loading = true;
+      return function($scope, provider, userId) {
+         $scope.noFeeds = true;
+         $scope.showRead = false;
+         $scope.loading = true;
 
-            //todo snag this from $location?
-            $scope.link = $scope.isDemo? 'demo' : 'hearth';
+         //todo snag this from $location?
+         $scope.link = $scope.isDemo? 'demo' : 'hearth';
 
-            $scope.getFeed = function(feedId) {
-               return $scope.feeds[feedId]||{};
-            };
+         $scope.getFeed = function(feedId) {
+            return $scope.feeds[feedId]||{};
+         };
 
-            $scope.isActive = function(feedId) {
-               return $scope.activeFeed === feedId;
-            };
+         $scope.isActive = function(feedId) {
+            return $scope.activeFeed === feedId;
+         };
 
-            $scope.showAllFeeds = function() {
-               return !$scope.activeFeed;
-            };
+         $scope.showAllFeeds = function() {
+            return !$scope.activeFeed;
+         };
 
-            $scope.openFeedBuilder = function($event) {
-               $event && $event.preventDefault();
-               $scope.$broadcast('modal:customFeed');
-            };
+         $scope.openFeedBuilder = function($event) {
+            $event && $event.preventDefault();
+            $scope.$broadcast('modal:customFeed');
+         };
 
-            $scope.openArticle = function(article, $event) {
-               if( $event ) { $event.preventDefault(); $event.stopPropagation(); }
-               $scope.$broadcast('modal:article', article);
-            };
+         $scope.openArticle = function(article, $event) {
+            if( $event ) { $event.preventDefault(); $event.stopPropagation(); }
+            $scope.$broadcast('modal:article', article);
+         };
 
-            $scope.filterMethod = function(article) {
-               return passesFilter(article) && notRead(article) && activeFeed(article);
-            };
+         $scope.filterMethod = function(article) {
+            return passesFilter(article) && notRead(article) && activeFeed(article);
+         };
 
-            $scope.orderMethod = function(article) {
-               var v = article[$scope.sortField];
-               return $scope.sortDesc? 0 - parseInt(v) : parseInt(v);
-            };
+         $scope.orderMethod = function(article) {
+            var v = article[$scope.sortField];
+            return $scope.sortDesc? 0 - parseInt(v) : parseInt(v);
+         };
 
-            $scope.markArticleRead = function(article, $event) {
-               if( $scope.isDemo ) { return; }
-               if( $event ) { $event.preventDefault(); $event.stopPropagation(); }
-               var f = article.feed;
-               if( !_.has($scope.readArticles, article.feed) ) {
-                  $scope.readArticles[f] = {};
-               }
-               $scope.readArticles[f][article.$id] = Date.now();
-            };
+         $scope.markArticleRead = function(article, $event) {
+            if( $scope.isDemo ) { return; }
+            if( $event ) { $event.preventDefault(); $event.stopPropagation(); }
+            var f = article.feed;
+            if( !_.has($scope.readArticles, article.feed) ) {
+               $scope.readArticles[f] = {};
+            }
+            $scope.readArticles[f][article.$id] = Date.now();
+         };
 
-            $scope.markFeedRead = function(feedId, $event) {
-               if( $event ) { $event.preventDefault(); $event.stopPropagation(); }
-               angular.forEach($scope.articles, function(article) {
-                  if( article.feed === feedId ) { $scope.markArticleRead(article); }
-               });
-            };
-
-            $scope.markAllFeedsRead = function($event) {
-               if( $event ) { $event.preventDefault(); $event.stopPropagation(); }
-               angular.forEach($scope.feeds, function(feed) {
-                  $scope.markFeedRead(feed.id, $event);
-               });
-            };
-
-            $scope.noVisibleArticles = function() {
-               return !$scope.loading && !$scope.noFeeds && countActiveArticles() === 0;
-            };
-
-            var to;
-            $scope.startLoading = function() {
-               $scope.loading = true;
-               to && clearTimeout(to);
-               to = $timeout(function() {
-                  $scope.loading = false;
-               }, 4000);
-            };
-
-            $scope.sortField = 'date';
-
-            $scope.$watch('sortDesc', function() {
-               //todo store in firebase
-               localStorage.set('sortDesc', $scope.sortDesc);
+         $scope.markFeedRead = function(feedId, $event) {
+            if( $event ) { $event.preventDefault(); $event.stopPropagation(); }
+            angular.forEach($scope.articles, function(article) {
+               if( article.feed === feedId ) { $scope.markArticleRead(article); }
             });
+         };
 
-            $scope.sortDesc = !!localStorage.get('sortDesc');
+         $scope.markAllFeedsRead = function($event) {
+            if( $event ) { $event.preventDefault(); $event.stopPropagation(); }
+            angular.forEach($scope.feeds, function(feed) {
+               $scope.markFeedRead(feed.id, $event);
+            });
+         };
 
-            // 2-way synchronize of the articles this user has marked as read
-            //todo limiting this to 250 is a bit hackish; use infinite scroll instead
-            $scope.readArticles = {};
-         angularFire(fbRef(['user', provider, userId, 'read'], 250), $scope, 'readArticles', {});
+         $scope.noVisibleArticles = function() {
+            return !$scope.loading && !$scope.noFeeds && countActiveArticles() === 0;
+         };
 
-            function passesFilter(article) {
-               if(_.isEmpty($scope.articleFilter)) {
-                  return true;
-               }
-               var txt = ($scope.articleFilter||'').toLowerCase();
-               return _.find(article, function(v,k) {
-                  return !!(v && (v+'').toLowerCase().indexOf(txt) >= 0);
-               });
+         var to;
+         $scope.startLoading = function() {
+            $scope.loading = true;
+            to && clearTimeout(to);
+            to = $timeout(function() {
+               $scope.loading = false;
+            }, 4000);
+         };
+
+         $scope.sortField = 'date';
+
+         $scope.$watch('sortDesc', function() {
+            //todo store in firebase
+            localStorage.set('sortDesc', $scope.sortDesc);
+         });
+
+         $scope.sortDesc = !!localStorage.get('sortDesc');
+
+         // 2-way synchronize of the articles this user has marked as read
+         $scope.readArticles = {};
+         $scope.isDemo || angularFire(fbRef(['user', provider, userId, 'read'], 250), $scope, 'readArticles');
+
+         function passesFilter(article) {
+            if(_.isEmpty($scope.articleFilter)) {
+               return true;
             }
+            var txt = ($scope.articleFilter||'').toLowerCase();
+            return _.find(article, function(v,k) {
+               return !!(v && (v+'').toLowerCase().indexOf(txt) >= 0);
+            });
+         }
 
-            function notRead(article) {
-               return $scope.showRead || !_.has($scope.readArticles, article.feed) || !_.has($scope.readArticles[article.feed], article.$id);
+         function notRead(article) {
+            return $scope.showRead || !_.has($scope.readArticles, article.feed) || !_.has($scope.readArticles[article.feed], article.$id);
+         }
+
+         function activeFeed(article) {
+            return !$scope.activeFeed || $scope.activeFeed === article.feed;
+         }
+
+         function countActiveArticles() {
+            if( $scope.activeFeed ) {
+               return $scope.counts[$scope.activeFeed] || 0;
             }
-
-            function activeFeed(article) {
-               return !$scope.activeFeed || $scope.activeFeed === article.feed;
-            }
-
-            function countActiveArticles() {
-               if( $scope.activeFeed ) {
-                  return $scope.counts[$scope.activeFeed] || 0;
-               }
-               else {
-                  return _.reduce($scope.counts, function(memo, num){ return memo + num; }, 0);
-               }
+            else {
+               return _.reduce($scope.counts, function(memo, num){ return memo + num; }, 0);
             }
          }
+      }
    }]);
 
    /**
@@ -351,7 +310,7 @@
                $scope.noFeeds = _.isEmpty($scope.feeds);
             }
 
-            var userRef = fbRef('user', provider, userId, 'list');
+            var userRef = fbRef(['user', provider, userId, 'list']);
             if( userId === 'demo' && provider === 'demo' ) {
                // read only
                userRef.once('value', function(ss) {
@@ -462,34 +421,6 @@
             return out;
          }
       };
-   }]);
-
-   /**
-    * A simple utility to monitor privileged Firebase connections and remove them on loss of authentication
-    */
-   appServices.factory('refMgr', ['$rootScope', function($rootScope) {
-      var subs = [];
-      $rootScope.$on('firebaseAuth::beforeLogout', function() {
-         angular.forEach(subs, function(s) { _.isObject(s)? s.dispose() : s(); });
-         subs = [];
-      });
-      return {
-         /**
-          * @param {Firebase} fbRef
-          * @param {String} [event]
-          * @param {Function} [fn]
-          */
-         add: function(fbRef, event, fn) {
-            if(_.isFunction(fbRef)) {
-               subs.push(fbRef);
-            }
-            else {
-               subs.push(function() {
-                  fbRef.off(event, fn);
-               })
-            }
-         }
-      }
    }]);
 
 })(angular);
