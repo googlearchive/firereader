@@ -1,14 +1,20 @@
 //todo-hack see #https://github.com/firebase/firereader/issues/30
 //todo-hack when that issue is fixed, this script will no longer be necessary
-var crypto = require("crypto")
-   , request = require("request")
-   , Parser = require("feedparser")
-   , Firebase = require("firebase");
+var crypto    = require("crypto")
+   , request  = require("request")
+   , Parser   = require("feedparser")
+   , Firebase = require("firebase")
+   , Q        = require('q');
 
-var REFRESH_INTERVAL = 600000;
+var REFRESH_INTERVAL = 1000*60*10 /* 10 minutes */;
 
-var url = process.env.FBURL || "https://feedthefire.firebaseio.com/";
+// set this to the user/ path in your firebase namespace, https://<NAME>.firebaseio.com/user
+var url = process.env.FBURL;
+
+// any providers accepted by the client should appear here
 var services = process.env.SERVICES? process.env.SERVICES.split(',') : ['persona', 'facebook', 'twitter', 'github'];
+
+console.log('connecting to', url);
 
 new Firebase(url).auth(process.env.SECRET, function(err) {
    if (err) {
@@ -25,12 +31,13 @@ function setupServices(serviceList) {
 }
 
 function launchService(service) {
-   console.log('launching', service); //debug
+   console.log('starting', service);
    var feeds = {};
    var feedContent = {};
+   var running = false;
    var ref = new Firebase(url+service);
-   setInterval(parseFeeds, REFRESH_INTERVAL);
    setupHandlers();
+   setInterval(parseFeeds, REFRESH_INTERVAL);
 
    function getHash(value) {
       var shasum = crypto.createHash("sha1");
@@ -76,6 +83,7 @@ function launchService(service) {
    }
 
    function writeToFirebase(url, data, secret, cb) {
+//      console.log('writeToFirebase', url);
       var options = {url: url + ".json", method: "PUT", json: data};
       if (secret) {
          options.qs = {auth: secret};
@@ -118,7 +126,7 @@ function launchService(service) {
       var self = this;
       ref.on("child_added", function(snap) {
          var userid = snap.name();
-         console.log('setup user', userid); //debug
+//         console.log('setup user', userid);
          if (!feeds[userid]) {
             feeds[userid] = {};
          }
@@ -137,97 +145,119 @@ function launchService(service) {
 
    function editUserFeed(userid, snap) {
       var id = snap.name();
+//      console.log('edit feed', userid, snap.name());
       var entry = feeds[userid][id] = {
-         statusURL: new Firebase(
-            snap.ref().toString()
-         ).parent().parent().child("status/" + id).toString(),
+         ref: snap.ref(),
+         statusURL: ref.child(userid).child("status/" + id).toString(),
          value: snap.val()
       };
       parseFeed(entry);
    }
 
    function parseFeeds() {
+      if( running ) {
+         console.log('skipped parseFeeds for provider %s (still running)', service);
+         return;
+      }
+      var startTime = new Date();
+      running = true;
+      var promises = [];
       for (var uid in feeds) {
          var user = feeds[uid];
          for (var index in user) {
-            parseFeed(user[index]);
+            promises.push(parseFeed(user[index]));
          }
       }
-      console.log("Parsed feeds at: " + new Date());
-   }
 
-   function parseFeed(feed) {
-      try {
-         var url = feed.value.url;
-         var statusURL = new Firebase(feed.statusURL).toString();
-
-         if (!url || url.indexOf("http") < 0) {
-            writeStatus(statusURL, "Error: Invalid feed URL specified: " + url);
-            return;
-         }
-         if (!feed.value.firebase || feed.value.firebase.indexOf("https") < 0) {
-            writeStatus(statusURL, "Error: Invalid Firebase URL specified, did you include the https prefix?");
-            return;
-         }
-
-         var fbURL = feed.value.firebase;
-         //todo-hack see #https://github.com/firebase/firereader/issues/30
-         //todo-hack we only write back to our own instance here, so just use the server secret directly
-         var secret = process.env.SECRET; //feed.value.secret;
-         var urlHash = getHash(url);
-
-         if (feedContent[urlHash]) {
-            if (new Date().getTime() - feedContent[urlHash].lastSync > REFRESH_INTERVAL) {
-               getAndSet(url, urlHash, statusURL, fbURL, secret);
-            } else {
-               setFeed(feedContent[urlHash].content, statusURL, fbURL, secret);
-            }
-         } else {
-            getAndSet(url, urlHash, statusURL, fbURL, secret);
-         }
-      } catch(e) {
-         writeStatus(statusURL, e.toString());
-      }
-   }
-
-   function getAndSet(url, hash, statusURL, fbURL, secret) {
-      request(url, function(err, resp, body) {
-         if (!err && resp.statusCode == 200) {
-            feedContent[hash] = {lastSync: new Date().getTime(), content: body};
-            setFeed(body, statusURL, fbURL, secret);
-         } else {
-            if (err) {
-               writeStatus(statusURL, err.toString());
-            } else {
-               writeStatus(statusURL, "Error: got status " + resp.statusCode + " when fetching feed.");
-            }
-         }
+      console.log("Parsing %d feeds for provider  %s at %s", promises.length, service, startTime);
+      Q.allSettled(promises).finally(function() {
+         running = false;
+         console.log('Finished parsing (%s)', timeElapsed(startTime));
       });
    }
 
+   function parseFeed(feed) {
+//      console.log('parseFeed', feed.value && feed.value.url);
+      var url = feed.value.url;
+      var statusURL = new Firebase(feed.statusURL).toString();
+      return Q(true)
+         .then(function() {
+            var err;
+            if (!url || url.indexOf("http") < 0) {
+               err = "Error: Invalid feed URL specified: " + url;
+            }
+            else if (!feed.value.firebase || feed.value.firebase.indexOf("https") < 0) {
+               err = "Error: Invalid Firebase URL specified, did you include the https prefix?";
+            }
+            if( err ) {
+               throw err;
+            }
+         })
+         .then(function() {
+            return getAndSet(url, getHash(url), statusURL, feed.value.firebase, process.env.SECRET);
+         })
+         .done(function() {
+//            console.log('Parsed feed', url, statusURL);
+         }, function(err, statusCode) {
+            console.error('PARSE ERROR', err, url, statusURL);
+            writeStatus(statusURL, (err||statusCode+'').toString());
+         });
+   }
+
+   function getAndSet(url, hash, statusURL, fbURL, secret) {
+//      console.log('getAndSet', url);
+      if (!feedContent[hash] || Date.now() - feedContent[hash].lastSync > REFRESH_INTERVAL) {
+         return doRequest(url)
+            .then(function(body) {
+               feedContent[hash] = {lastSync: Date.now(), content: body};
+               return setFeed(body, statusURL, fbURL, secret)
+            });
+      } else {
+         return setFeed(feedContent[hash].content, statusURL, fbURL, secret);
+      }
+   }
+
    function setFeed(feed, statusURL, fbURL, secret) {
+      var def = Q.defer();
       Parser.parseString(feed, {addmeta: false}, function(err, meta, articles) {
          if (err) {
             writeStatus(statusURL, err.toString());
+            def.reject(err);
             return;
          }
          try {
             writeToFirebase(fbURL + "/meta", sanitizeObject(meta), secret, function(err) {
                if (err) {
+                  def.reject(err);
                   writeStatus(statusURL, err.toString());
                   return;
                }
                setArticles(articles, 0, articles.length, statusURL, fbURL, secret);
+               def.resolve();
             });
          } catch(e) {
+            def.reject(e);
             writeStatus(statusURL, e.toString());
          }
       });
+      return def.promise;
+   }
+
+   function doRequest(opts) {
+      var def = Q.defer();
+      request(opts, function(err, resp, body) {
+         if (!err && resp.statusCode == 200) {
+            def.resolve(body);
+         } else {
+            def.reject(err || resp && resp.statusCode);
+         }
+      });
+      return def.promise;
    }
 
    function setArticles(articles, done, total, statusURL, fbURL, secret) {
       if (total <= 0) {
-         writeStatus(statusURL, "Last Sync: " + new Date().toString());
+         writeStatus(statusURL, "Last Sync: " + new Date().toString() + ' (no articles)');
          return;
       }
 
@@ -256,4 +286,17 @@ function launchService(service) {
       });
    }
 
+}
+
+function timeElapsed(startTime) {
+   var diff = Math.floor( (Date.now() - startTime.valueOf()) / 1000);
+   var units = '';
+   if( diff > 60 ) {
+      units = 'minute';
+      diff = Math.round( (diff/60)*10 )/10;
+   }
+   else {
+      units = 'second';
+   }
+   return diff + '' + (diff !== 1? units+'s' : units);
 }

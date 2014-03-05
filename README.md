@@ -3,15 +3,21 @@
 
 Firereader is a fully functional, real-time content aggregator built using [Angular](http://www.angularjs.org) and [Firebase](http://www.firebase.com).
 
+It contains a fully functional client in the app/ directory, and a service that parses RSS data and pushes it into Firebase in the service/ directory.
+
 <h1><a href="http://firereader.io">Visit Firereader.io and see it in action</a></h1>
+
+## Installation
+
+To install a Firereader service, follow these steps:
+* open app/js/config.js and set the `FIREBASE_URL` to your namespace
+* cd into service/
+* run `npm install` to configure dependencies
+* start feeds.js: `FBURL="https://<NAMESPACE>.firebaseio.com/user" SECRET="xxx" node ./feeds.js`
 
 ## Use this code in your project
 
-Firereader was built using [angularFire](https://github.com/firebase/angularFire).
-
-To use this code in your own project, follow the instructions in the [angular-seed README](https://github.com/angular/angular-seed). The only additional step is to open `app/js/config.js` and set your Firebase URL.
-
-If you are looking for a working seed project to build AngularFire apps, check out [AngularFire-seed](https://github.com/firebase/angularFire-seed)!
+Firereader was built using [angularFire](https://github.com/firebase/angularFire) as a demo app. If you are looking for a working example project to build AngularFire apps, check out [AngularFire-seed](https://github.com/firebase/angularFire-seed)!
 
 ## Contributing
 
