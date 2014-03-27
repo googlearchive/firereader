@@ -3,7 +3,9 @@ angular.module('myApp.config', [])
    .constant('version', '0.1')
 
    // end this with a trailing slash
-   .constant('FIREBASE_URL', 'https://firereader.firebaseio.com/')
+   .constant('FIREBASE_URL', 'https://firereader-dev.firebaseio.com/')
+
+    .constant('loginRedirectPath', '/login')
 
    // max number of feeds to display
    .constant('FB_DEMO_LIMIT', 5)

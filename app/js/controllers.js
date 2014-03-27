@@ -2,10 +2,13 @@
 
 /* Controllers */
 
-angular.module('myApp.controllers', ['firebase', 'feedTheFire'])
+angular.module('myApp.controllers', ['myApp.utils'])
 
-   .controller('LoginCtrl', ['$scope', 'authProviders', '$location', function($scope, authProviders) {
+   .controller('LoginCtrl', ['$scope', 'authProviders', 'authManager', function($scope, authProviders, authManager) {
       $scope.providers = {};
+      $scope.login = authManager.login;
+      $scope.logout = authManager.logout;
+
       angular.forEach(authProviders, function(p) {
          $scope.providers[p.id] = angular.extend({preferred: $scope.auth.provider === p.id}, p);
       });

@@ -1,27 +1,25 @@
 (function(angular) {
    "use strict";
-   var appServices = angular.module('myApp.services', ['myApp.utils']);
+   var appServices = angular.module('myApp.services', ['myApp.utils', 'feedTheFire']);
 
    /**
     * A service that authenticates against Fireabase using simple login
     */
-   appServices.factory('authManager', ['$rootScope', 'fbRef', 'angularFireAuth', 'authScopeUtil', function($rootScope, fbRef, angularFireAuth, authScopeUtil) {
+   appServices.factory('authManager', ['$rootScope', 'fbRef', '$firebaseSimpleLogin', 'authScopeUtil', function($rootScope, fbRef, $firebaseSimpleLogin, authScopeUtil) {
       authScopeUtil($rootScope);
 
-      angularFireAuth.initialize(fbRef(), {
-         scope: $rootScope,
-         name: 'user',
-         path: '/login'
-      });
+       var auth = $firebaseSimpleLogin(fbRef());
 
       // provide some convenience methods to log in and out
       return {
          login: function(providerId) {
-            angularFireAuth.login(providerId, { rememberMe: true, scope: 'email'});
+            console.log('login', providerId);//debug
+            auth.$login(providerId, { rememberMe: true, scope: 'email'});
          },
 
          logout: function() {
-            angularFireAuth.logout();
+            console.log('logout');//debug
+            auth.$logout();
          }
       };
    }]);
@@ -39,12 +37,12 @@
             provider: localStorage.get('authProvider')
          };
 
-         $scope.$on('angularFireAuth:login', _loggedIn);
-         $scope.$on('angularFireAuth:error', function(err) {
+         $scope.$on('$firebaseSimpleLogin:login', _loggedIn);
+         $scope.$on('$firebaseSimpleLogin:error', function(err) {
             $log.error(err);
             _loggedOut();
          });
-         $scope.$on('angularFireAuth:logout', _loggedOut);
+         $scope.$on('$firebaseSimpleLogin:logout', _loggedOut);
 
          function parseName(user) {
             switch(user.provider) {
@@ -158,11 +156,10 @@
    /**
     * Some straightforward scope methods for dealing with feeds and articles; these have no dependencies
     */
-   appServices.factory('feedScopeUtils', ['localStorage', '$timeout', 'angularFire', 'fbRef', function(localStorage, $timeout, angularFire, fbRef) {
+   appServices.factory('feedScopeUtils', ['localStorage', '$timeout', 'syncData', function(localStorage, $timeout, syncData) {
       return function($scope, provider, userId) {
          $scope.noFeeds = true;
          $scope.showRead = false;
-         $scope.loading = true;
 
          //todo snag this from $location?
          $scope.link = $scope.isDemo? 'demo' : 'hearth';
@@ -229,10 +226,21 @@
          var to;
          $scope.startLoading = function() {
             $scope.loading = true;
-            to && clearTimeout(to);
+            to && $timeout.cancel(to);
             to = $timeout(function() {
                $scope.loading = false;
             }, 4000);
+            return to;
+         };
+
+         $scope.stopLoading = function() {
+             to && $timeout.cancel(to);
+             to = null;
+             if( $scope.loading ) {
+                 $timeout(function() {
+                    $scope.loading = false;
+                 });
+             }
          };
 
          $scope.sortField = 'date';
@@ -246,7 +254,9 @@
 
          // 2-way synchronize of the articles this user has marked as read
          $scope.readArticles = {};
-         $scope.isDemo || angularFire(fbRef(['user', provider, userId, 'read'], 250), $scope, 'readArticles');
+         if( !$scope.isDemo ) {
+             syncData(['user', provider, userId, 'read'], 250).$bind($scope, 'readArticles');
+         }
 
          function passesFilter(article) {
             if(_.isEmpty($scope.articleFilter)) {
@@ -274,6 +284,8 @@
                return _.reduce($scope.counts, function(memo, num){ return memo + num; }, 0);
             }
          }
+
+          $scope.startLoading();
       }
    }]);
 
@@ -281,8 +293,8 @@
     * A change listener that updates the feedManager and articleManager, as well as
     * making some minor scope manipulations
     */
-   appServices.factory('feedChangeApplier', ['$log', 'ArticleManager', 'treeDiff', 'fbRef', 'angularFire', '$timeout', '$location',
-      function($log, ArticleManager, treeDiff, fbRef, angularFire, $timeout, $location) {
+   appServices.factory('feedChangeApplier', ['$log', 'ArticleManager', 'treeDiff', 'syncData', '$timeout', '$location',
+      function($log, ArticleManager, treeDiff, syncData, $timeout, $location) {
          return function($scope, feedManager, provider, userId) {
             var articleManager = new ArticleManager(feedManager, $scope);
             $scope.feeds = {};
@@ -309,27 +321,20 @@
                $scope.noFeeds = _.isEmpty($scope.feeds);
             }
 
-            var userRef = fbRef(['user', provider, userId, 'list']);
-            if( userId === 'demo' && provider === 'demo' ) {
-               // read only
-               userRef.once('value', function(ss) {
-                  $timeout(function() {
-                     $scope.feeds = ss.val();
-                     $scope.loading = false;
-                  })
-               });
-            }
-            else {
-               // 2-way synchronize of the list of feeds this user has picked
-               angularFire(userRef, $scope, 'feeds').then(function() {
+           // 2-way synchronize of the list of feeds this user has picked
+           syncData(['user', provider, userId, 'list']).$bind($scope, 'feeds').then(function() {
+              if( userId === 'demo' && provider === 'demo' ) {
+                  $scope.stopLoading();
+              }
+              else {
                   var feed = ($location.search()||{}).feed;
                   if( feed && !($scope.feeds||{})[feed] ) {
                      $location.replace();
                      $location.search(null);
                   }
                   $scope.startLoading();
-               });
-            }
+              }
+           });
          }
       }]);
 
@@ -347,10 +352,7 @@
 
          function incFeed(article) {
             $scope.counts[article.feed]++;
-            if( $scope.loading ) {
-               $scope.loading = false;
-               $scope.$apply();
-            }
+            $scope.stopLoading();
          }
 
          function decFeed(article) {

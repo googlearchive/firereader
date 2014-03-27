@@ -3,7 +3,7 @@
 (function (angular) {
    "use strict";
 
-   var appUtils = angular.module('myApp.utils', []);
+   var appUtils = angular.module('myApp.utils', ['firebase']);
 
    /**
     * A simple utility to create Firebase URLs from a list of parameters

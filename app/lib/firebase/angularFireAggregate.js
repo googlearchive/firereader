@@ -1,7 +1,7 @@
 
 // Read-only collection that monitors multiple paths
 // This is an ALPHA / EXPERIMENTAL concept and probably not suitable for general use
-angular.module('firebase').factory('angularFireAggregate', ['$timeout', '$q', '$log', function($timeout, $q, $log) {
+angular.module('angularFireAggregate', []).factory('angularFireAggregate', ['$timeout', '$q', '$log', function($timeout, $q, $log) {
 
    /**
     * Opts parms (all optional):

@@ -3,7 +3,7 @@
 (function (angular, $) {
    "use strict";
 
-   var ngModule = angular.module('myApp.animate', []);
+   var ngModule = angular.module('myApp.animate', ['ngAnimate']);
 
    ngModule.animation('animate-enter', [function() {
       return {

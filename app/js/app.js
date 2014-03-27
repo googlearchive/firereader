@@ -2,8 +2,17 @@
    'use strict';
 
    var isAuthenticated = false;
-   var dependencyModules = ['ngSanitize', 'ui.bootstrap', 'ui.keypress'];
-   var myAppComponents = ['myApp.utils', 'myApp.animate', 'myApp.config', 'myApp.filters', 'myApp.services', 'myApp.directives', 'myApp.controllers'];
+   var dependencyModules = ['ngSanitize', 'ui.bootstrap', 'ui.keypress', 'firebase.routeSecurity',
+       'firebase.utilities', 'angularFireAggregate', 'ngRoute'];
+   var myAppComponents = [
+       'myApp.utils',
+//       'myApp.animate',
+       'myApp.config',
+       'myApp.filters',
+       'myApp.services',
+       'myApp.directives',
+       'myApp.controllers'
+   ];
 
    // Declare app level module which depends on filters, and services
    angular.module('myApp', dependencyModules.concat(myAppComponents))
@@ -42,10 +51,8 @@
 
       /** LOAD LIST OF FEEDS
        ***************/
-      .run(['$rootScope', 'angularFireCollection', 'fbRef', function($rootScope, angularFireCollection, fbRef) {
-         // use angularFireCollection because this list should be read-only, and it should be filterable
-         // by using | filter command, which doesn't work with key/value iterators
-         $rootScope.feedChoices = angularFireCollection(fbRef('meta'));
+      .run(['$rootScope', 'syncData', function($rootScope, syncData) {
+         $rootScope.feedChoices = syncData('meta');
       }])
 
       /** ROOT SCOPE AND UTILS
@@ -74,6 +81,21 @@
             $rootScope.activeFeed = next.params.feed || false;
             next.scope && (next.scope.activeFeed = next.params.feed||false);
          });
+
+           $.ajax({
+               url      : document.location.protocol + '//ajax.googleapis.com/ajax/services/feed/load?v=1.0&num=10&callback=?&q=' + encodeURIComponent('http://stackoverflow.com/feeds/question/10943544'),
+               dataType : 'json',
+               success  : function (data) {
+                   if (data.responseData.feed && data.responseData.feed.entries) {
+                       $.each(data.responseData.feed.entries, function (i, e) {
+                           console.log("------------------------");
+                           console.log("title      : " + e.title);
+                           console.log("author     : " + e.author);
+                           console.log("description: " + e.description);
+                       });
+                   }
+               }
+           });
       }]);
 
 })();
