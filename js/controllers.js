@@ -2,7 +2,7 @@
 
 /* Controllers */
 
-angular.module('myApp.controllers', ['myApp.utils'])
+angular.module('myApp.controllers', ['myApp.utils', 'fr.FeedManager'])
 
    .controller('LoginCtrl', ['$scope', 'authProviders', 'authManager', function($scope, authProviders, authManager) {
       $scope.providers = {};
@@ -65,7 +65,8 @@ angular.module('myApp.controllers', ['myApp.utils'])
    }])
 
    .controller('HearthCtrl', ['$scope', 'FeedManager', '$location', '$dialog', function($scope, FeedManager, $location, $dialog) {
-      var feedMgr = new FeedManager($scope, $scope.auth.provider, $scope.auth.user);
+      var feedMgr = new FeedManager($scope.auth.provider, $scope.auth.user);
+      $scope.feeds = feedMgr.syncFeeds();
 
       $scope.addFeed = function(feedId) {
          $scope.feeds[feedId] = feedMgr.fromChoice(feedId);
