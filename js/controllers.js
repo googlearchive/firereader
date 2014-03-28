@@ -2,16 +2,12 @@
 
 /* Controllers */
 
-angular.module('myApp.controllers', ['myApp.utils', 'fr.FeedManager'])
+angular.module('myApp.controllers', ['myApp.utils', 'fr.feedManager'])
 
    .controller('LoginCtrl', ['$scope', 'authProviders', 'authManager', function($scope, authProviders, authManager) {
-      $scope.providers = {};
+      $scope.providers = authManager.getProviders();
       $scope.login = authManager.login;
       $scope.logout = authManager.logout;
-
-      angular.forEach(authProviders, function(p) {
-         $scope.providers[p.id] = angular.extend({preferred: $scope.auth.provider === p.id}, p);
-      });
 
       $scope.$watch('auth.provider', setPreferred);
       setPreferred($scope.auth.provider);
@@ -45,7 +41,7 @@ angular.module('myApp.controllers', ['myApp.utils', 'fr.FeedManager'])
 
       function setPreferred(provider) {
          $scope.preferred = provider? angular.extend({}, $scope.providers[provider]) : null;
-         angular.forEach($scope.providers, function(p, k) {p.preferred = (k === provider)});
+         authManager.setPreferred(provider);
       }
    }])
 
@@ -64,12 +60,36 @@ angular.module('myApp.controllers', ['myApp.utils', 'fr.FeedManager'])
       };
    }])
 
-   .controller('HearthCtrl', ['$scope', 'FeedManager', '$location', '$dialog', function($scope, FeedManager, $location, $dialog) {
-      var feedMgr = new FeedManager($scope.auth.provider, $scope.auth.user);
-      $scope.feeds = feedMgr.syncFeeds();
+   .controller('HearthCtrl', ['$scope', 'feedManager', '$location', '$dialog', function($scope, feedManager, $location, $dialog) {
+      var feedMgr = $scope.feedManager = new feedManager($scope.auth.provider, $scope.auth.user);
+      feedMgr.syncFeeds($scope, 'feeds');
+      $scope.feedChoices = feedMgr.getChoices();
+
+      //todo
+      //todo
+      //todo
+      //todo
+      // 2-way synchronize of the list of feeds this user has picked
+      /*syncData(['user', provider, userId, 'feeds']).$bind($scope, 'feeds').then(function () {
+         if (userId === 'demo' && provider === 'demo') {
+            $scope.stopLoading();
+         }
+         else {
+            var feed = ($location.search() || {}).feed;
+            if (feed && !($scope.feeds || {})[feed]) {
+               $location.replace();
+               $location.search(null);
+            }
+            $scope.startLoading();
+         }
+      });*/
+      //todo
+      //todo
+      //todo
+      //todo
 
       $scope.addFeed = function(feedId) {
-         $scope.feeds[feedId] = feedMgr.fromChoice(feedId);
+         feedMgr.addFeed(feedId);
          $scope.startLoading();
          $location.search('feed', feedId);
       };
@@ -98,14 +118,12 @@ angular.module('myApp.controllers', ['myApp.utils', 'fr.FeedManager'])
       };
    }])
 
-   .controller('DemoCtrl', ['$scope', 'FeedManager', function($scope, FeedManager) {
+   .controller('DemoCtrl', ['$scope', 'feedManager', 'disposeOnLogout', function($scope, feedManager, disposeOnLogout) {
       $scope.isDemo = true;
-      new FeedManager($scope, 'demo', 'demo');
+      feedManager('demo', 'demo', disposeOnLogout);
    }])
 
    .controller('ArticleCtrl', ['$scope', function($scope) {
-      var $log = $scope.$log;
-
       var ABSOLUTE_WIDTH = 850;
 
       $scope.opts = {
@@ -126,6 +144,7 @@ angular.module('myApp.controllers', ['myApp.utils', 'fr.FeedManager'])
             $scope.markArticleRead(article);
          }
       };
+
       $scope.close = function() {
          $scope.isOpen = false;
       };
@@ -134,7 +153,6 @@ angular.module('myApp.controllers', ['myApp.utils', 'fr.FeedManager'])
          $scope.article = null;
          $scope.isOpen = false;
       };
-
 
       // resize height of element dynamically
       var resize = _.debounce(function() {
@@ -185,9 +203,8 @@ angular.module('myApp.controllers', ['myApp.utils', 'fr.FeedManager'])
       };
 
       $scope.add = function() {
-         var auth = $scope.auth||{};
-         $log.debug('addFeed', $scope.title, $scope.url);
-         $scope.feedManager.addFeed($scope.title, $scope.url);
+         $log.debug('adding custom feed', $scope.title, $scope.url);
+         $scope.feedManager.addFeed({url: $scope.url, title: $scope.title});
          $scope.close();
          $scope.title = null;
          $scope.url = null;

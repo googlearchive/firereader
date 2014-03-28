@@ -3,7 +3,7 @@
 
    var isAuthenticated = false;
    var dependencyModules = ['ngSanitize', 'ui.bootstrap', 'ui.keypress', 'firebase.routeSecurity',
-       'firebase.utilities', 'angularFireAggregate', 'ngRoute'];
+       'firebase.utils', 'angularFireAggregate', 'ngRoute'];
    var myAppComponents = [
        'myApp.utils',
 //       'myApp.animate',
@@ -45,14 +45,7 @@
       /** AUTHENTICATION
        ***************/
       .run(['$rootScope', 'authManager', function($rootScope, authManager) {
-         $rootScope.login = authManager.login;
-         $rootScope.logout = authManager.logout;
-      }])
-
-      /** LOAD LIST OF FEEDS
-       ***************/
-      .run(['$rootScope', 'syncData', function($rootScope, syncData) {
-         $rootScope.feedChoices = syncData('meta');
+         authManager.addToScope($rootScope);
       }])
 
       /** ROOT SCOPE AND UTILS
@@ -82,20 +75,7 @@
             next.scope && (next.scope.activeFeed = next.params.feed||false);
          });
 
-           $.ajax({
-               url      : document.location.protocol + '//ajax.googleapis.com/ajax/services/feed/load?v=1.0&num=10&callback=?&q=' + encodeURIComponent('http://stackoverflow.com/feeds/question/10943544'),
-               dataType : 'json',
-               success  : function (data) {
-                   if (data.responseData.feed && data.responseData.feed.entries) {
-                       $.each(data.responseData.feed.entries, function (i, e) {
-                           console.log("------------------------");
-                           console.log("title      : " + e.title);
-                           console.log("author     : " + e.author);
-                           console.log("description: " + e.description);
-                       });
-                   }
-               }
-           });
+
       }]);
 
 })();
