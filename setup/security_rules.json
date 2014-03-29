@@ -2,28 +2,30 @@
    "rules": {
       "articles_meta": {
          ".read": true,
-         ".write": "!data.exists()",
-         ".validate": "newData.hasChildren(['dataUrl', 'last', 'users']) && (!newData.hasChild('id') || root.child('meta/'+newData.child('id').val()+'/url').val() === newData.child('dataUrl').val())",
-         "dataUrl": {
-            ".validate": "newData.isString()"
-         },
-         "users": {
-            ".write": true,
-            ".validate": "newData.isNumber()"
-         },
-         "last": {
-            ".write": true,
-            ".validate": "newData.isNumber() && (!data.exists() || newData.val() > data.val())"
-         },
-         "id": {
-            ".validate": "newData.isString() && root.child('meta/'+newData.val()).exists()"
-         },
-         "error": {
-            ".write": true,
-            ".validate": "newData.isString()"
-         },
-         "$other": {
-            ".validate": false
+         "$feedUrl": {
+            ".write": "!data.exists()",
+            ".validate": "newData.hasChildren(['dataUrl', 'last', 'users']) && (!newData.hasChild('id') || root.child('meta/'+newData.child('id').val()+'/url').val() === newData.child('dataUrl').val())",
+            "dataUrl": {
+               ".validate": "newData.isString()"
+            },
+            "users": {
+               ".write": "data.parent().exists()",
+               ".validate": "newData.isNumber()"
+            },
+            "last": {
+               ".write": true,
+               ".validate": "newData.isNumber() && (!data.exists() || newData.val() >= data.val())"
+            },
+            "id": {
+               ".validate": "newData.isString() && root.child('meta/'+newData.val()).exists()"
+            },
+            "error": {
+               ".write": "data.parent().exists()",
+               ".validate": "newData.isString()"
+            },
+            "$other": {
+               ".validate": false
+            }
          }
       },
 
@@ -31,15 +33,16 @@
          ".read": true,
          "$feedUrl": {
             "index": {
-               "$articleUrl": {
-                  ".write": "!data.exists()",
+               // $indexId is an escaped url matching entries/$articleId/indexId
+               "$indexId": {
+                  ".write": "!data.exists() && newData.exists()",
                   ".validate": "newData.isString() && root.child('articles/'+$feedUrl+'/entries/'+newData.val()).exists()"
                }
             },
             "entries": {
-               "$articleUrl": {
-                  ".write": "newData.exists() && root.child('article_meta/'+$feedUrl).exists()",
-                  ".validate": "newData.hasChildren(['title', 'summary', 'link', 'description'])",
+               "$articleId": {
+                  ".write": "!data.exists() && newData.exists() && root.child('articles_meta/'+$feedUrl).exists()",
+                  ".validate": "newData.hasChildren(['title', 'summary', 'link', 'description', 'indexId'])",
                   "title": {
                      ".validate": "newData.isString() && newData.val().length < 1000"
                   },
@@ -48,6 +51,9 @@
                   },
                   "link": {
                      ".validate": "newData.isString() && newData.val().length < 5000"
+                  },
+                  "indexId": {
+                     ".validate": "newData.isString() && newData.val().length < 5000 && !root.child('articles/'+$feedUrl+'/index/'+newData.val()).exists()"
                   },
                   "description": {
                      ".validate": "newData.isString() && newData.val().length < 600000"

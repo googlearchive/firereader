@@ -92,6 +92,7 @@ angular.module('myApp.controllers', ['myApp.utils', 'fr.feedManager'])
                   $event.stopPropagation();
                }
                feedMgr.removeFeed(feedId);
+               //todo remove from $user/read as well
             }
          });
       };

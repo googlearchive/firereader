@@ -14,6 +14,11 @@ angular.module('myApp.config', [])
    // how often we check for new feeds; most sites will not allow you to do this more than every 60 mins
    .constant('CHECK_INTERVAL', 30*60*1000 /* 30 mins */ ) //todo investigate pubsubhubbub
 
+   // number of RSS articles we fetch from each URL when an update takes place
+   // larger numbers will make performance slow, since we can only see the latest 25
+   // there's no reason to get far beyond that here
+   .constant('NUMBER_TO_FETCH', 2)
+
    .constant('authProviders', [
       { id: 'persona',  name: 'Persona',  icon: 'icon-user'     },
       { id: 'twitter',  name: 'Twitter',  icon: 'icon-twitter'  },
