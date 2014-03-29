@@ -1,0 +1,125 @@
+{
+   "rules": {
+      "articles_meta": {
+         ".read": true,
+         ".write": "!data.exists()",
+         ".validate": "newData.hasChildren(['dataUrl', 'last', 'users']) && (!newData.hasChild('id') || root.child('meta/'+newData.child('id').val()+'/url').val() === newData.child('dataUrl').val())",
+         "dataUrl": {
+            ".validate": "newData.isString()"
+         },
+         "users": {
+            ".write": true,
+            ".validate": "newData.isNumber()"
+         },
+         "last": {
+            ".write": true,
+            ".validate": "newData.isNumber() && (!data.exists() || newData.val() > data.val())"
+         },
+         "id": {
+            ".validate": "newData.isString() && root.child('meta/'+newData.val()).exists()"
+         },
+         "error": {
+            ".write": true,
+            ".validate": "newData.isString()"
+         },
+         "$other": {
+            ".validate": false
+         }
+      },
+
+      "articles": {
+         ".read": true,
+         "$feedUrl": {
+            "index": {
+               "$articleUrl": {
+                  ".write": "!data.exists()",
+                  ".validate": "newData.isString() && root.child('articles/'+$feedUrl+'/entries/'+newData.val()).exists()"
+               }
+            },
+            "entries": {
+               "$articleUrl": {
+                  ".write": "newData.exists() && root.child('article_meta/'+$feedUrl).exists()",
+                  ".validate": "newData.hasChildren(['title', 'summary', 'link', 'description'])",
+                  "title": {
+                     ".validate": "newData.isString() && newData.val().length < 1000"
+                  },
+                  "summary": {
+                     ".validate": "newData.isString() && newData.val().length < 10000"
+                  },
+                  "link": {
+                     ".validate": "newData.isString() && newData.val().length < 5000"
+                  },
+                  "description": {
+                     ".validate": "newData.isString() && newData.val().length < 600000"
+                  },
+                  "date": {
+                     ".validate": "newData.isNumber()"
+                  },
+                  "author": {
+                     ".validate": "newData.isString() && newData.val().length < 1000"
+                  },
+                  "$other": {
+                     ".validate": false
+                  }
+               }
+            }
+         }
+      },
+
+      "meta": {
+         // list of standard feeds are read only
+         ".read": true,
+         ".write": false
+      },
+
+      "user": {
+         "demo": {
+            "demo": {
+               ".read": true
+            }
+         },
+         "$provider": {
+            "$user_id": {
+               ".read": "auth.id === $user_id && auth.provider === $provider",
+               ".write": "auth.id === $user_id && auth.provider === $provider",
+               "feeds": {
+                  "$feed_id": {
+                     ".validate": "newData.hasChildren(['title', 'id'])", // required fields
+                     "id": {
+                        ".validate": "newData.isString()"
+                     },
+                     "title": {
+                        ".validate": "newData.isString()"
+                     },
+                     "isCustom": {
+                        ".validate": "newData.isBoolean()"
+                     },
+                     "url": {
+                        ".validate": "newData.isString()"
+                     },
+                     "$other": {
+                        ".validate": false // no other children allowed
+                     }
+                  }
+               },
+               "read": {
+                  "$feed_id": {
+                     ".validate": "data.parent().parent().child('list').child($feed_id).exists()",
+                     "$article_id": {
+                        ".validate": "newData.isNumber()"
+                     }
+                  }
+               },
+               "status": {
+                  "$feed_id": {
+                     ".validate": "newData.isString()"
+                  }
+               },
+               "$other": {
+                  ".validate": false // no other children allowed
+               }
+            }
+         }
+      }
+   }
+}

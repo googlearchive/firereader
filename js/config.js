@@ -11,6 +11,8 @@ angular.module('myApp.config', [])
    .constant('FB_DEMO_LIMIT', 5)
    .constant('FB_LIVE_LIMIT', 25)
 
+   // how often we check for new feeds; most sites will not allow you to do this more than every 60 mins
+   .constant('CHECK_INTERVAL', 30*60*1000 /* 30 mins */ ) //todo investigate pubsubhubbub
 
    .constant('authProviders', [
       { id: 'persona',  name: 'Persona',  icon: 'icon-user'     },

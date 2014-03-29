@@ -3,35 +3,7 @@
 (function (angular) {
    "use strict";
 
-   var appUtils = angular.module('myApp.utils', ['firebase']);
-
-   /**
-    * A simple utility to create Firebase URLs from a list of parameters
-    * by joining them to the base URL for this instance (defined in FIREBASE_URL above)
-    */
-   appUtils.factory('fbUrl', ['FIREBASE_URL', function(URL) {
-      /**
-       * Any number of arguments may be passed into this function. They can be strings or arrays
-       */
-      return function() {
-         var args = _.flatten(_.toArray(arguments));
-         return URL + args.join('/');
-      }
-   }]);
-
-   /**
-    * Just a wrapper to create a Firebase reference based on a url and possible limit or startAt/endAt parms
-    */
-   appUtils.factory('fbRef', ['fbUrl', 'Firebase', function(fbUrl, Firebase) {
-      // url can be an array or string
-      return function(url, limit) {
-         var ref = new Firebase(fbUrl(url));
-         if( limit ){
-            ref = ref.limit(limit);
-         }
-         return ref;
-      }
-   }]);
+   var appUtils = angular.module('myApp.utils', ['firebase', 'firebase.utils']);
 
    /**
     * A utility to store variables in local storage, with a fallback to cookies if localStorage isn't supported.
@@ -83,7 +55,6 @@
           * @returns {localStorage}
           */
          remove: function(key) {
-//               $log.debug('localStorage.remove', key);
             if( typeof(localStorage) === 'undefined' ) {
                cookie(key, null);
             }
@@ -103,142 +74,28 @@
       return loc;
    }]);
 
-   /**
-    * A diff utility that compares arrays and returns a list of added, removed, and updated items
-    */
-   appUtils.factory('listDiff', [function() {
-      function _map(list, hashFn) {
-         var out = {};
-         _.each(list, function(x) {
-            out[ hashFn(x) ] = x;
-         });
-         return out;
+   appUtils.factory('articlesUrl', ['firebaseRef', 'FB_DEMO_LIMIT', 'FB_LIVE_LIMIT', 'encodeFirebaseKey', function(firebaseRef, FB_DEMO_LIMIT, FB_LIVE_LIMIT, encodeFirebaseKey) {
+      return function(feedUrl, isDemo) {
+         var limit = isDemo? FB_DEMO_LIMIT : FB_LIVE_LIMIT;
+         return firebaseRef('articles', encodeFirebaseKey(feedUrl), 'entries').endAt().limit(limit);
       }
-
-      function diff(old, curr, hashFn) {
-         var out = {
-            count: 0,
-            added: [],
-            removed: []
-         };
-
-         if( !old && curr ) {
-            out.added = curr.slice(0);
-         }
-         else if( !curr && old ) {
-            out.removed = old.slice(0);
-         }
-         else if( hashFn ) {
-            //todo this could be more efficient (it's possibly worse than o(n) right now)
-            var oldMap = _map(old, hashFn), newMap = _map(curr, hashFn);
-            out.removed = _.filter(oldMap, function(x,k) { return !_.has(newMap, k); });
-            out.added = _.filter(newMap, function(x,k) { return !_.has(oldMap, k); });
-         }
-         else {
-            // these don't work for angularFire because it returns different objects in each set and === is used to compare
-            out.removed = _.difference(old, curr);
-            out.added = _.difference(curr, old);
-         }
-         out.count = out.removed.length + out.added.length;
-         return out;
-      }
-
-      return {
-         diff: diff,
-         watch: function($scope, varName, callback, hashFn) {
-            //todo add a dispose method
-            return $scope.$watch(varName, function(newVal, oldVal) {
-               var out = diff(oldVal, newVal, hashFn);
-//                  console.log('listDiff', out);
-               if( out.count ) {
-                  callback(out);
-               }
-            }, true);
-         }
-      };
    }]);
 
-   /**
-    * A diff utility that compares objects (only one level deep) and returns a list
-    * of added, removed, and updated elements.
-    */
-   appUtils.factory('treeDiff', function() {
-      return function($scope, variableName) {
-         var orig = copy($scope[variableName]);
-         var listeners = [];
-
-         function copy(orig) {
-            var cloned = {};
-            orig && _.each(orig, function(v,k) {
-               cloned[k] = _.isArray(v)? v.slice(0) : (_.isObject(v)? _.clone(v) : v);
-            });
-            return cloned;
-         }
-
-
-         function update(newVal) {
-            newVal || (newVal = {});
-            var changes = diff(orig, newVal);
-            if( changes.count ) {
-               notify(changes, newVal, orig);
-               orig = copy(newVal);
-            }
-         }
-
-         function diff(orig, updated) {
-            var newKeys = _.keys(updated), oldKeys = _.keys(orig);
-            var removed = _.difference(oldKeys, newKeys);
-            var added = _.difference(newKeys, oldKeys);
-            var union = _.union(newKeys, oldKeys);
-
-            var changes = {
-               count: removed.length+added.length,
-               added: added,
-               removed: removed,
-               updated: []
-            };
-
-            _.each(union, function(k) {
-               if( !_.isEqual(orig[k], updated[k]) ) {
-                  changes.updated.push(k);
-                  changes.count++;
-               }
-            });
-
-            return changes;
-         }
-
-         function notify(changes, newVal, orig) {
-            _.each(listeners, function(fn) { fn(changes, newVal, orig); });
-         }
-
-         $scope.$watch(variableName, update, true);
-
-         return {
-            orig: function() {
-               return orig;
-            },
-            diff: diff,
-            watch: function(callback) {
-               listeners.push(callback);
-            }
-         }
+   appUtils.factory('articlesMetaUrl', ['firebaseRef', 'encodeFirebaseKey', function(firebaseRef, encodeFirebaseKey) {
+      return function(feedUrl) {
+         return firebaseRef('articles_meta', encodeFirebaseKey(feedUrl));
       }
-   });
+   }]);
 
-   appUtils.factory('feedUrl', ['FIREBASE_URL', 'FB_DEMO_LIMIT', 'FB_LIVE_LIMIT', 'Firebase', '$rootScope', function(URL, DEMO_LIMIT, LIVE_LIMIT, Firebase, $rootScope) {
-      return function(opts, isDemo) {
-         var path, limit = isDemo? DEMO_LIMIT : LIVE_LIMIT;
-         opts = _.extend({id: null, isCustom: false}, opts);
-         var feedId = opts.id || new Firebase(URL).push().name();
-         var auth = $rootScope.auth || {};
-         if( opts.isCustom ) {
-            path = URL + ['user', auth.provider, auth.user, 'feeds', feedId, 'articles'].join('/');
-         }
-         else {
-            path = 'https://feeds.firebaseio.com/'+feedId+'/articles';
-         }
-         return [new Firebase(path).limit(limit), feedId];
+   appUtils.factory('articlesIndexUrl', ['firebaseRef', 'encodeFirebaseKey', function(firebaseRef, encodeFirebaseKey) {
+      return function(feedUrl) {
+         return firebaseRef('articles', encodeFirebaseKey(feedUrl), 'index');
+      }
+   }]);
+
+   appUtils.factory('feedUrl', ['firebaseRef', function(firebaseRef) {
+      return function(feedId) {
+         return firebaseRef('feeds', feedId);
       }
    }]);
 

@@ -1,12 +1,12 @@
 (function(angular) {
    "use strict";
-   var appServices = angular.module('myApp.services', ['myApp.utils', 'feedTheFire']);
+   var appServices = angular.module('myApp.services', ['myApp.utils', 'firebase', 'firebase.utils']);
 
    /**
     * A service that authenticates against Fireabase using simple login
     */
-   appServices.factory('authManager', ['fbRef', '$firebaseSimpleLogin', 'authScopeUtil', 'authProviders', '$rootScope', function(fbRef, $firebaseSimpleLogin, authScopeUtil, authProviders, $rootScope) {
-      var auth = $firebaseSimpleLogin(fbRef());
+   appServices.factory('authManager', ['firebaseRef', '$firebaseSimpleLogin', 'authScopeUtil', 'authProviders', '$rootScope', function(firebaseRef, $firebaseSimpleLogin, authScopeUtil, authProviders, $rootScope) {
+      var auth = $firebaseSimpleLogin(firebaseRef());
       var providers = {};
       angular.forEach(authProviders, function(p) {
          providers[p.id] = angular.extend({preferred: false}, p);
@@ -98,10 +98,22 @@
    /**
     * Some straightforward scope methods for dealing with feeds and articles; these have no dependencies
     */
-   appServices.factory('feedScopeUtils', ['localStorage', '$timeout', 'syncData', function (localStorage, $timeout, syncData) {
-      return function ($scope, provider, userId) {
-         $scope.noFeeds = true;
+   appServices.factory('feedScopeUtils', ['localStorage', '$timeout', '$location', function (localStorage, $timeout, $location) {
+      return function ($scope, feedMgr) {
          $scope.showRead = false;
+         $scope.feedName = feedMgr.feedName.bind(feedMgr);
+         $scope.feeds = feedMgr.getFeeds();
+         $scope.feeds.$on('change', function() {
+            // if a feed is currently selected and that feed does not exist anymore
+            // then clear the selection
+            var feed = ($location.search() || {}).feed;
+            if (feed && !($scope.feeds || {})[feed]) {
+               $location.replace();
+               $location.search(null);
+            }
+         });
+
+         $scope.feedChoices = feedMgr.getChoices();
 
          //todo snag this from $location?
          $scope.link = $scope.isDemo ? 'demo' : 'hearth';
@@ -206,12 +218,6 @@
 
          $scope.sortDesc = !!localStorage.get('sortDesc');
 
-         // 2-way synchronize of the articles this user has marked as read
-         $scope.readArticles = {};
-         if (!$scope.isDemo) {
-            syncData(['user', provider, userId, 'read'], 250).$bind($scope, 'readArticles');
-         }
-
          function passesFilter(article) {
             if (_.isEmpty($scope.articleFilter)) {
                return true;
@@ -242,6 +248,9 @@
          }
 
          $scope.startLoading();
+         $scope.feeds.$on('loaded', function() {
+            $scope.stopLoading();
+         });
       }
    }]);
 

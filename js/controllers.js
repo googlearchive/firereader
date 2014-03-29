@@ -60,33 +60,12 @@ angular.module('myApp.controllers', ['myApp.utils', 'fr.feedManager'])
       };
    }])
 
-   .controller('HearthCtrl', ['$scope', 'feedManager', '$location', '$dialog', function($scope, feedManager, $location, $dialog) {
-      var feedMgr = $scope.feedManager = new feedManager($scope.auth.provider, $scope.auth.user);
-      feedMgr.syncFeeds($scope, 'feeds');
-      $scope.feedChoices = feedMgr.getChoices();
+   .controller('HearthCtrl', ['$scope', 'feedManager', '$location', '$dialog', 'disposeOnLogout', 'feedScopeUtils', 'syncData', function($scope, feedManager, $location, $dialog, disposeOnLogout, feedScopeUtils, syncData) {
+      var feedMgr = $scope.feedManager = new feedManager($scope.auth.provider, $scope.auth.user, disposeOnLogout);
+      feedScopeUtils($scope, feedMgr);
 
-      //todo
-      //todo
-      //todo
-      //todo
-      // 2-way synchronize of the list of feeds this user has picked
-      /*syncData(['user', provider, userId, 'feeds']).$bind($scope, 'feeds').then(function () {
-         if (userId === 'demo' && provider === 'demo') {
-            $scope.stopLoading();
-         }
-         else {
-            var feed = ($location.search() || {}).feed;
-            if (feed && !($scope.feeds || {})[feed]) {
-               $location.replace();
-               $location.search(null);
-            }
-            $scope.startLoading();
-         }
-      });*/
-      //todo
-      //todo
-      //todo
-      //todo
+      // 2-way synchronize of the articles this user has marked as read
+      syncData(['user', provider, userId, 'read'], 250).$bind($scope, 'readArticles');
 
       $scope.addFeed = function(feedId) {
          feedMgr.addFeed(feedId);
@@ -118,9 +97,11 @@ angular.module('myApp.controllers', ['myApp.utils', 'fr.feedManager'])
       };
    }])
 
-   .controller('DemoCtrl', ['$scope', 'feedManager', 'disposeOnLogout', function($scope, feedManager, disposeOnLogout) {
+   .controller('DemoCtrl', ['$scope', 'feedManager', 'feedScopeUtils', function($scope, feedManager, feedScopeUtils) {
       $scope.isDemo = true;
-      feedManager('demo', 'demo', disposeOnLogout);
+      $scope.readArticles = {};
+      var feedMgr = $scope.feedManager = new feedManager('demo', 'demo');
+      feedScopeUtils($scope, feedMgr);
    }])
 
    .controller('ArticleCtrl', ['$scope', function($scope) {
