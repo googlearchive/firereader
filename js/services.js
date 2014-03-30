@@ -163,7 +163,7 @@
                $event.stopPropagation();
             }
             var f = article.$feed;
-            if (!_.has($scope.readArticles, article.$feed)) {
+            if (!_.has($scope.readArticles, f)) {
                $scope.readArticles[f] = {};
             }
             $scope.readArticles[f][article.$id] = Date.now();
@@ -235,7 +235,7 @@
          }
 
          function notRead(article) {
-            return $scope.showRead || !_.has($scope.readArticles, article.$feed) || !_.has($scope.readArticles[article.$feed], article.$id);
+            return $scope.showRead || !$scope.readArticles || !_.has($scope.readArticles, article.$feed) || !_.has($scope.readArticles[article.$feed], article.$id);
          }
 
          function activeFeed(article) {

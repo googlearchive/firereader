@@ -100,11 +100,10 @@
    }]);
 
    appUtils.factory('readUrl', ['FIREBASE_URL', 'Firebase', '$rootScope', function(URL, Firebase, $rootScope) {
-      return function(opts, isDemo) {
+      return function(feedId, isDemo) {
          if( isDemo ) { return null; }
-         var feedId = opts.id;
          var path = URL + ['user', $rootScope.auth.provider, $rootScope.auth.user, 'read', feedId].join('/');
-         return new Firebase(path).limit(250);
+         return new Firebase(path).endAt().limit(250);
       }
    }]);
 

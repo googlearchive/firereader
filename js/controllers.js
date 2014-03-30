@@ -63,7 +63,7 @@ angular.module('myApp.controllers', ['myApp.utils', 'fr.feedManager'])
       feedScopeUtils($scope, feedMgr);
 
       // 2-way synchronize of the articles this user has marked as read
-      syncData(['user', pid, uid, 'read'], 250).$bind($scope, 'readArticles');
+      $scope.readArticles = syncData(['user', pid, uid, 'read'], 250);
 
       $scope.addFeed = function(feedId) {
          feedMgr.addFeed(feedId);
