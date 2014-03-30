@@ -5,39 +5,17 @@
 
    var ngModule = angular.module('myApp.animate', ['ngAnimate']);
 
-   ngModule.animation('animate-enter', [function() {
+   ngModule.animation('.animate-articles', function() {
       return {
-         setup : function(element) {
-            // hide element because there is a delay before animations run on add
-            // and this prevents them from appearing then disappearing
-            element.css('opacity', 0);
-         },
-         start : animateMove
-      }
-   }]);
+         enter: animateMove,
+         leave: opacityTo,
+         move: animateMove
+      };
+   });
 
-   ngModule.animation('animate-leave', [function() {
-      return {
-         setup : function(element) {
-            // we just do an opacity change on leave
-            return 0;
-         },
-         start : opacityTo
-      }
-   }]);
-
-   ngModule.animation('animate-move', [function() {
-      return {
-         setup : function(element) {
-            return { sop: 1 };
-         },
-         start : animateMove
-      }
-   }]);
-
-   function opacityTo(element, done, amt) {
-      element.animate({opacity: amt}, {
-         duration: 500,
+   function opacityTo(element, done) {
+      element.animate({opacity: 0}, {
+         duration: 250,
          complete: done
       });
    }

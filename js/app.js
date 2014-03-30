@@ -6,7 +6,7 @@
        'firebase.utils', 'angularFireAggregate', 'ngRoute'];
    var myAppComponents = [
        'myApp.utils',
-//       'myApp.animate',
+       'myApp.animate',
        'myApp.config',
        'myApp.filters',
        'myApp.services',
@@ -74,8 +74,6 @@
             $rootScope.activeFeed = next.params.feed || false;
             next.scope && (next.scope.activeFeed = next.params.feed||false);
          });
-
-
       }]);
 
 })();

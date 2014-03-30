@@ -4,11 +4,7 @@
 
 angular.module('myApp.controllers', ['myApp.utils', 'fr.feedManager'])
 
-   .controller('LoginCtrl', ['$scope', 'authProviders', 'authManager', function($scope, authProviders, authManager) {
-      $scope.providers = authManager.getProviders();
-      $scope.login = authManager.login;
-      $scope.logout = authManager.logout;
-
+   .controller('LoginCtrl', ['$scope', 'authManager', function($scope, authManager) {
       $scope.$watch('auth.provider', setPreferred);
       setPreferred($scope.auth.provider);
 
@@ -61,11 +57,13 @@ angular.module('myApp.controllers', ['myApp.utils', 'fr.feedManager'])
    }])
 
    .controller('HearthCtrl', ['$scope', 'feedManager', '$location', '$dialog', 'disposeOnLogout', 'feedScopeUtils', 'syncData', function($scope, feedManager, $location, $dialog, disposeOnLogout, feedScopeUtils, syncData) {
-      var feedMgr = $scope.feedManager = new feedManager($scope.auth.provider, $scope.auth.user, disposeOnLogout);
+      var pid = $scope.auth.provider;
+      var uid = $scope.auth.user;
+      var feedMgr = $scope.feedManager = new feedManager(pid, uid, disposeOnLogout);
       feedScopeUtils($scope, feedMgr);
 
       // 2-way synchronize of the articles this user has marked as read
-      syncData(['user', provider, userId, 'read'], 250).$bind($scope, 'readArticles');
+      syncData(['user', pid, uid, 'read'], 250).$bind($scope, 'readArticles');
 
       $scope.addFeed = function(feedId) {
          feedMgr.addFeed(feedId);

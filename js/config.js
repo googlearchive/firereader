@@ -17,7 +17,7 @@ angular.module('myApp.config', [])
    // number of RSS articles we fetch from each URL when an update takes place
    // larger numbers will make performance slow, since we can only see the latest 25
    // there's no reason to get far beyond that here
-   .constant('NUMBER_TO_FETCH', 2)
+   .constant('NUMBER_TO_FETCH', 25)
 
    .constant('authProviders', [
       { id: 'persona',  name: 'Persona',  icon: 'icon-user'     },

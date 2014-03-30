@@ -27,12 +27,12 @@
                     </aside>
                     <a href="#{{link}}"><i class="icon-bullseye"></i><i class="icon-circle"></i> All {{isDemo? 'Demo ' : ''}}Feeds</a>
                 </li>
-                <li ng-repeat="feed in feeds | orderBy:title" ng-class="{active:isActive(feed.id)}">
+                <li ng-repeat="(feedId, feed) in feeds | orderBy:title" ng-class="{active:isActive(feedId)}">
                     <aside>
-                        <a ng-click="markFeedRead(feed.id, $event)" ng-show="counts[feed.id] > 0" title="Mark articles for this feed as read"><i class="icon-ok"></i></a>
-                        <a ng-click="removeFeed(feed.id, $event)" title="Remove this feed forever"><i class="icon-remove-sign"></i></a>
+                        <a ng-click="markFeedRead(feedId, $event)" ng-show="counts[feedId] > 0" title="Mark articles for this feed as read"><i class="icon-ok"></i></a>
+                        <a ng-click="removeFeed(feedId, $event)" title="Remove this feed forever"><i class="icon-remove-sign"></i></a>
                     </aside>
-                    <a href="#{{link}}?feed={{feed.id}}" title="{{feed.title}}"><i class="icon-circle-blank"></i><i class="icon-circle"></i> {{feed.title}}<span> ({{counts[feed.id]||0}})</span></a>
+                    <a href="#{{link}}?feed={{feedId}}" title="{{feed.title}}"><i class="icon-circle-blank"></i><i class="icon-circle"></i> {{feed.title}}<span> ({{counts[feedId]||0}})</span></a>
                 </li>
             </ul>
 
@@ -73,7 +73,7 @@
                 <h3 class="done">You read everything<i class="icon-smile"></i></h3>
 
                 <!-- the articles -->
-                <article ng-animate="'animate'" ng-repeat="article in articles | orderBy:orderMethod | filter:filterMethod" ng-click="openArticle(article)" id="{{article.$id}}">
+                <article class="animate-articles" ng-repeat="article in articles | orderBy:orderMethod | filter:filterMethod" ng-click="openArticle(article)" id="{{article.$id}}">
                     <h2 title="{{article.title}}">{{article.title}}</h2>
                     <div ng-bind-html="article.summary"></div>
                     <p>&nbsp;</p>

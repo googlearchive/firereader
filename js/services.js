@@ -13,7 +13,7 @@
       });
 
       // provide some convenience wrappers on $firebaseSimpleLogin so it's easy to extend behavior and isolate upgrades
-      return {
+      var inst = {
          login: function(providerId) {
             auth.$login(providerId, { rememberMe: true, scope: 'email'});
          },
@@ -24,17 +24,22 @@
          },
 
          getProviders: function() {
-            return _.extend({}, providers);
+            return providers;
          },
 
-         setPreferred: function() {
-            angular.forEach(providers, function(p, k) {p.preferred = (k === provider)});
+         setPreferred: function(newProvider) {
+            angular.forEach(providers, function(p, k) {p.preferred = (k === newProvider)});
          },
 
          addToScope: function($scope) {
             authScopeUtil($scope);
+            $scope.login = inst.login;
+            $scope.logout = inst.logout;
+            $scope.providers = providers;
          }
       };
+
+      return inst;
    }]);
 
    /**
@@ -103,6 +108,8 @@
          $scope.showRead = false;
          $scope.feedName = feedMgr.feedName.bind(feedMgr);
          $scope.feeds = feedMgr.getFeeds();
+         $scope.articles = feedMgr.getArticles();
+         $scope.counts = feedMgr.articleManager.counts;
          $scope.feeds.$on('change', function() {
             // if a feed is currently selected and that feed does not exist anymore
             // then clear the selection
@@ -112,7 +119,6 @@
                $location.search(null);
             }
          });
-
          $scope.feedChoices = feedMgr.getChoices();
 
          //todo snag this from $location?
@@ -156,8 +162,8 @@
                $event.preventDefault();
                $event.stopPropagation();
             }
-            var f = article.feed;
-            if (!_.has($scope.readArticles, article.feed)) {
+            var f = article.$feed;
+            if (!_.has($scope.readArticles, article.$feed)) {
                $scope.readArticles[f] = {};
             }
             $scope.readArticles[f][article.$id] = Date.now();
@@ -169,7 +175,7 @@
                $event.stopPropagation();
             }
             angular.forEach($scope.articles, function (article) {
-               if (article.feed === feedId) {
+               if (article.$feed === feedId) {
                   $scope.markArticleRead(article);
                }
             });
@@ -181,7 +187,7 @@
                $event.stopPropagation();
             }
             angular.forEach($scope.feeds, function (feed) {
-               $scope.markFeedRead(feed.id, $event);
+               $scope.markFeedRead(feed.$id, $event);
             });
          };
 
@@ -229,11 +235,11 @@
          }
 
          function notRead(article) {
-            return $scope.showRead || !_.has($scope.readArticles, article.feed) || !_.has($scope.readArticles[article.feed], article.$id);
+            return $scope.showRead || !_.has($scope.readArticles, article.$feed) || !_.has($scope.readArticles[article.$feed], article.$id);
          }
 
          function activeFeed(article) {
-            return !$scope.activeFeed || $scope.activeFeed === article.feed;
+            return !$scope.activeFeed || $scope.activeFeed === article.$feed;
          }
 
          function countActiveArticles() {
