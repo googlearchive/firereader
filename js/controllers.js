@@ -66,9 +66,11 @@ angular.module('myApp.controllers', ['myApp.utils', 'fr.feedManager'])
       $scope.readArticles = syncData(['user', pid, uid, 'read'], 250);
 
       $scope.addFeed = function(feedId) {
-         feedMgr.addFeed(feedId);
-         $scope.startLoading();
-         $location.search('feed', feedId);
+         feedMgr.addFeed(feedId, function(errCode, errMsg) {
+            $location.search('feed', feedId);
+            $scope.startLoading();
+            $scope.articles.$on('change', function() { $scope.stopLoading(); });
+         });
       };
 
       $scope.removeFeed = function(feedId, $event) {
@@ -90,7 +92,7 @@ angular.module('myApp.controllers', ['myApp.utils', 'fr.feedManager'])
                   $event.stopPropagation();
                }
                feedMgr.removeFeed(feedId);
-               //todo remove from $user/read as well
+               $scope.readArticles.$remove(feedId);
             }
          });
       };

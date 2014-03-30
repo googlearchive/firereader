@@ -110,16 +110,11 @@
          $scope.feeds = feedMgr.getFeeds();
          $scope.articles = feedMgr.getArticles();
          $scope.counts = feedMgr.articleManager.counts;
-         $scope.feeds.$on('change', function() {
-            // if a feed is currently selected and that feed does not exist anymore
-            // then clear the selection
-            var feed = ($location.search() || {}).feed;
-            if (feed && !($scope.feeds || {})[feed]) {
-               $location.replace();
-               $location.search(null);
-            }
-         });
          $scope.feedChoices = feedMgr.getChoices();
+
+         $scope.feeds.$on('change', function() {
+            $scope.noFeeds = $scope.feeds.$getIndex().length === 0;
+         });
 
          //todo snag this from $location?
          $scope.link = $scope.isDemo ? 'demo' : 'hearth';
@@ -154,7 +149,7 @@
             return $scope.sortDesc ? 0 - parseInt(v) : parseInt(v);
          };
 
-         $scope.markArticleRead = function (article, $event) {
+         $scope.markArticleRead = function (article, $event, noSave) {
             if ($scope.isDemo) {
                return;
             }
@@ -167,6 +162,7 @@
                $scope.readArticles[f] = {};
             }
             $scope.readArticles[f][article.$id] = Date.now();
+            noSave || $scope.readArticles.$save(f);
          };
 
          $scope.markFeedRead = function (feedId, $event) {
@@ -174,11 +170,13 @@
                $event.preventDefault();
                $event.stopPropagation();
             }
-            angular.forEach($scope.articles, function (article) {
+            angular.forEach($scope.articles, function(article) {
                if (article.$feed === feedId) {
-                  $scope.markArticleRead(article);
+                  $scope.markArticleRead(article, null, true);
                }
             });
+            $scope.counts[feedId] = 0;
+            $scope.readArticles.$save();
          };
 
          $scope.markAllFeedsRead = function ($event) {
@@ -250,6 +248,18 @@
                return _.reduce($scope.counts, function (memo, num) {
                   return memo + num;
                }, 0);
+            }
+         }
+
+         $scope.feeds.$on('loaded', checkSearchPath);
+         $scope.feeds.$on('child_removed', checkSearchPath);
+         function checkSearchPath() {
+            // if a feed is currently selected and that feed does not exist anymore
+            // then clear the selection
+            var feed = ($location.search() || {}).feed;
+            if (feed && !($scope.feeds || {})[feed]) {
+               $location.replace();
+               $location.search('feed', null);
             }
          }
 

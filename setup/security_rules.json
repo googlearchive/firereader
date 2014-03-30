@@ -87,18 +87,14 @@
          "$provider": {
             "$user_id": {
                ".read": "auth.id === $user_id && auth.provider === $provider",
-               ".write": "auth.id === $user_id && auth.provider === $provider && newData.hasChildren()",
+               ".write": "auth.id === $user_id && auth.provider === $provider",
+               ".validate": "newData.hasChildren()",
                "feeds": {
+                  ".validate": "newData.hasChildren()",
                   "$feed_id": {
-                     ".validate": "newData.hasChildren(['title', 'id'])", // required fields
-                     "id": {
-                        ".validate": "newData.isString()"
-                     },
+                     ".validate": "newData.hasChildren(['title', 'url'])", // required fields
                      "title": {
                         ".validate": "newData.isString()"
-                     },
-                     "isCustom": {
-                        ".validate": "newData.isBoolean()"
                      },
                      "url": {
                         ".validate": "newData.isString()"

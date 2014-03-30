@@ -16,7 +16,7 @@
                     <li><a ng-click="openFeedBuilder()">Custom Feed</a></li>
                     <li class="divider"></li>
                     <!--<li><input ng-model="feedChoiceFilter" placeholder="filter" /></li>-->
-                    <li ng-repeat="feed in feedChoices | filter:feedChoiceFilter | orderBy:feed.title"><a title="{{feed.description}}" ng-click="addFeed(feed.$id)">{{feed.title}}</a></li>
+                    <li ng-repeat="(feedId,feed) in feedChoices | filter:feedChoiceFilter | orderBy:feed.title"><a title="{{feed.description}}" ng-click="addFeed(feedId)">{{feed.title}}</a></li>
                 </ul>
             </div>
 
