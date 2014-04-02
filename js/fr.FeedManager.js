@@ -48,13 +48,13 @@
                   feeds.$save(idOrProps);
                }
                else {
-                  feeds.$add(props, function(ref) {
-                     feedLoader.testFeed(props.url, function(errCode, errMsg) {
-                        if( errCode ) {
-                           alert(errCode+' '+errMsg);
-                           inst.removeFeed(ref.name());
-                        }
-                     });
+                  feedLoader.testFeed(props.url, function(errCode, errMsg) {
+                     if( errCode ) {
+                        alert(errCode+' '+errMsg);
+                     }
+                     else {
+                        feeds.$add(props);
+                     }
                   });
                }
             },
@@ -184,6 +184,10 @@
             });
          },
 
+         createFeed: function(url) {
+
+         },
+
          trackFeeds: function(feeds) {
             feeds.$on('child_added', inst.trackFeed);
             feeds.$on('child_removed', inst.untrackFeed);
@@ -237,8 +241,9 @@
          checkTime: function(snap) {
             this.clearNext();
             if( snap.val() === null ) {
-               console.warn('no meta found for feed', this.sourceUrl);
-               this.dispose();
+               // create the meta data if it does not exist; this will trigger another
+               // check time when the value is updated
+               this.metaRef.set({users: 1, last: 0, url: this.sourceUrl});
             }
             else {
                var last = snap.val()||0;
