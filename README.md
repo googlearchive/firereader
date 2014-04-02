@@ -1,7 +1,7 @@
 
 # Firereader
 
-Firereader is a fully functional, real-time content aggregator built using [Angular](http://www.angularjs.org) and [Firebase](http://www.firebase.com).
+Firereader is a fully functional, real-time content aggregator built using [Angular](http://www.angularjs.org) and [Firebase](http://www.firebase.com). It's also completly server-less!
 
 It contains a fully functional client in the app/ directory, and a service that parses RSS data and pushes it into Firebase in the service/ directory.
 
@@ -12,7 +12,7 @@ It contains a fully functional client in the app/ directory, and a service that 
  - `git clone https://github.com/firebase/firereader.git`
  - Open and configure `js/config.js` and set `FIREBASE_URL` to your own Firebase instance.
  - Import `setup/seed.json` into your Firebase.
- - Add setup/security_rules.json to your security rules
+ - Add `setup/security_rules.json` to your security rules
 
 ## Use this code as an example.
 
