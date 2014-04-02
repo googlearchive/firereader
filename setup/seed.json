@@ -1,0 +1,244 @@
+{
+   "meta": {
+      "lifehacker" : {
+         "url" : "http://lifehacker.com/atom.xml",
+         "description" : "Tips and downloads for getting things done",
+         "title" : "Lifehacker"
+      },
+      "oatmeal" : {
+         "url" : "http://feeds.feedburner.com/oatmealfeed",
+         "description" : "The oatmeal tastes better than stale skittles found under the couch cushions",
+         "title" : "The Oatmeal"
+      },
+      "seth" : {
+         "url" : "http://sethgodin.typepad.com/seths_blog/rss.xml",
+         "description" : "Seth Godin's riffs on marketing, respect, and the ways ideas spread.",
+         "title" : "Seth Godin's Blog on marketing, tribes and respect"
+      },
+      "hn" : {
+         "url" : "https://news.ycombinator.com/rss",
+         "description" : "Links for the intellectually curious, ranked by readers.",
+         "title" : "Hacker News"
+      },
+      "xkcd" : {
+         "url" : "http://xkcd.com/atom.xml",
+         "description" : "xkcd.com: A webcomic of romance and math humor.",
+         "title" : "xkcd.com"
+      },
+      "gizmodo" : {
+         "url" : "http://gizmodo.com/atom.xml",
+         "description" : "The Gadget Guide",
+         "title" : "Gizmodo"
+      },
+      "tuaw" : {
+         "url" : "http://www.tuaw.com/rss.xml",
+         "description" : "TUAW - The Unofficial Apple Weblog",
+         "title" : "TUAW - The Unofficial Apple Weblog"
+      },
+      "boing" : {
+         "url" : "http://boingboing.net/atom.xml",
+         "description" : "Brain candy for Happy Mutants",
+         "title" : "Boing Boing"
+      },
+      "whatif" : {
+         "url" : "http://what-if.xkcd.com/feed.atom",
+         "title" : "What If?"
+      },
+      "waxy" : {
+         "url" : "http://waxy.org/atom.xml",
+         "description" : "Andy Baio lives here",
+         "title" : "Waxy.org"
+      },
+      "failblog" : {
+         "url" : "http://feeds.feedburner.com/ICanHasCheezburger",
+         "description" : "Funny FAIL Pictures and Videos",
+         "title" : "FAIL Blog"
+      },
+      "smashing" : {
+         "url" : "http://rss1.smashingmagazine.com/feed/",
+         "description" : "For Professional Web Designers and Developers",
+         "title" : "Smashing Magazine Feed"
+      },
+      "codinghorror" : {
+         "url" : "http://www.codinghorror.com/blog/atom.xml",
+         "description" : "programming and human factors - Jeff Atwood",
+         "title" : "Coding Horror"
+      },
+      "reader" : {
+         "url" : "http://googlereader.blogspot.com/rss.xml",
+         "description" : "News, tips and tricks from the Google reader team.",
+         "title" : "Official Google Reader Blog"
+      },
+      "penny" : {
+         "url" : "http://www.penny-arcade.com/rss.xml",
+         "description" : "News Fucker 5000",
+         "title" : "Penny Arcade"
+      },
+      "schneier" : {
+         "url" : "http://www.schneier.com/blog/rss.xml",
+         "description" : "A blog covering security and security technology.",
+         "title" : "Schneier on Security"
+      },
+      "cnn" : {
+         "url" : "http://rss.cnn.com/rss/cnn_topstories.rss",
+         "description" : "CNN.com delivers up-to-the-minute news and information on the latest top stories, weather, entertainment, politics and more.",
+         "title" : "CNN.com - Top Stories"
+      },
+      "engadget" : {
+         "url" : "http://www.engadget.com/rss.xml",
+         "description" : "Engadget",
+         "title" : "Engadget RSS Feed"
+      },
+      "joel" : {
+         "url" : "http://www.joelonsoftware.com/rss.xml",
+         "description" : "Painless Software Management",
+         "title" : "Joel on Software"
+      },
+      "hyperbole" : {
+         "url" : "http://hyperboleandahalf.blogspot.com/atom.xml",
+         "description" : "Blog of Indescribable Awesomeness",
+         "title" : "Hyperbole and a Half"
+      },
+      "gigaom" : {
+         "url" : "http://gigaom.com/rss.xml",
+         "title" : "GigaOM"
+      },
+      "gmail" : {
+         "url" : "http://gmailblog.blogspot.com/rss.xml",
+         "description" : "News, tips and tricks from Google's Gmail team and friends.",
+         "title" : "Gmail Blog"
+      },
+      "marco" : {
+         "url" : "http://www.marco.org/rss.xml",
+         "description" : "I’m Marco Arment, creator of Instapaper, technology writer, and coffee enthusiast.",
+         "title" : "Marco.org"
+      },
+      "smitten" : {
+         "url" : "http://feeds.feedburner.com/smittenkitchen",
+         "title" : "smitten kitchen"
+      },
+      "bigpicture" : {
+         "url" : "http://feeds.boston.com/boston/bigpicture/index",
+         "description" : "News Stories in Photographs from the Boston Globe",
+         "title" : "The Big Picture"
+      },
+      "rands" : {
+         "url" : "http://randsinrepose.com/feed/",
+         "title" : "Rands In Repose"
+      },
+      "cooltools" : {
+         "url" : "http://feeds.feedburner.com/CoolTools",
+         "description" : "Cool tools really work. A cool tool can be any book, gadget, software, video, map, hardware, material, or website that is tried and true. All reviews on this site are written by readers who have actually used the tool and others like it. Items can be either old or new as long as they are wonderful. We only post things we like and ignore the rest. Suggestions for tools much better than what is recommended here are always wanted. Tell me what you love.",
+         "title" : "Cool Tools"
+      },
+      "nyt" : {
+         "url" : "http://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml",
+         "description" : "US",
+         "title" : "NYT > U.S."
+      },
+      "slashdot" : {
+         "url" : "http://rss.slashdot.org/Slashdot/slashdot?content_type=atom",
+         "description" : "News for nerds, stuff that matters",
+         "title" : "Slashdot"
+      },
+      "qc" : {
+         "url" : "http://www.questionablecontent.net/QCRSS.xml",
+         "description" : "The Official QC RSS Feed",
+         "title" : "QC RSS"
+      },
+      "alistapart" : {
+         "url" : "http://alistapart.com/rss.xml",
+         "description" : "Articles, columns, and blog posts for people who make web sites.",
+         "title" : "A List Apart"
+      },
+      "apartment" : {
+         "url" : "http://feeds.apartmenttherapy.com/apartmenttherapy/main",
+         "description" : "Saving the world, one room at a time",
+         "title" : "Apartment Therapy"
+      },
+      "smbc" : {
+         "url" : "http://feeds.feedburner.com/smbc-comics/PvLb",
+         "description" : "The Saturday Morning Breakfast Cereal Blog",
+         "title" : "Saturday Morning Breakfast Cereal (updated daily)"
+      },
+      "firebase" : {
+         "url" : "https://www.firebase.com/blog/feed.xml",
+         "description" : "Posts by the Firebase team about technologies, best practices, new features, and the Firebase community.",
+         "title" : "Firebase Blog"
+      },
+      "google" : {
+         "url" : "http://googleblog.blogspot.com/rss.xml",
+         "description" : "Insights from Googlers into our products, technology, and the Google culture.",
+         "title" : "The Official Google Blog"
+      },
+      "verge" : {
+         "url" : "http://www.theverge.com/rss.xml",
+         "title" : "The Verge -  All Posts"
+      },
+      "newsblur" : {
+         "url" : "http://blog.newsblur.com/rss.xml",
+         "description" : "NewsBlur is a personal news reader that brings people together to talk about the world. A new sound of an old instrument.",
+         "title" : "The NewsBlur Blog"
+      },
+      "zenhabits" : {
+         "url" : "http://feeds.feedburner.com/zenhabits",
+         "description" : "breathe",
+         "title" : "zenhabits"
+      },
+      "make" : {
+         "url" : "http://blog.makezine.com/atom.xml",
+         "description" : "DIY projects, how-tos, and inspiration from geeks, makers, and hackers",
+         "title" : "MAKE"
+      },
+      "bbc" : {
+         "url" : "http://feeds.bbci.co.uk/news/rss.xml",
+         "description" : "The latest stories from the Home section of the BBC News web site.",
+         "title" : "BBC News - Home"
+      },
+      "techcrunch" : {
+         "url" : "http://techcrunch.com/atom.xml",
+         "description" : "TechCrunch is a group-edited blog that profiles the companies, products and events defining and transforming the new web.",
+         "title" : "TechCrunch"
+      },
+      "dailywtf" : {
+         "url" : "http://syndication.thedailywtf.com/TheDailyWtf",
+         "description" : "Curious Perversions in Information Technology",
+         "title" : "The Daily WTF"
+      },
+      "kottke" : {
+         "url" : "http://feeds.kottke.org/main",
+         "description" : "Jason Kottke's weblog, home of fine hypertext products",
+         "title" : "kottke.org"
+      },
+      "googleos" : {
+         "url" : "http://googlesystem.blogspot.com/atom.xml",
+         "description" : "Unofficial news and tips about Google. A blog that watches Google's latest developments and the attempts to move your operating system online.",
+         "title" : "Google Operating System"
+      },
+      "fireball" : {
+         "url" : "http://daringfireball.net/index.xml",
+         "description" : "Mac and web curmudgeonry/nerdery. By John Gruber.",
+         "title" : "Daring Fireball"
+      },
+      "venturebeat" : {
+         "url" : "http://venturebeat.com/rss.xml",
+         "description" : "News About Tech, Money and Innovation",
+         "title" : "VentureBeat"
+      },
+      "macrumors" : {
+         "url" : "http://www.macrumors.com/rss.xml",
+         "description" : "the mac news you care about",
+         "title" : "MacRumors"
+      },
+      "wired" : {
+         "url" : "http://feeds.wired.com/wired/index",
+         "description" : "Top Stories",
+         "title" : "Wired Top Stories"
+      },
+      "ars" : {
+         "url" : "http://feeds.arstechnica.com/arstechnica/index",
+         "description" : "The Art of Technology",
+         "title" : "Ars Technica"
+      }
+   }
+}
