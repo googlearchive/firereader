@@ -168,24 +168,22 @@
       var inst = {
          testFeed: function(feedUrl, callback) {
             $.ajax({
-               url      : feedUrl,
+               url      : FeedTracker.feedUrl(feedUrl),
                dataType : 'json',
                success  : function (data) {
                   if( data.responseStatus >= 400 ) {
-                     callback(data.responseStatus+'', data.responseDetails+''||'Could not find that feed');
+                     console.error('feed unreachable', data); //debug
+                     callback(data.responseStatus+'', data.responseDetails+''||'Could not load that feed');
                   }
                   else {
                      callback();
                   }
                },
                error: function(err) {
-                  callback(err||'Unable to load feed');
+                  console.error(err); //debug
+                  callback(err.status, (err.statusText||'unreachable')+' (could not load this feed)');
                }
             });
-         },
-
-         createFeed: function(url) {
-
          },
 
          trackFeeds: function(feeds) {
@@ -237,13 +235,19 @@
          this._init();
       }
 
+      FeedTracker.feedUrl = function(sourceUrl) {
+         return document.location.protocol +
+            '//ajax.googleapis.com/ajax/services/feed/load?v=1.0' +
+            '&num=' + NUMBER_TO_FETCH + '&n=' + NUMBER_TO_FETCH +
+            '&callback=?&q=' + encodeURIComponent(sourceUrl);
+      };
+
       FeedTracker.prototype = {
          checkTime: function(snap) {
             this.clearNext();
             if( snap.val() === null ) {
-               // create the meta data if it does not exist; this will trigger another
-               // check time when the value is updated
-               this.metaRef.set({users: 1, last: 0, url: this.sourceUrl});
+               console.log('checkTime is null, cancelling feed tracker');
+               this.dispose();
             }
             else {
                var last = snap.val()||0;
@@ -269,10 +273,7 @@
 
          fetch: function() {
             var self = this;
-            var url = document.location.protocol +
-               '//ajax.googleapis.com/ajax/services/feed/load?v=1.0' +
-               '&num=' + NUMBER_TO_FETCH + '&n=' + NUMBER_TO_FETCH +
-               '&callback=?&q=' + encodeURIComponent(self.sourceUrl);
+            var url = FeedTracker.feedUrl(self.sourceUrl);
            self.clearNext();
             $.ajax({
                url      : url,
@@ -330,11 +331,43 @@
             });
          },
 
-         _init: function() {
+         _createMeta: function(next) {
+            var self = this;
+            // check time when the value is updated
+            self.metaRef.set({users: 1, last: 0, dataUrl: self.sourceUrl}, function(err) {
+               if( err ) {
+                  console.error('could not create meta; cancelling FeedTracker', self.sourceUrl, err);
+                  self.dispose();
+               }
+               else {
+                  next && next.call(self);
+               }
+            });
+         },
+
+         _initTimeCheck: function() {
             var self = this;
             var fn = self.metaRef.child('last').on('value', self.checkTime.bind(self));
             self.subs.push(function() {
                self.metaRef.off('value', fn);
+            });
+         },
+
+         _init: function() {
+            var self = this;
+            // check to make sure meta is valid
+            self.metaRef.child('last').once('value', function(snap) {
+               // must be done inside a once() block or it results in a recursive
+               // loop since the local on('value') fires before the remote set
+               // can fail
+               if( snap.val() === null ) {
+                  // create the meta data if it does not exist
+                  console.log('article meta not found for ', self.sourceUrl, {users: 1, last: 0, url: self.sourceUrl}, self.metaRef.toString()); //debug
+                  self._createMeta(self._initTimeCheck);
+               }
+               else {
+                  self._initTimeCheck();
+               }
             });
          },
 
