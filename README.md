@@ -5,7 +5,7 @@ Firereader is a fully functional, real-time content aggregator built using [Angu
 
 It contains a fully functional client in the app/ directory, and a service that parses RSS data and pushes it into Firebase in the service/ directory.
 
-<h1><a href="http://firereader.io">Visit Firereader.io and see it in action</a></h1>
+<h1><a href="http://firebase.github.io/firereader/">See it in action</a></h1>
 
 ## Installation
 
