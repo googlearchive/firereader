@@ -62,12 +62,7 @@
          $scope.$on('$firebaseSimpleLogin:logout', _loggedOut);
 
          function parseName(user) {
-            switch(user.provider) {
-               case 'persona':
-                  return (user.id||'').replace(',', '.');
-               default:
-                  return user.id;
-            }
+            return user.id;
          }
 
          function _loggedIn(evt, user) {

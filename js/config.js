@@ -20,7 +20,6 @@ angular.module('myApp.config', [])
    .constant('NUMBER_TO_FETCH', 25)
 
    .constant('authProviders', [
-      { id: 'persona',  name: 'Persona',  icon: 'icon-user'     },
       { id: 'twitter',  name: 'Twitter',  icon: 'icon-twitter'  },
       { id: 'facebook', name: 'Facebook', icon: 'icon-facebook' },
       { id: 'github',   name: 'GitHub',   icon: 'icon-github'   }

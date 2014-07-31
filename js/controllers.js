@@ -26,9 +26,6 @@ angular.module('myApp.controllers', ['myApp.utils', 'fr.feedManager'])
             case 'twitter':
                c = 'btn-info';
                break;
-            case 'persona':
-               c = 'btn-success';
-               break;
             default:
                c = '';
          }
