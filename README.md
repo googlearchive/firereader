@@ -1,31 +1,40 @@
+<div id="readme" class="readme boxed-group clearfix announce instapaper_body md">
+    <h3>
+      <svg aria-hidden="true" class="octicon octicon-book" height="16" role="img" version="1.1" viewBox="0 0 16 16" width="16"><path d="M2 5h4v1H2v-1z m0 3h4v-1H2v1z m0 2h4v-1H2v1z m11-5H9v1h4v-1z m0 2H9v1h4v-1z m0 2H9v1h4v-1z m2-6v9c0 0.55-0.45 1-1 1H8.5l-1 1-1-1H1c-0.55 0-1-0.45-1-1V3c0-0.55 0.45-1 1-1h5.5l1 1 1-1h5.5c0.55 0 1 0.45 1 1z m-8 0.5l-0.5-0.5H1v9h6V3.5z m7-0.5H8.5l-0.5 0.5v8.5h6V3z"></path></svg><trans data-src="
+      README.md
+    " data-dst="readme.md">readme.md</trans></h3>
 
-# Firereader
+      <article class="markdown-body entry-content" itemprop="text"><h1><a id="user-content-firereader" class="anchor" href="#firereader" aria-hidden="true"><svg aria-hidden="true" class="octicon octicon-link" height="16" role="img" version="1.1" viewBox="0 0 16 16" width="16"><path d="M4 9h1v1h-1c-1.5 0-3-1.69-3-3.5s1.55-3.5 3-3.5h4c1.45 0 3 1.69 3 3.5 0 1.41-0.91 2.72-2 3.25v-1.16c0.58-0.45 1-1.27 1-2.09 0-1.28-1.02-2.5-2-2.5H4c-0.98 0-2 1.22-2 2.5s1 2.5 2 2.5z m9-3h-1v1h1c1 0 2 1.22 2 2.5s-1.02 2.5-2 2.5H9c-0.98 0-2-1.22-2-2.5 0-0.83 0.42-1.64 1-2.09v-1.16c-1.09 0.53-2 1.84-2 3.25 0 1.81 1.55 3.5 3 3.5h4c1.45 0 3-1.69 3-3.5s-1.5-3.5-3-3.5z"></path></svg></a><trans data-src="Firereader" data-dst="firereader">firereader</trans></h1>
 
-Firereader is a fully functional, real-time content aggregator built using [Angular](http://www.angularjs.org) and [Firebase](http://www.firebase.com). It's also completly server-less!
+<p><trans data-src="Firereader is a fully functional, real-time content aggregator built using " data-dst="firereader是一个全功能的、实时的内容聚合器用">firereader是一个全功能的、实时的内容聚合器用</trans><a href="http://www.angularjs.org"><trans data-src="Angular" data-dst="角">角</trans></a><trans data-src=" and " data-dst="和">和</trans><a href="http://www.firebase.com"><trans data-src="Firebase" data-dst="火力点">火力点</trans></a><trans data-src=". It's also completly server-less!" data-dst="。它也完全无服务器！">。它也完全无服务器！</trans></p>
 
-It contains a fully functional client in the app/ directory, and a service that parses RSS data and pushes it into Firebase in the service/ directory.
+<p><trans data-src="It contains a fully functional client in the app/ directory, and a service that parses RSS data and pushes it into Firebase in the service/ directory." data-dst="它包含在应用程序目录一个全功能的客户端和服务解析RSS数据并把它变成在服务目录发。">它包含在应用程序目录一个全功能的客户端和服务解析RSS数据并把它变成在服务目录发。</trans></p>
 
-<h1><a href="http://firebase.github.io/firereader/">See it in action</a></h1>
+<h1><a id="user-content-see-it-in-action" class="anchor" href="#see-it-in-action" aria-hidden="true"><svg aria-hidden="true" class="octicon octicon-link" height="16" role="img" version="1.1" viewBox="0 0 16 16" width="16"><path d="M4 9h1v1h-1c-1.5 0-3-1.69-3-3.5s1.55-3.5 3-3.5h4c1.45 0 3 1.69 3 3.5 0 1.41-0.91 2.72-2 3.25v-1.16c0.58-0.45 1-1.27 1-2.09 0-1.28-1.02-2.5-2-2.5H4c-0.98 0-2 1.22-2 2.5s1 2.5 2 2.5z m9-3h-1v1h1c1 0 2 1.22 2 2.5s-1.02 2.5-2 2.5H9c-0.98 0-2-1.22-2-2.5 0-0.83 0.42-1.64 1-2.09v-1.16c-1.09 0.53-2 1.84-2 3.25 0 1.81 1.55 3.5 3 3.5h4c1.45 0 3-1.69 3-3.5s-1.5-3.5-3-3.5z"></path></svg></a><a href="http://firebase.github.io/firereader/"><trans data-src="See it in action" data-dst="看到它在行动">看到它在行动</trans></a></h1>
 
-## Installation
+<h2><a id="user-content-installation" class="anchor" href="#installation" aria-hidden="true"><svg aria-hidden="true" class="octicon octicon-link" height="16" role="img" version="1.1" viewBox="0 0 16 16" width="16"><path d="M4 9h1v1h-1c-1.5 0-3-1.69-3-3.5s1.55-3.5 3-3.5h4c1.45 0 3 1.69 3 3.5 0 1.41-0.91 2.72-2 3.25v-1.16c0.58-0.45 1-1.27 1-2.09 0-1.28-1.02-2.5-2-2.5H4c-0.98 0-2 1.22-2 2.5s1 2.5 2 2.5z m9-3h-1v1h1c1 0 2 1.22 2 2.5s-1.02 2.5-2 2.5H9c-0.98 0-2-1.22-2-2.5 0-0.83 0.42-1.64 1-2.09v-1.16c-1.09 0.53-2 1.84-2 3.25 0 1.81 1.55 3.5 3 3.5h4c1.45 0 3-1.69 3-3.5s-1.5-3.5-3-3.5z"></path></svg></a><trans data-src="Installation" data-dst="安装">安装</trans></h2>
 
- - `git clone https://github.com/firebase/firereader.git`
- - Open and configure `js/config.js` and set `FIREBASE_URL` to your own Firebase instance.
- - Import `setup/seed.json` into your Firebase.
- - Add `setup/security_rules.json` to your security rules
+<ul>
+<li><code><trans data-src="git clone https://github.com/firebase/firereader.git" data-dst="git clone https://github.com/firebase/firereader.git"><trans data-src="git clone https://github.com/firebase/firereader.git" data-dst="git clone https://github.com/firebase/firereader.git">git clone https://github.com/firebase/firereader.git</trans></trans></code></li>
+<li><trans data-src="Open and configure " data-dst="开放和配置">开放和配置</trans><code><trans data-src="js/config.js" data-dst="config.js JS号">config.js JS号</trans></code><trans data-src=" and set " data-dst="并设置">并设置</trans><code><trans data-src="FIREBASE_URL" data-dst="firebase_url">firebase_url</trans></code><trans data-src=" to your own Firebase instance." data-dst="自己的发审。">自己的发审。</trans></li>
+<li><trans data-src="Import " data-dst="进口">进口</trans><code><trans data-src="setup/seed.json" data-dst="安装/ seed.json">安装/ seed.json</trans></code><trans data-src=" into your Firebase." data-dst="在你的发。">在你的发。</trans></li>
+<li><trans data-src="Add " data-dst="添加">添加</trans><code><trans data-src="setup/security_rules.json" data-dst="安装/ security_rules.json">安装/ security_rules.json</trans></code><trans data-src=" to your security rules" data-dst="为了你的安全规则">为了你的安全规则</trans></li>
+</ul>
 
-## Use this code as an example.
+<h2><a id="user-content-use-this-code-as-an-example" class="anchor" href="#use-this-code-as-an-example" aria-hidden="true"><svg aria-hidden="true" class="octicon octicon-link" height="16" role="img" version="1.1" viewBox="0 0 16 16" width="16"><path d="M4 9h1v1h-1c-1.5 0-3-1.69-3-3.5s1.55-3.5 3-3.5h4c1.45 0 3 1.69 3 3.5 0 1.41-0.91 2.72-2 3.25v-1.16c0.58-0.45 1-1.27 1-2.09 0-1.28-1.02-2.5-2-2.5H4c-0.98 0-2 1.22-2 2.5s1 2.5 2 2.5z m9-3h-1v1h1c1 0 2 1.22 2 2.5s-1.02 2.5-2 2.5H9c-0.98 0-2-1.22-2-2.5 0-0.83 0.42-1.64 1-2.09v-1.16c-1.09 0.53-2 1.84-2 3.25 0 1.81 1.55 3.5 3 3.5h4c1.45 0 3-1.69 3-3.5s-1.5-3.5-3-3.5z"></path></svg></a><trans data-src="Use this code as an example." data-dst="使用此代码为例。">使用此代码为例。</trans></h2>
 
-Firereader was built using [AngularFire-seed](https://github.com/firebase/angularFire-seed). If you want to build similar angularFire apps, check it out!
+<p><trans data-src="Firereader was built using " data-dst="firereader建成使用">firereader建成使用</trans><a href="https://github.com/firebase/angularFire-seed"><trans data-src="AngularFire-seed" data-dst="angularfire种子">angularfire种子</trans></a><trans data-src=". If you want to build similar angularFire apps, check it out!" data-dst="。如果你想建立一个相似的angularfire程序，检查出来！">。如果你想建立一个相似的angularfire程序，检查出来！</trans></p>
 
-## Contributing
+<h2><a id="user-content-contributing" class="anchor" href="#contributing" aria-hidden="true"><svg aria-hidden="true" class="octicon octicon-link" height="16" role="img" version="1.1" viewBox="0 0 16 16" width="16"><path d="M4 9h1v1h-1c-1.5 0-3-1.69-3-3.5s1.55-3.5 3-3.5h4c1.45 0 3 1.69 3 3.5 0 1.41-0.91 2.72-2 3.25v-1.16c0.58-0.45 1-1.27 1-2.09 0-1.28-1.02-2.5-2-2.5H4c-0.98 0-2 1.22-2 2.5s1 2.5 2 2.5z m9-3h-1v1h1c1 0 2 1.22 2 2.5s-1.02 2.5-2 2.5H9c-0.98 0-2-1.22-2-2.5 0-0.83 0.42-1.64 1-2.09v-1.16c-1.09 0.53-2 1.84-2 3.25 0 1.81 1.55 3.5 3 3.5h4c1.45 0 3-1.69 3-3.5s-1.5-3.5-3-3.5z"></path></svg></a><trans data-src="Contributing" data-dst="贡献">贡献</trans></h2>
 
-To contribute to Firereader, please fork this project on GitHub, then use the Pull Request feature to submit your changes. All contributions must pass the Travis integration tests before they will be merged. Please add appropriate tests to the e2e and test unit libs.
+<p><trans data-src="To contribute to Firereader, please fork this project on GitHub, then use the Pull Request feature to submit your changes. All contributions must pass the Travis integration tests before they will be merged. Please add appropriate tests to the e2e and test unit libs." data-dst="有助于firereader，请叉这GitHub上的项目，然后使用pull请求提交你的变化特征。所有捐款必须通过特拉维斯集成测试之前，他们将合并。请添加适当的测试端到端的测试单元库。">有助于firereader，请叉这GitHub上的项目，然后使用pull请求提交你的变化特征。所有捐款必须通过特拉维斯集成测试之前，他们将合并。请添加适当的测试端到端的测试单元库。</trans></p>
 
-## Contact
+<h2><a id="user-content-contact" class="anchor" href="#contact" aria-hidden="true"><svg aria-hidden="true" class="octicon octicon-link" height="16" role="img" version="1.1" viewBox="0 0 16 16" width="16"><path d="M4 9h1v1h-1c-1.5 0-3-1.69-3-3.5s1.55-3.5 3-3.5h4c1.45 0 3 1.69 3 3.5 0 1.41-0.91 2.72-2 3.25v-1.16c0.58-0.45 1-1.27 1-2.09 0-1.28-1.02-2.5-2-2.5H4c-0.98 0-2 1.22-2 2.5s1 2.5 2 2.5z m9-3h-1v1h1c1 0 2 1.22 2 2.5s-1.02 2.5-2 2.5H9c-0.98 0-2-1.22-2-2.5 0-0.83 0.42-1.64 1-2.09v-1.16c-1.09 0.53-2 1.84-2 3.25 0 1.81 1.55 3.5 3 3.5h4c1.45 0 3-1.69 3-3.5s-1.5-3.5-3-3.5z"></path></svg></a><trans data-src="Contact" data-dst="联系">联系</trans></h2>
 
-Submit questions or bugs using the [issue tracker](http://github.com/firebase/firereader). For Firebase-releated questions, try the [mailing list](https://groups.google.com/forum/#!forum/firebase-talk).
+<p><trans data-src="Submit questions or bugs using the " data-dst="提交问题或错误使用">提交问题或错误使用</trans><a href="http://github.com/firebase/firereader"><trans data-src="issue tracker" data-dst="问题跟踪器">问题跟踪器</trans></a><trans data-src=". For Firebase-releated questions, try the " data-dst="。对火力点相关问题，尝试">。对火力点相关问题，尝试</trans><a href="https://groups.google.com/forum/#!forum/firebase-talk"><trans data-src="mailing list" data-dst="通讯名单">通讯名单</trans></a><trans data-src="." data-dst="。">。</trans></p>
 
-## License
+<h2><a id="user-content-license" class="anchor" href="#license" aria-hidden="true"><svg aria-hidden="true" class="octicon octicon-link" height="16" role="img" version="1.1" viewBox="0 0 16 16" width="16"><path d="M4 9h1v1h-1c-1.5 0-3-1.69-3-3.5s1.55-3.5 3-3.5h4c1.45 0 3 1.69 3 3.5 0 1.41-0.91 2.72-2 3.25v-1.16c0.58-0.45 1-1.27 1-2.09 0-1.28-1.02-2.5-2-2.5H4c-0.98 0-2 1.22-2 2.5s1 2.5 2 2.5z m9-3h-1v1h1c1 0 2 1.22 2 2.5s-1.02 2.5-2 2.5H9c-0.98 0-2-1.22-2-2.5 0-0.83 0.42-1.64 1-2.09v-1.16c-1.09 0.53-2 1.84-2 3.25 0 1.81 1.55 3.5 3 3.5h4c1.45 0 3-1.69 3-3.5s-1.5-3.5-3-3.5z"></path></svg></a><trans data-src="License" data-dst="许可证">许可证</trans></h2>
 
-[MIT](http://firebase.mit-license.org/)
+<p><a href="http://firebase.mit-license.org/"><trans data-src="MIT" data-dst="麻省理工学院">麻省理工学院</trans></a></p>
+</article>
+  </div>
